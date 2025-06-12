@@ -10,12 +10,11 @@
 
 import Foundation
 import SwiftData
+import WebKit
 
-@Model
-final class Item {
+struct StoredTab: @MainActor Codable, Hashable {
+    var uuid: UUID = UUID()
     var timestamp: Date
-    
-    init(timestamp: Date) {
-        self.timestamp = timestamp
-    }
+    var url: String
+    var tabType: TabType
 }

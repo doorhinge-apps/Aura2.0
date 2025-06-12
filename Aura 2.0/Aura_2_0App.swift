@@ -15,7 +15,7 @@ import SwiftData
 struct Aura_2_0App: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            SpaceData.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
@@ -28,7 +28,7 @@ struct Aura_2_0App: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentContainerView()
         }
         .modelContainer(sharedModelContainer)
     }
