@@ -11,6 +11,7 @@
 import SwiftUI
 import SwiftData
 import WebKit
+import Combine
 
 struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
@@ -23,6 +24,10 @@ struct ContentView: View {
     
     @State var selectedSpace: SpaceData
     @State var selectedTab: WebPage = WebPage()
+    
+    var cancellables = Set<AnyCancellable>()
+    
+    @State private var htmlOutput: String = ""
     
     var body: some View {
         GeometryReader { geo in
@@ -43,13 +48,32 @@ struct ContentView: View {
                             Image(systemName: "plus")
                         }
                         
+                        
+                        if storageManager.currentTabs.count == 1,
+                               storageManager.currentTabs[0].count == 1 {
+                            Button {
+                                Task {
+                                    if let html = try? await storageManager.currentTabs[0][0].page.callJavaScript("document.documentElement.outerHTML") as? String {
+                                        print(html)
+                                    }
+                                }
+                            } label: {
+                                Image(systemName: "wrench.and.screwdriver.fill")
+                            }
+                            }
+                        
                         WebsitePanel()
                             .padding(settingsManager.showBorder ? 20: 0)
                             .scrollEdgeEffectStyle(.none, for: .all)
                     }
-                }.onTapGesture {
+                }.overlay {
                     if uiViewModel.showCommandBar {
-                        uiViewModel.showCommandBar = false
+                        Color.white.opacity(0.001)
+                            .onTapGesture {
+                                uiViewModel.showCommandBar = false
+                                uiViewModel.commandBarText = ""
+                                uiViewModel.searchSuggestions = []
+                            }
                     }
                 }
                 
@@ -80,6 +104,7 @@ struct ContentView: View {
             }
         }.environmentObject(storageManager)
             .environmentObject(uiViewModel)
+            .environmentObject(settingsManager)
     }
     
     var backgroundGradientColors: [Color] {

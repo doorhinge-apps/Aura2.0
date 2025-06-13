@@ -18,6 +18,8 @@ class UIViewModel: ObservableObject {
     @Published var isEditingURL: Bool = false
     @Published var commandBarText: String = ""
     
+    @Published var currentHoverTab: StoredTab?
+    
     @AppStorage("sidebarWidth") var sidebarWidth = CGFloat(250)
     
     

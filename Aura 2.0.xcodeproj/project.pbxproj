@@ -176,8 +176,8 @@
 				B9BB573E2DF8D07200B7E1E7 /* StorageManager.swift */,
 				B9B0051C2DFA834500B79152 /* TabsManager.swift */,
 				B9B0050E2DFA740700B79152 /* SettingsViewModel.swift */,
-				B9B005102DFA744A00B79152 /* Enums */,
 				B9B004FF2DF9836F00B79152 /* UIViewModel.swift */,
+				B9B005102DFA744A00B79152 /* Enums */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";

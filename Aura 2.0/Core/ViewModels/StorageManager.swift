@@ -156,5 +156,22 @@ class StorageManager: ObservableObject {
             selectedSpace = spaces.first
         }
     }
+    
+    func appLaunchTasks(allTabs: [StoredTab]) {
+        clearOldTabs(allTabs: allTabs)
+    }
+    
+    func clearOldTabs(allTabs: [StoredTab]) -> [StoredTab] {
+        let closeWindowDays = UserDefaults.standard.integer(forKey: "tabCloseWindow")
+        let now = Date()
+        let calendar = Calendar.current
+
+        return allTabs.filter { tab in
+            guard let cutoff = calendar.date(byAdding: .day, value: -closeWindowDays, to: now) else {
+                return true
+            }
+            return tab.timestamp >= cutoff
+        }
+    }
 }
 
