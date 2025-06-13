@@ -8,9 +8,9 @@
 //
 
 
-import SwiftUI
+import Foundation
 
-enum TabType: @MainActor Codable {
+enum TabType: String, Codable {
     case primary
     case pinned
     case favorites

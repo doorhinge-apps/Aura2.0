@@ -10,11 +10,27 @@
 
 import Foundation
 import SwiftData
-import WebKit
 
-struct StoredTab: @MainActor Codable, Hashable {
+@Model
+final class StoredTab {
     var uuid: UUID = UUID()
     var timestamp: Date
     var url: String
     var tabType: TabType
+
+    @Relationship var parentSpace: SpaceData?
+
+    init(
+        uuid: UUID = UUID(),
+        timestamp: Date,
+        url: String,
+        tabType: TabType,
+        parentSpace: SpaceData? = nil
+    ) {
+        self.uuid = uuid
+        self.timestamp = timestamp
+        self.url = url
+        self.tabType = tabType
+        self.parentSpace = parentSpace
+    }
 }
