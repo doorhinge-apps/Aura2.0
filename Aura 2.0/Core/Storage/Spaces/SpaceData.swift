@@ -25,9 +25,9 @@ final class SpaceData {
     // The color gradient of the background as hex codes
     var spaceBackgroundColors: [String]
     
-    var primaryTabs: [StoredTab] = []
-    var pinnedTabs: [StoredTab] = []
-    var favoriteTabs: [StoredTab] = []
+    @Relationship(deleteRule: .cascade) var primaryTabs: [StoredTab] = []
+    @Relationship(deleteRule: .cascade) var pinnedTabs: [StoredTab] = []
+    @Relationship(deleteRule: .cascade) var favoriteTabs: [StoredTab] = []
     
     init(
         spaceIdentifier: String,

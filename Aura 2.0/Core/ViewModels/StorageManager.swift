@@ -99,7 +99,8 @@ class StorageManager: ObservableObject {
         let storedTabObject = StoredTab(
             timestamp: Date.now,
             url: formattedURL,
-            tabType: .primary
+            tabType: .primary,
+            parentSpace: space
         )
         
         // Add to the space's storedTabs and persist

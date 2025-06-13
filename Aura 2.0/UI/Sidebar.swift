@@ -68,10 +68,7 @@ struct Sidebar: View {
                                                 await storageManager.selectOrLoadTab(tabObject: tab)
                                                 
                                                 if let index = selectedSpace.primaryTabs.firstIndex(where: { $0.uuid == tab.uuid }) {
-                                                    var updatedTabs = selectedSpace.primaryTabs
-                                                    updatedTabs[index].timestamp = Date.now
-                                                    selectedSpace.primaryTabs = updatedTabs
-
+                                                    selectedSpace.primaryTabs[index].timestamp = Date.now
                                                     try? modelContext.save()
                                                 }
                                             }
