@@ -29,8 +29,11 @@ final class SpaceData {
     var textColor: String
     var adaptiveTheme: Bool = false
     
+    @Relationship(deleteRule: .cascade, inverse: \StoredTab.parentSpace)
     var primaryTabs: [StoredTab] = []
+    @Relationship(deleteRule: .cascade, inverse: \StoredTab.parentSpace)
     var pinnedTabs: [StoredTab] = []
+    @Relationship(deleteRule: .cascade, inverse: \StoredTab.parentSpace)
     var favoriteTabs: [StoredTab] = []
     
     init(
@@ -38,18 +41,12 @@ final class SpaceData {
         spaceName: String,
         isIncognito: Bool,
         spaceBackgroundColors: [String],
-        textColor: String,
-        primaryTabs: [StoredTab] = [],
-        pinnedTabs: [StoredTab] = [],
-        favoriteTabs: [StoredTab] = []
+        textColor: String
     ) {
         self.spaceIdentifier = spaceIdentifier
         self.spaceName = spaceName
         self.isIncognito = isIncognito
         self.spaceBackgroundColors = spaceBackgroundColors
         self.textColor = textColor
-        self.primaryTabs = primaryTabs
-        self.pinnedTabs = pinnedTabs
-        self.favoriteTabs = favoriteTabs
     }
 }
