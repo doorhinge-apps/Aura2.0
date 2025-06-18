@@ -10,7 +10,9 @@
 
 import SwiftUI
 
-enum TabType: @MainActor Codable {
+/// Type of a stored tab. Uses a `String` raw value so it can be
+/// persisted by SwiftData.
+enum TabType: String, Codable {
     case primary
     case pinned
     case favorites

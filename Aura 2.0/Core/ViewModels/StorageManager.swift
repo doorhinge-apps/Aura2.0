@@ -40,7 +40,10 @@ class StorageManager: ObservableObject {
             request.attribution = .user
             page.load(request)
 
-        let stored = StoredTab(id: createStoredTabID(url: url), timestamp: .now, url: url, tabType: .primary)
+        let stored = StoredTab(id: createStoredTabID(url: url),
+                               timestamp: .now,
+                               url: url,
+                               tabType: .primary)
             let tab = BrowserTab(lastActiveTime: .now, tabType: .primary, page: page, storedTab: stored)
             return tab
         }
@@ -136,10 +139,12 @@ class StorageManager: ObservableObject {
             id: createStoredTabID(url: formattedURL),
             timestamp: Date.now,
             url: formattedURL,
-            tabType: .primary
+            tabType: .primary,
+            parentSpace: space
         )
-        
+
         // Add to the space's storedTabs and persist
+        modelContext.insert(storedTabObject)
         space.primaryTabs.append(storedTabObject)
         try? modelContext.save()
         

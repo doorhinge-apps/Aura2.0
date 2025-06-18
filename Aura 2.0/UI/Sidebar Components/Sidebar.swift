@@ -172,7 +172,7 @@ struct Sidebar: View {
                                     }.keyboardShortcut("t", modifiers: .command)
                                     
                                     // MARK: - Primary Tabs
-                                    ForEach(space.primaryTabs, id:\.self) { tab in
+                                    ForEach(space.primaryTabs, id: \.id) { tab in
                                         ZStack {
                                             RoundedRectangle(cornerRadius: 15)
                                                 .fill(Color.white.opacity(0.001))
@@ -209,13 +209,8 @@ struct Sidebar: View {
                                             Task {
                                                 await storageManager.selectOrLoadTab(tabObject: tab)
                                                 
-                                                if let index = space.primaryTabs.firstIndex(where: { $0.id == tab.id }) {
-                                                    var updatedTabs = space.primaryTabs
-                                                    updatedTabs[index].timestamp = Date.now
-                                                    space.primaryTabs = updatedTabs
-
-                                                    try? modelContext.save()
-                                                }
+                                                tab.timestamp = Date.now
+                                                try? modelContext.save()
                                             }
                                             uiViewModel.currentSelectedTab = tab.id
                                         }
