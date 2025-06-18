@@ -122,29 +122,36 @@ struct CommandBar: View {
             }
         }
         .frame(width: geo.size.width / 2)
+        .onAppear() {
+            commandBarFocus = true
+        }
         .onKeyPress(.upArrow) {
-            if currentSuggestionIndex == -1 {
-                currentSuggestionIndex = 4
-            }
-            else {
-                currentSuggestionIndex -= 1
-            }
-            
-            if currentSuggestionIndex != -1 {
-                previewSuggestionInCommandBar = uiViewModel.searchSuggestions[currentSuggestionIndex]
+            if uiViewModel.searchSuggestions.count >= 5 {
+                if currentSuggestionIndex == -1 {
+                    currentSuggestionIndex = 4
+                }
+                else {
+                    currentSuggestionIndex -= 1
+                }
+                
+                if currentSuggestionIndex != -1 {
+                    previewSuggestionInCommandBar = uiViewModel.searchSuggestions[currentSuggestionIndex]
+                }
             }
             return KeyPress.Result.handled
         }
         .onKeyPress(.downArrow) {
-            if currentSuggestionIndex == 4 {
-                currentSuggestionIndex = -1
-            }
-            else {
-                currentSuggestionIndex += 1
-            }
-            
-            if currentSuggestionIndex != -1 {
-                previewSuggestionInCommandBar = uiViewModel.searchSuggestions[currentSuggestionIndex]
+            if uiViewModel.searchSuggestions.count >= 5 {
+                if currentSuggestionIndex == 4 {
+                    currentSuggestionIndex = -1
+                }
+                else {
+                    currentSuggestionIndex += 1
+                }
+                
+                if currentSuggestionIndex != -1 {
+                    previewSuggestionInCommandBar = uiViewModel.searchSuggestions[currentSuggestionIndex]
+                }
             }
             return KeyPress.Result.handled
         }

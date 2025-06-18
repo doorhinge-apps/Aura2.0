@@ -23,48 +23,139 @@ struct ContentView: View {
     @StateObject var settingsManager = SettingsManager()
     
     @State var selectedSpace: SpaceData
-    @State var selectedTab: WebPage = WebPage()
     
     var cancellables = Set<AnyCancellable>()
     
     @State private var htmlOutput: String = ""
     
+    @State var htmlStringInspector = ""
+    @State var urlStringInspector = ""
+    
+    @Namespace var namespace
+    
     var body: some View {
         GeometryReader { geo in
             ZStack {
                 ZStack {
-                    LinearGradient(
-                        colors: backgroundGradientColors,
-                        startPoint: .bottomLeading,
-                        endPoint: .topTrailing
-                    ).ignoresSafeArea()
+                    if storageManager.selectedSpace?.adaptiveTheme ?? false && storageManager.currentTabs.first?.first?.page.themeColor != nil {
+                        storageManager.currentTabs.first?.first?.page.themeColor
+                    }
+                    else {
+                        LinearGradient(
+                            colors: backgroundGradientColors,
+                            startPoint: .bottomLeading,
+                            endPoint: .topTrailing
+                        ).ignoresSafeArea()
+                    }
                     
-                    HStack {
-                        Sidebar()
-                        
-                        Button {
-                            uiViewModel.showCommandBar.toggle()
-                        } label: {
-                            Image(systemName: "plus")
+                    HStack(spacing: 0) {
+                        if settingsManager.tabsPosition == "left" && uiViewModel.showSidebar {
+                            Sidebar()
+                                .matchedGeometryEffect(id: "Sidebar", in: namespace)
+                                .padding([.vertical, .leading], 20)
                         }
                         
-                        
-                        if storageManager.currentTabs.count == 1,
-                               storageManager.currentTabs[0].count == 1 {
-                            Button {
-                                Task {
-                                    if let html = try? await storageManager.currentTabs[0][0].page.callJavaScript("document.documentElement.outerHTML") as? String {
-                                        print(html)
+                        ZStack {
+                            WebsitePanel()
+                                .scrollEdgeEffectStyle(.none, for: .all)
+                                .overlay {
+                                    if !uiViewModel.sidebarOffset && !uiViewModel.showSidebar {
+                                        Color.white.opacity(0.001)
+                                            .onTapGesture {
+                                                withAnimation(.easeInOut) {
+                                                    uiViewModel.sidebarOffset = true
+                                                }
+                                            }
                                     }
                                 }
-                            } label: {
-                                Image(systemName: "wrench.and.screwdriver.fill")
+                            
+                            if !uiViewModel.showSidebar {
+                                HStack {
+                                    if settingsManager.tabsPosition == "right" {
+                                        Spacer()
+//                                            .frame(width: uiViewModel.sidebarOffset ? geo.size.width + uiViewModel.sidebarWidth * 2: .infinity)
+                                    }
+                                    Sidebar()
+                                        .padding(.leading, 20)
+                                        .background {
+                                            GeometryReader { sideGeo in
+                                                LinearGradient(
+                                                    colors: backgroundGradientColors,
+                                                    startPoint: .bottomLeading,
+                                                    endPoint: .topTrailing
+                                                )
+                                                .ignoresSafeArea()
+                                                .frame(width: sideGeo.size.width)
+                                            }
+                                        }
+                                        .padding(.top, 40)
+                                        .padding(.bottom, 30)
+                                        .padding(.horizontal, 20)
+                                        .offset(x: uiViewModel.sidebarOffset
+                                                ? (uiViewModel.sidebarWidth + 80) *
+                                                  (settingsManager.tabsPosition == "right" ? 1 : -1)
+                                                : 0)
+                                        .allowsHitTesting(!uiViewModel.sidebarOffset)     // no ghost hits
+                                        .onHover { over in
+                                            if !over {                                    // pointer left sidebar
+                                                withAnimation(.easeInOut) {
+                                                    uiViewModel.sidebarOffset = true      // hide
+                                                }
+                                            }
+                                        }
+                                    
+                                    if settingsManager.tabsPosition == "left" {
+                                        Spacer()
+//                                            .frame(width: uiViewModel.sidebarOffset ? geo.size.width + uiViewModel.sidebarWidth * 2: .infinity)
+                                    }
+                                }
+                                
+                                HStack {
+                                    if settingsManager.tabsPosition == "right" {
+                                        Spacer()
+                                    }
+                                    Color.white.opacity(0.001)
+                                        .frame(width: 20)
+                                        .onTapGesture {
+                                            withAnimation(.easeInOut) {
+                                                uiViewModel.sidebarOffset = false
+                                            }
+                                        }
+                                        .onHover { hovering in
+                                            withAnimation(.easeInOut) {
+                                                uiViewModel.sidebarOffset = false
+                                            }
+                                        }
+                                    
+                                    if settingsManager.tabsPosition == "left" {
+                                        Spacer()
+                                    }
+                                }
                             }
-                            }
+                        }
                         
-                        WebsitePanel()
-                            .padding(settingsManager.showBorder ? 20: 0)
-                            .scrollEdgeEffectStyle(.none, for: .all)
+                        if settingsManager.tabsPosition == "right" && uiViewModel.showSidebar {
+                            Sidebar()
+                                .matchedGeometryEffect(id: "Sidebar", in: namespace)
+                                .padding([.vertical, .trailing], 20)
+                        }
+                        
+                        if uiViewModel.showInspector && !storageManager.currentTabs.isEmpty {
+                            if !storageManager.currentTabs[0].isEmpty {
+                                Inspector(htmlString: $htmlStringInspector)
+                                    .onAppear() {
+                                        Task {
+                                            print("hello 3")
+                                            do {
+                                                htmlStringInspector = try await fetchHTML(from: storageManager.currentTabs[0][0].page.url?.absoluteString ?? "")
+                                                print(htmlStringInspector)
+                                            } catch {
+                                                print("Error: \(error)")
+                                            }
+                                        }
+                                    }
+                            }
+                        }
                     }
                 }.overlay {
                     if uiViewModel.showCommandBar {
@@ -87,7 +178,8 @@ struct ContentView: View {
                         spaceIdentifier: UUID().uuidString,
                         spaceName: "Untitled",
                         isIncognito: false,
-                        spaceBackgroundColors: ["8041E6", "A0F2FC"]
+                        spaceBackgroundColors: ["8041E6", "A0F2FC"],
+                        textColor: "ffffff"
                     )
                     modelContext.insert(newSpace)
                     try? modelContext.save()
@@ -102,9 +194,13 @@ struct ContentView: View {
             .task {
                 storageManager.initializeSelectedSpace(from: spaces, modelContext: modelContext)
             }
-        }.environmentObject(storageManager)
-            .environmentObject(uiViewModel)
-            .environmentObject(settingsManager)
+        }
+//        .ignoresSafeArea()
+        .environmentObject(storageManager)
+        .environmentObject(uiViewModel)
+        .environmentObject(settingsManager)
+        .environmentObject(tabsManager)
+        
     }
     
     var backgroundGradientColors: [Color] {

@@ -19,6 +19,8 @@ struct ContentContainerView: View {
         Group {
             if let selected = spaces.first {
                 ContentView(selectedSpace: selected)
+                    .scrollEdgeEffectDisabled(true)
+                    .scrollEdgeEffectStyle(.hard, for: .top)
             } else {
                 ProgressView()
                     .task {
@@ -26,7 +28,8 @@ struct ContentContainerView: View {
                             spaceIdentifier: UUID().uuidString,
                             spaceName: "Untitled",
                             isIncognito: false,
-                            spaceBackgroundColors: ["8041E6", "A0F2FC"]
+                            spaceBackgroundColors: ["8041E6", "A0F2FC"],
+                            textColor: "ffffff"
                         )
                         modelContext.insert(newSpace)
                         try? modelContext.save()

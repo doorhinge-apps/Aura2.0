@@ -31,21 +31,31 @@ struct WebsitePanel: View {
                     .fill(Color.white.opacity(0.25))
                 
                 VStack {
+//                    Spacer()
+//                        .frame(height: 50)
                     ForEach(storageManager.currentTabs, id:\.self) { tabRow in
                         HStack {
                             ForEach(tabRow, id:\.id) { website in
-                                WebView(website.page)
-                                    .scrollBounceBehavior(.basedOnSize, axes: .horizontal) // Fixes issue with horizontal scrolling without overflow
-                                    .webViewScrollPosition($scrollPosition)
-                                    .findNavigator(isPresented: $findNavigatorIsPresent)
+                                GeometryReader { geo in
+                                    ZStack {
+                                        WebView(website.page)
+                                            .scrollEdgeEffectDisabled(true)
+                                            .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
+                                            .webViewScrollPosition($scrollPosition)
+                                            .findNavigator(isPresented: $findNavigatorIsPresent)
+                                            .padding(.vertical, 10)
+                                            .frame(height: geo.size.height + 20)
+                                    }
+                                    .frame(height: geo.size.height)
                                     .cornerRadius(10)
-                                    
+                                    .clipped()
+                                }
                             }
                         }
                     }
                 }
             }
-        }
+        }.scrollEdgeEffectDisabled(true)
     }
 }
 

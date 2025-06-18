@@ -33,5 +33,13 @@ class SettingsManager: ObservableObject {
     @AppStorage("hideBrowseForMe") var hideBrowseForMe = false
     
     @AppStorage("hideMagnifyingGlassSearch") var hideMagnifyingGlassSearch = true
+    
+    @AppStorage("useUnifiedToolbar") var useUnifiedToolbar = true
+    
+    @AppStorage("hideResizingHandles") var hideResizingHandles = false
+    
+    @AppStorage("commandBarOnLaunch") var commandBarOnLaunch = false
+    
+    @AppStorage("adBlock") var adBlock = false
 }
 

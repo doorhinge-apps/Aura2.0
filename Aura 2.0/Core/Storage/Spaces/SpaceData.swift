@@ -20,10 +20,14 @@ final class SpaceData {
     // The display name of the space
     var spaceName: String
     
+    var spaceIcon: String = "circle.fill"
+    
     var isIncognito: Bool
     
     // The color gradient of the background as hex codes
     var spaceBackgroundColors: [String]
+    var textColor: String
+    var adaptiveTheme: Bool = false
     
     var primaryTabs: [StoredTab] = []
     var pinnedTabs: [StoredTab] = []
@@ -34,6 +38,7 @@ final class SpaceData {
         spaceName: String,
         isIncognito: Bool,
         spaceBackgroundColors: [String],
+        textColor: String,
         primaryTabs: [StoredTab] = [],
         pinnedTabs: [StoredTab] = [],
         favoriteTabs: [StoredTab] = []
@@ -42,6 +47,7 @@ final class SpaceData {
         self.spaceName = spaceName
         self.isIncognito = isIncognito
         self.spaceBackgroundColors = spaceBackgroundColors
+        self.textColor = textColor
         self.primaryTabs = primaryTabs
         self.pinnedTabs = pinnedTabs
         self.favoriteTabs = favoriteTabs

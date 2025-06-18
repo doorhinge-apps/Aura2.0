@@ -14,6 +14,37 @@ import WebKit
 import SwiftData
 
 class StorageManager: ObservableObject {
+    @Published var currentTabs: [[BrowserTab]]
+    init() {
+        self.currentTabs = []
+
+        self.currentTabs.append([
+            makeTab(url: "https://apple.com"),
+            makeTab(url: "https://figma.com")
+        ])
+
+        self.currentTabs.append([
+            makeTab(url: "https://arc.net"),
+            makeTab(url: "https://google.com"),
+            makeTab(url: "https://thebrowser.company")
+        ])
+
+        self.currentTabs.append([
+            makeTab(url: "https://doorhingeapps.com")
+        ])
+    }
+    
+    private func makeTab(url: String) -> BrowserTab {
+            let page = WebPage()
+            var request = URLRequest(url: URL(string: url)!)
+            request.attribution = .user
+            page.load(request)
+
+        let stored = StoredTab(id: createStoredTabID(url: url), timestamp: .now, url: url, tabType: .primary)
+            let tab = BrowserTab(lastActiveTime: .now, tabType: .primary, page: page, storedTab: stored)
+            return tab
+        }
+    
     @StateObject var settingManager = SettingsManager()
     
     @Published var selectedSpace: SpaceData?
@@ -24,7 +55,12 @@ class StorageManager: ObservableObject {
     // This update will allow for split view. This will work with nested arrays.
     // Each array is a row. The number of items in each array is the number of collumns.
     // Aura will load all of these at the same time
-    @Published var currentTabs: [[BrowserTab]] = []
+//    @Published var currentTabs: [[BrowserTab]] = []
+    
+    
+//    @Published var currentTabs: [[BrowserTab]] = [
+//        BrowserTab(lastActiveTime: Date.now, tabType: .primary, page: <#T##WebPage#>, storedTab: StoredTab(timestamp: Date.now, url: "https://apple.com", tabType: .primary))
+//    ]
     
     @Published var splitViewTabs: [SplitViewTab] = []
     
@@ -97,6 +133,7 @@ class StorageManager: ObservableObject {
         page.load(request)
         
         let storedTabObject = StoredTab(
+            id: createStoredTabID(url: formattedURL),
             timestamp: Date.now,
             url: formattedURL,
             tabType: .primary
@@ -116,19 +153,19 @@ class StorageManager: ObservableObject {
     func closeTab(tabObject: StoredTab, tabType: TabType) {
         switch tabType {
         case .primary:
-            if let index = selectedSpace?.primaryTabs.firstIndex(where: { $0.uuid == tabObject.uuid }) {
+            if let index = selectedSpace?.primaryTabs.firstIndex(where: { $0.id == tabObject.id }) {
                 selectedSpace?.primaryTabs.remove(at: index)
             }
         case .pinned:
-            if let index = selectedSpace?.pinnedTabs.firstIndex(where: { $0.uuid == tabObject.uuid }) {
+            if let index = selectedSpace?.pinnedTabs.firstIndex(where: { $0.id == tabObject.id }) {
                 selectedSpace?.pinnedTabs.remove(at: index)
             }
         case .favorites:
-            if let index = selectedSpace?.favoriteTabs.firstIndex(where: { $0.uuid == tabObject.uuid }) {
+            if let index = selectedSpace?.favoriteTabs.firstIndex(where: { $0.id == tabObject.id }) {
                 selectedSpace?.favoriteTabs.remove(at: index)
             }
         }
-        if currentTabs.joined().contains(where: { $0.storedTab.uuid == tabObject.uuid }) {
+        if currentTabs.joined().contains(where: { $0.storedTab.id == tabObject.id }) {
             currentTabs = [[]]
         }
     }
@@ -147,7 +184,8 @@ class StorageManager: ObservableObject {
                 spaceIdentifier: UUID().uuidString,
                 spaceName: "Untitled",
                 isIncognito: false,
-                spaceBackgroundColors: ["8041E6", "A0F2FC"]
+                spaceBackgroundColors: ["8041E6", "A0F2FC"],
+                textColor: "ffffff"
             )
             modelContext.insert(newSpace)
             try? modelContext.save()

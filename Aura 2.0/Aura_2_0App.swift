@@ -29,7 +29,9 @@ struct Aura_2_0App: App {
     var body: some Scene {
         WindowGroup {
             ContentContainerView()
+                .ignoresSafeArea(edges: .all)
         }
         .modelContainer(sharedModelContainer)
+        
     }
 }

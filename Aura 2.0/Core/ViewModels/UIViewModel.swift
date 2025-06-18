@@ -12,17 +12,29 @@ import SwiftUI
 import Combine
 
 class UIViewModel: ObservableObject {
+//    let hoveringBackgroundOpacity = 0.5
     // Shows the command bar
     @Published var showCommandBar: Bool = false
     // Determines if the command bar is editing the current url or opening a new tab
     @Published var isEditingURL: Bool = false
     @Published var commandBarText: String = ""
     
+    @Published var hoveringID = ""
+    
+    @Published var showInspector = false
+    
+    @Published var currentSelectedTab: String?
+    
     @Published var currentHoverTab: StoredTab?
+    @Published var currentHoverTabID: UUID?
     
     @AppStorage("sidebarWidth") var sidebarWidth = CGFloat(250)
     
+    @AppStorage("showSidebar") var showSidebar = true
     
+    @Published var sidebarOffset = true
+    
+    @Published var showSettings = false
     
     // Search suggestions from Google
     @Published var searchSuggestions: [String] = []
