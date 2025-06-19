@@ -172,6 +172,7 @@ struct Sidebar: View {
                                     }.keyboardShortcut("t", modifiers: .command)
                                     
                                     // MARK: - Primary Tabs
+                                VStack {
                                     ForEach(space.primaryTabs, id: \.id) { tab in
                                         ZStack {
                                             RoundedRectangle(cornerRadius: 15)
@@ -188,7 +189,7 @@ struct Sidebar: View {
                                             HStack {
                                                 Favicon(url: tab.url)
                                                 Text(tabsManager.linksWithTitles[tab.url] ?? tab.url)
-//                                                Text(tab.timestamp.description)
+                                                //                                                Text(tab.timestamp.description)
                                                     .lineLimit(1)
                                                     .onAppear {
                                                         Task {
@@ -225,6 +226,10 @@ struct Sidebar: View {
                                             }
                                         }
                                     }
+                                }
+//                                .dragContainer(for: StoredTab.self, selection: $uiViewModel.selectedTabs) { draggedTabs in
+//                                    
+//                                }
                                 //}
                             }
                         }.scrollEdgeEffectDisabled(true)

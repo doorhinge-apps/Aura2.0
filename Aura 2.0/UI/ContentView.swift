@@ -73,7 +73,6 @@ struct ContentView: View {
                                 HStack {
                                     if settingsManager.tabsPosition == "right" {
                                         Spacer()
-//                                            .frame(width: uiViewModel.sidebarOffset ? geo.size.width + uiViewModel.sidebarWidth * 2: .infinity)
                                     }
                                     Sidebar()
                                         .padding(.leading, 20)
@@ -95,18 +94,17 @@ struct ContentView: View {
                                                 ? (uiViewModel.sidebarWidth + 80) *
                                                   (settingsManager.tabsPosition == "right" ? 1 : -1)
                                                 : 0)
-                                        .allowsHitTesting(!uiViewModel.sidebarOffset)     // no ghost hits
+                                        .allowsHitTesting(!uiViewModel.sidebarOffset)
                                         .onHover { over in
-                                            if !over {                                    // pointer left sidebar
+                                            if !over {
                                                 withAnimation(.easeInOut) {
-                                                    uiViewModel.sidebarOffset = true      // hide
+                                                    uiViewModel.sidebarOffset = true
                                                 }
                                             }
                                         }
                                     
                                     if settingsManager.tabsPosition == "left" {
                                         Spacer()
-//                                            .frame(width: uiViewModel.sidebarOffset ? geo.size.width + uiViewModel.sidebarWidth * 2: .infinity)
                                     }
                                 }
                                 

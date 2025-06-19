@@ -21,6 +21,7 @@ struct ContentContainerView: View {
                 ContentView(selectedSpace: selected)
                     .scrollEdgeEffectDisabled(true)
                     .scrollEdgeEffectStyle(.hard, for: .top)
+                    .statusBarHidden(true)
             } else {
                 ProgressView()
                     .task {

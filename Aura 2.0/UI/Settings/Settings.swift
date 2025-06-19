@@ -31,7 +31,12 @@ struct Settings: View {
                 } label: {
                     Text("General")
                 }
-
+                
+                NavigationLink {
+                    AppearanceSettings()
+                } label: {
+                    Text("General")
+                }
             }
         }
     }

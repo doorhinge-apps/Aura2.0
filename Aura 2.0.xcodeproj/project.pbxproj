@@ -12,6 +12,9 @@
 		B95A80D52E02BAAF007FE1F4 /* GeneralSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95A80D42E02BAAF007FE1F4 /* GeneralSettings.swift */; };
 		B95A80D72E02BD10007FE1F4 /* MotionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95A80D62E02BD10007FE1F4 /* MotionManager.swift */; };
 		B95A80D92E02C0DC007FE1F4 /* HoverDisabledVision.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95A80D82E02C0DC007FE1F4 /* HoverDisabledVision.swift */; };
+		B95A80E12E035199007FE1F4 /* AppearanceSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95A80E02E035199007FE1F4 /* AppearanceSettings.swift */; };
+		B95A80E32E03896A007FE1F4 /* Settings Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B95A80E22E03896A007FE1F4 /* Settings Images.xcassets */; };
+		B978E16F2E038D9D00146E9B /* Aura.icon in Resources */ = {isa = PBXBuildFile; fileRef = B978E16E2E038D9D00146E9B /* Aura.icon */; };
 		B9B004E62DF8D16E00B79152 /* StoredTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B004E52DF8D16E00B79152 /* StoredTab.swift */; };
 		B9B004E82DF8D18200B79152 /* BrowserTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B004E72DF8D18200B79152 /* BrowserTab.swift */; };
 		B9B004EA2DF8D1F400B79152 /* TabType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B004E92DF8D1F400B79152 /* TabType.swift */; };
@@ -65,6 +68,9 @@
 		B95A80D42E02BAAF007FE1F4 /* GeneralSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettings.swift; sourceTree = "<group>"; };
 		B95A80D62E02BD10007FE1F4 /* MotionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionManager.swift; sourceTree = "<group>"; };
 		B95A80D82E02C0DC007FE1F4 /* HoverDisabledVision.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoverDisabledVision.swift; sourceTree = "<group>"; };
+		B95A80E02E035199007FE1F4 /* AppearanceSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettings.swift; sourceTree = "<group>"; };
+		B95A80E22E03896A007FE1F4 /* Settings Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Settings Images.xcassets"; sourceTree = "<group>"; };
+		B978E16E2E038D9D00146E9B /* Aura.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Aura.icon; sourceTree = "<group>"; };
 		B9B004E52DF8D16E00B79152 /* StoredTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredTab.swift; sourceTree = "<group>"; };
 		B9B004E72DF8D18200B79152 /* BrowserTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTab.swift; sourceTree = "<group>"; };
 		B9B004E92DF8D1F400B79152 /* TabType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabType.swift; sourceTree = "<group>"; };
@@ -167,10 +173,28 @@
 			isa = PBXGroup;
 			children = (
 				B95A80A22DFD4D41007FE1F4 /* Settings.swift */,
-				B95A80D42E02BAAF007FE1F4 /* GeneralSettings.swift */,
-				B95A80D62E02BD10007FE1F4 /* MotionManager.swift */,
+				B95A80E42E038971007FE1F4 /* Subpages */,
+				B95A80E52E038980007FE1F4 /* Components */,
 			);
 			path = Settings;
+			sourceTree = "<group>";
+		};
+		B95A80E42E038971007FE1F4 /* Subpages */ = {
+			isa = PBXGroup;
+			children = (
+				B95A80D42E02BAAF007FE1F4 /* GeneralSettings.swift */,
+				B95A80E02E035199007FE1F4 /* AppearanceSettings.swift */,
+			);
+			path = Subpages;
+			sourceTree = "<group>";
+		};
+		B95A80E52E038980007FE1F4 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				B95A80D62E02BD10007FE1F4 /* MotionManager.swift */,
+				B95A80E22E03896A007FE1F4 /* Settings Images.xcassets */,
+			);
+			path = Components;
 			sourceTree = "<group>";
 		};
 		B9B004ED2DF96BCD00B79152 /* Scheme Handlers */ = {
@@ -295,6 +319,7 @@
 			isa = PBXGroup;
 			children = (
 				B9BB57312DF8CE6F00B7E1E7 /* Assets.xcassets */,
+				B978E16E2E038D9D00146E9B /* Aura.icon */,
 				B9BB57322DF8CE6F00B7E1E7 /* Aura_2_0.entitlements */,
 				B9BB57332DF8CE6F00B7E1E7 /* Aura_2_0App.swift */,
 				B9B0050A2DFA16CF00B79152 /* ContentContainer.swift */,
@@ -457,7 +482,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				B9B005042DFA091B00B79152 /* Launch Screen.storyboard in Resources */,
+				B978E16F2E038D9D00146E9B /* Aura.icon in Resources */,
 				B9BB573B2DF8CE6F00B7E1E7 /* Assets.xcassets in Resources */,
+				B95A80E32E03896A007FE1F4 /* Settings Images.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -503,6 +530,7 @@
 				B9B0052E2DFC045F00B79152 /* Inspector.swift in Sources */,
 				B9B004F32DF96DC400B79152 /* SpaceData.swift in Sources */,
 				B9B004E82DF8D18200B79152 /* BrowserTab.swift in Sources */,
+				B95A80E12E035199007FE1F4 /* AppearanceSettings.swift in Sources */,
 				B95A80D52E02BAAF007FE1F4 /* GeneralSettings.swift in Sources */,
 				B9B005072DFA0AF500B79152 /* SplitViewTab.swift in Sources */,
 				B9B0051A2DFA7E1600B79152 /* LoadingIndicators.swift in Sources */,
@@ -548,8 +576,9 @@
 		B9BB57272DF8CE4700B7E1E7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "iOS 18 Icon";
+				ASSETCATALOG_COMPILER_APPICON_NAME = Aura;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = "Aura 2.0/Aura_2_0.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -582,8 +611,9 @@
 		B9BB57282DF8CE4700B7E1E7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "iOS 18 Icon";
+				ASSETCATALOG_COMPILER_APPICON_NAME = Aura;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = YES;
 				CODE_SIGN_ENTITLEMENTS = "Aura 2.0/Aura_2_0.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

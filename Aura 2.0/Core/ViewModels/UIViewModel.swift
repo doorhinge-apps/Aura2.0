@@ -36,6 +36,8 @@ class UIViewModel: ObservableObject {
     
     @Published var showSettings = false
     
+    @Published var selectedTabs: [StoredTab]?
+    
     // Search suggestions from Google
     @Published var searchSuggestions: [String] = []
     
