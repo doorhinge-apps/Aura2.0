@@ -208,9 +208,9 @@
 		B9B004F02DF96C0E00B79152 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				B9BB57402DF8D10300B7E1E7 /* Storage */,
 				B9B004FE2DF9836000B79152 /* ViewModels */,
 				B9B004F12DF96C6D00B79152 /* Browsing Management */,
-				B9BB57402DF8D10300B7E1E7 /* Storage */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -249,7 +249,6 @@
 				B9B0051C2DFA834500B79152 /* TabsManager.swift */,
 				B9B0050E2DFA740700B79152 /* SettingsManager.swift */,
 				B9B004FF2DF9836F00B79152 /* UIViewModel.swift */,
-				B9B005102DFA744A00B79152 /* Enums */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -261,13 +260,6 @@
 				B9B005022DFA091B00B79152 /* Launch Animation.swift */,
 			);
 			path = "Launch Screen";
-			sourceTree = "<group>";
-		};
-		B9B005102DFA744A00B79152 /* Enums */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			path = Enums;
 			sourceTree = "<group>";
 		};
 		B9B005162DFA7D9000B79152 /* Frameworks */ = {
@@ -349,10 +341,10 @@
 		B9BB57402DF8D10300B7E1E7 /* Storage */ = {
 			isa = PBXGroup;
 			children = (
+				B9B004F42DF96E4200B79152 /* Spaces */,
 				B9B004E52DF8D16E00B79152 /* StoredTab.swift */,
 				B9B005062DFA0AF500B79152 /* SplitViewTab.swift */,
 				B9B0050C2DFA71BF00B79152 /* WebMetadata.swift */,
-				B9B004F42DF96E4200B79152 /* Spaces */,
 				B9B004EB2DF8D35A00B79152 /* TabLoadingData.swift */,
 				B9B004E72DF8D18200B79152 /* BrowserTab.swift */,
 				B9B004E92DF8D1F400B79152 /* TabType.swift */,

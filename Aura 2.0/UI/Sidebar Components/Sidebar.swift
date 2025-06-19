@@ -11,6 +11,7 @@
 import SwiftUI
 import SwiftData
 import WebKit
+import UniformTypeIdentifiers
 
 struct Sidebar: View {
     @EnvironmentObject var storageManager: StorageManager
@@ -26,6 +27,8 @@ struct Sidebar: View {
     @State private var startWidth: CGFloat?
     
     @State var hoverSearch = false
+    
+    @State private var draggingTabID: String?
     
     var body: some View {
         HStack(spacing: 0) {
@@ -228,30 +231,17 @@ struct Sidebar: View {
                                                 }
                                             }
                                         }
-                                        .draggable(tab.id)
-                                        .dropDestination(for: String.self) { items, _ in
-                                            guard let draggedID = items.first,
-                                                  let fromIndex = space.primaryTabs.firstIndex(where: { $0.id == draggedID }),
-                                                  let toIndex = space.primaryTabs.firstIndex(where: { $0.id == tab.id }) else {
-                                                print("Drop failed to resolve indexes")
-                                                return false
+                                        .onDrag {
+                                            let tabID = tab.id // Copy id to a local variable (String is Sendable)
+                                            draggingTabID = tabID
+                                            let provider = NSItemProvider()
+                                            provider.registerDataRepresentation(forTypeIdentifier: UTType.text.identifier, visibility: .ownProcess) { [tabID] completion in
+                                                completion(Data(tabID.utf8), nil)
+                                                return nil
                                             }
-                                            
-                                            print("Dropping tab \(draggedID) from index \(fromIndex) to \(toIndex)")
-                                            if fromIndex != toIndex {
-                                                withAnimation {
-                                                    let moved = space.primaryTabs.remove(at: fromIndex)
-                                                    let insertIndex = fromIndex < toIndex ? toIndex - 1 : toIndex
-                                                    space.primaryTabs.insert(moved, at: insertIndex)
-                                                    for (idx, t) in space.primaryTabs.enumerated() {
-                                                        t.orderIndex = idx
-                                                    }
-                                                    print("New tab order: \(space.primaryTabs.map { $0.orderIndex })")
-                                                }
-                                                try? modelContext.save()
-                                            }
-                                            return true
+                                            return provider
                                         }
+                                        .onDrop(of: [UTType.text], delegate: TabDropDelegate(tab: tab, space: space, draggingTabID: $draggingTabID, modelContext: modelContext))
                                     }
                                 }
 //                                .dragContainer(for: StoredTab.self, selection: $uiViewModel.selectedTabs) { draggedTabs in
@@ -396,3 +386,48 @@ private extension Comparable {
         min(max(self, range.lowerBound), range.upperBound)
     }
 }
+
+struct TabDropDelegate: DropDelegate {
+    let tab: StoredTab
+    let space: SpaceData
+    @Binding var draggingTabID: String?
+    var modelContext: ModelContext
+
+    // Fire on hover, just for the live animation.
+    func dropEntered(info: DropInfo) {
+        guard
+            let draggingID = draggingTabID,
+            draggingID != tab.id
+        else { return }
+
+        // Work on a snapshot that reflects the on-screen order
+        var ordered = space.primaryTabs.sorted { $0.orderIndex < $1.orderIndex }
+
+        guard
+            let from = ordered.firstIndex(where: { $0.id == draggingID }),
+            let to   = ordered.firstIndex(where: { $0.id == tab.id })
+        else { return }
+
+        withAnimation {
+            let moved = ordered.remove(at: from)
+            ordered.insert(moved, at: to)
+
+            // The order you show is driven solely by this field
+            for (i, t) in ordered.enumerated() { t.orderIndex = i }
+        }
+        // no save here – keeps the gesture smooth
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? { DropProposal(operation: .move) }
+
+    // Commit once, when the user lets go
+    func performDrop(info: DropInfo) -> Bool {
+        draggingTabID = nil
+        do { try modelContext.save() }            // persist the new order
+        catch { assertionFailure("SwiftData save failed: \(error)") }
+        return true
+    }
+}
+
+
+
