@@ -11,6 +11,7 @@
 import SwiftUI
 import SwiftData
 import WebKit
+import UniformTypeIdentifiers
 
 struct Sidebar: View {
     @EnvironmentObject var storageManager: StorageManager
@@ -22,10 +23,12 @@ struct Sidebar: View {
     @Query private var spaces: [SpaceData]
     
     @State private var dragOffset: CGFloat = 0
-    
+
     @State private var startWidth: CGFloat?
-    
+
     @State var hoverSearch = false
+
+    @State private var draggedTab: StoredTab?
     
     var body: some View {
         HStack(spacing: 0) {
@@ -228,30 +231,12 @@ struct Sidebar: View {
                                                 }
                                             }
                                         }
-                                        .draggable(tab.id)
-                                        .dropDestination(for: String.self) { items, _ in
-                                            guard let draggedID = items.first,
-                                                  let fromIndex = space.primaryTabs.firstIndex(where: { $0.id == draggedID }),
-                                                  let toIndex = space.primaryTabs.firstIndex(where: { $0.id == tab.id }) else {
-                                                print("Drop failed to resolve indexes")
-                                                return false
-                                            }
-                                            
-                                            print("Dropping tab \(draggedID) from index \(fromIndex) to \(toIndex)")
-                                            if fromIndex != toIndex {
-                                                withAnimation {
-                                                    let moved = space.primaryTabs.remove(at: fromIndex)
-                                                    let insertIndex = fromIndex < toIndex ? toIndex - 1 : toIndex
-                                                    space.primaryTabs.insert(moved, at: insertIndex)
-                                                    for (idx, t) in space.primaryTabs.enumerated() {
-                                                        t.orderIndex = idx
-                                                    }
-                                                    print("New tab order: \(space.primaryTabs.map { $0.orderIndex })")
-                                                }
-                                                try? modelContext.save()
-                                            }
-                                            return true
-                                        }
+                                        .draggable(TabDragItem(id: tab.id), onDragBegan: {
+                                            draggedTab = tab
+                                        }, onDragEnded: { _ in
+                                            draggedTab = nil
+                                        })
+                                        .onDrop(of: [UTType.tabDragItem], delegate: TabDropDelegate(tab: tab, tabs: $space.primaryTabs, draggedTab: $draggedTab, modelContext: modelContext))
                                     }
                                 }
 //                                .dragContainer(for: StoredTab.self, selection: $uiViewModel.selectedTabs) { draggedTabs in
