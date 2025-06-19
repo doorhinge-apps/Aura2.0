@@ -7,6 +7,7 @@ final class StoredTab {
     var id: String
     var timestamp: Date
     var url: String
+    var orderIndex: Int
     var tabType: TabType
     var folderName: String?
 
@@ -16,12 +17,14 @@ final class StoredTab {
     init(id: String,
          timestamp: Date,
          url: String,
+         orderIndex: Int,
          tabType: TabType,
          folderName: String? = nil,
          parentSpace: SpaceData? = nil) {
         self.id = id
         self.timestamp = timestamp
         self.url = url
+        self.orderIndex = orderIndex
         self.tabType = tabType
         self.folderName = folderName
         self.parentSpace = parentSpace

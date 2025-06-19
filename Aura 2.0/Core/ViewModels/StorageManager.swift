@@ -43,6 +43,7 @@ class StorageManager: ObservableObject {
         let stored = StoredTab(id: createStoredTabID(url: url),
                                timestamp: .now,
                                url: url,
+                               orderIndex: 0,
                                tabType: .primary)
             let tab = BrowserTab(lastActiveTime: .now, tabType: .primary, page: page, storedTab: stored)
             return tab
@@ -135,13 +136,16 @@ class StorageManager: ObservableObject {
         request.attribution = .user
         page.load(request)
         
+        let newOrder = space.primaryTabs.count
         let storedTabObject = StoredTab(
             id: createStoredTabID(url: formattedURL),
             timestamp: Date.now,
             url: formattedURL,
+            orderIndex: newOrder,
             tabType: .primary,
             parentSpace: space
         )
+        print("Created tab \(storedTabObject.id) with orderIndex \(newOrder)")
 
         // Add to the space's storedTabs and persist
         modelContext.insert(storedTabObject)
@@ -160,6 +164,13 @@ class StorageManager: ObservableObject {
         case .primary:
             if let index = selectedSpace?.primaryTabs.firstIndex(where: { $0.id == tabObject.id }) {
                 selectedSpace?.primaryTabs.remove(at: index)
+                // Re-index remaining tabs so orderIndex stays in sync
+                if let tabs = selectedSpace?.primaryTabs {
+                    for (idx, tab) in tabs.enumerated() {
+                        tab.orderIndex = idx
+                    }
+                }
+                print("Removed tab \(tabObject.id). New order: \(selectedSpace?.primaryTabs.map { $0.orderIndex } ?? [])")
             }
         case .pinned:
             if let index = selectedSpace?.pinnedTabs.firstIndex(where: { $0.id == tabObject.id }) {

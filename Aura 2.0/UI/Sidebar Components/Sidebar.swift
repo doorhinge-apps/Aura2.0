@@ -173,7 +173,9 @@ struct Sidebar: View {
                                     
                                     // MARK: - Primary Tabs
                                 VStack {
-                                    ForEach(space.primaryTabs, id: \.id) { tab in
+//                                    ForEach(space.primaryTabs, id: \.id) { tab in
+                                    let orderedTabs = space.primaryTabs.sorted { $0.orderIndex < $1.orderIndex }
+                                    ForEach(orderedTabs, id: \.id) { tab in
                                         ZStack {
                                             RoundedRectangle(cornerRadius: 15)
                                                 .fill(Color.white.opacity(0.001))
@@ -206,6 +208,7 @@ struct Sidebar: View {
                                             .padding(.vertical, 10)
                                             .padding(.horizontal, 5)
                                         }
+                                        .contentShape(Rectangle())
                                         .onTapGesture {
                                             Task {
                                                 await storageManager.selectOrLoadTab(tabObject: tab)
@@ -224,6 +227,30 @@ struct Sidebar: View {
                                                     uiViewModel.currentHoverTab = tab
                                                 }
                                             }
+                                        }
+                                        .draggable(tab.id)
+                                        .dropDestination(for: String.self) { items, _ in
+                                            guard let draggedID = items.first,
+                                                  let fromIndex = space.primaryTabs.firstIndex(where: { $0.id == draggedID }),
+                                                  let toIndex = space.primaryTabs.firstIndex(where: { $0.id == tab.id }) else {
+                                                print("Drop failed to resolve indexes")
+                                                return false
+                                            }
+                                            
+                                            print("Dropping tab \(draggedID) from index \(fromIndex) to \(toIndex)")
+                                            if fromIndex != toIndex {
+                                                withAnimation {
+                                                    let moved = space.primaryTabs.remove(at: fromIndex)
+                                                    let insertIndex = fromIndex < toIndex ? toIndex - 1 : toIndex
+                                                    space.primaryTabs.insert(moved, at: insertIndex)
+                                                    for (idx, t) in space.primaryTabs.enumerated() {
+                                                        t.orderIndex = idx
+                                                    }
+                                                    print("New tab order: \(space.primaryTabs.map { $0.orderIndex })")
+                                                }
+                                                try? modelContext.save()
+                                            }
+                                            return true
                                         }
                                     }
                                 }
