@@ -44,6 +44,6 @@ class SettingsManager: ObservableObject {
     
     @AppStorage("adBlock") var adBlock = false
     
-    @AppStorage("closePrimaryTabsAfter") var closePrimaryTabsAfter = 1.0 // In minutes
+    @AppStorage("closePrimaryTabsAfter") var closePrimaryTabsAfter = 26297460.0 // In minutes
 }
 

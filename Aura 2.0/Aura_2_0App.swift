@@ -32,7 +32,7 @@ struct Aura_2_0App: App {
     @StateObject var settingsManager = SettingsManager()
 
     var body: some Scene {
-        WindowGroup {
+        WindowGroup(id: "mainWindow") {
             ContentContainerView()
                 .ignoresSafeArea(edges: .all)
                 .environmentObject(storageManager)
