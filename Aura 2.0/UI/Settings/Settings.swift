@@ -17,6 +17,10 @@ struct Settings: View {
     @EnvironmentObject var tabsManager: TabsManager
     @EnvironmentObject var settingsManager: SettingsManager
     
+    init() {
+        UINavigationBar.appearance().largeTitleTextAttributes = [.foregroundColor: UIColor.white]
+    }
+    
     var body: some View {
         ZStack {
             LinearGradient(
@@ -26,17 +30,70 @@ struct Settings: View {
             ).ignoresSafeArea()
             
             NavigationStack {
-                NavigationLink {
-                    GeneralSettings()
-                } label: {
-                    Text("General")
+                List {
+                    NavigationLink {
+                        GeneralSettings()
+                    } label: {
+                        HStack {
+                            Image("General Icon")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 25, height: 25)
+                                .padding(2)
+                                .background {
+                                    ZStack {
+                                        LinearGradient(
+                                            colors: backgroundGradientColors,
+                                            startPoint: .bottomLeading,
+                                            endPoint: .topTrailing
+                                        ).ignoresSafeArea()
+                                        
+                                        Color.black.opacity(0.25)
+                                    }.cornerRadius(5)
+                                }
+                            Text("General")
+                        }
+                    }
+                    
+                    NavigationLink {
+                        AppearanceSettings()
+                    } label: {
+                        HStack {
+                            Image("Appearance Icon")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 25, height: 25)
+                                .padding(2)
+                                .background {
+                                    ZStack {
+                                        LinearGradient(
+                                            colors: backgroundGradientColors,
+                                            startPoint: .bottomLeading,
+                                            endPoint: .topTrailing
+                                        ).ignoresSafeArea()
+                                        
+                                        Color.black.opacity(0.25)
+                                    }.cornerRadius(5)
+                                }
+                            Text("Appearance")
+                        }
+                    }
                 }
+                .scrollContentBackground(.hidden)
+                .navigationTitle("Settings")
                 
-                NavigationLink {
-                    AppearanceSettings()
-                } label: {
-                    Text("General")
-                }
+//                 .background(Color.blue)
+//                NavigationLink {
+//                    GeneralSettings()
+//                } label: {
+//                    Text("General")
+//                }
+//                
+//                NavigationLink {
+//                    AppearanceSettings()
+//                } label: {
+//                    Text("Appearance")
+//                }
             }
         }
     }

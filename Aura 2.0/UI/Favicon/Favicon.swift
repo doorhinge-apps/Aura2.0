@@ -30,7 +30,6 @@ struct Favicon: View {
         .onSuccess { image, data, cacheType in
             
         }
-        .indicator(.activity)
         .transition(.fade(duration: 0.5))
         .scaledToFit()
     }

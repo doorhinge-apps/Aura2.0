@@ -86,7 +86,7 @@ struct Sidebar: View {
                         }
                     } label: {
                         HStack {
-                            if !hoverSearch {
+                            if !hoverSearch && settingsManager.useUnifiedToolbar {
                                 Spacer()
                             }
                             
@@ -97,6 +97,33 @@ struct Sidebar: View {
                             Spacer()
                             
                             if (hoverSearch || !settingsManager.useUnifiedToolbar) && storageManager.currentTabs.first?.first?.page != nil {
+                                Button {
+                                    UIPasteboard.general.string = storageManager.currentTabs[0][0].storedTab.url
+                                } label: {
+                                    ZStack {
+                                        Color.white.opacity(uiViewModel.hoveringID == "searchbarCopy" ? 0.25: 0.0)
+                                        
+                                        Image(systemName: "link")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 20, height: 20)
+                                            .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
+                                            .opacity(uiViewModel.hoveringID == "searchbarCopy" ? 1.0: 0.5)
+                                        
+                                    }.frame(width: 40, height: 40).cornerRadius(7)
+                                        .onHover { hover in
+                                            withAnimation {
+                                                if uiViewModel.hoveringID == "searchbarCopy" {
+                                                    uiViewModel.hoveringID = ""
+                                                }
+                                                else {
+                                                    uiViewModel.hoveringID = "searchbarCopy"
+                                                }
+                                            }
+                                        }
+                                }
+                                
+                                
                                 Button {
                                     let activityController = UIActivityViewController(activityItems: [storageManager.currentTabs.first?.first?.page.url ?? URL(string: "")!, storageManager.currentTabs.first?.first?.page ?? WebPage()], applicationActivities: nil)
                                     
@@ -109,12 +136,32 @@ struct Sidebar: View {
                                     
                                     UIApplication.shared.windows.first?.rootViewController!.present(activityController, animated: true, completion: nil)
                                 } label: {
-                                    Image(systemName: "square.and.arrow.up")
+                                    ZStack {
+                                        Color.white.opacity(uiViewModel.hoveringID == "searchbarShare" ? 0.25: 0.0)
+                                        
+                                        Image(systemName: "square.and.arrow.up")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 20, height: 20)
+                                            .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
+                                            .opacity(uiViewModel.hoveringID == "searchbarShare" ? 1.0: 0.5)
+                                        
+                                    }.frame(width: 40, height: 40).cornerRadius(7)
+                                        .onHover { hover in
+                                            withAnimation {
+                                                if uiViewModel.hoveringID == "searchbarShare" {
+                                                    uiViewModel.hoveringID = ""
+                                                }
+                                                else {
+                                                    uiViewModel.hoveringID = "searchbarShare"
+                                                }
+                                            }
+                                        }
                                 }
                             }
                         }
                         .padding(.horizontal, 15)
-                        .frame(width: hoverSearch ? .infinity: 50, height: 50)
+                        .frame(width: hoverSearch || !settingsManager.useUnifiedToolbar ? .infinity: 50, height: 50)
                             .background() {
                                 RoundedRectangle(cornerRadius: 20)
                                     .fill(Color.white.opacity(hoverSearch ? 0.25: 0.15))
@@ -141,42 +188,38 @@ struct Sidebar: View {
                     ForEach(spaces, id:\.id) { space in
                         ScrollView {
                             VStack {
-//                                if let selectedSpace = storageManager.selectedSpace {
-                                    
-                                    
-                                    // MARK: - New Tab
-                                    Button {
-                                        uiViewModel.showCommandBar.toggle()
-                                    } label: {
-                                        ZStack {
-                                            RoundedRectangle(cornerRadius: 20)
-                                                .foregroundStyle(Color(.white).opacity(uiViewModel.hoveringID == "newTab" ? 0.5: 0.0))
-                                                .frame(height: 50)
-                                            HStack {
-                                                Label("New Tab", systemImage: "plus")
-                                                    .foregroundStyle(Color(hex: space.textColor ?? "ffffff"))
-                                                    .font(.system(.headline, design: .rounded, weight: .bold))
-                                                    .padding(.leading, 10)
-                                                
-                                                Spacer()
-                                            }
-                                        }.foregroundStyle(Color(hex: space.textColor ?? "ffffff"))
-                                            .onHover { hover in
-                                                withAnimation {
-                                                    let hoverID = "newTab"
-                                                    if uiViewModel.hoveringID == hoverID {
-                                                        uiViewModel.hoveringID = ""
-                                                    }
-                                                    else {
-                                                        uiViewModel.hoveringID = hoverID
-                                                    }
+                                // MARK: - New Tab
+                                Button {
+                                    uiViewModel.showCommandBar.toggle()
+                                } label: {
+                                    ZStack {
+                                        RoundedRectangle(cornerRadius: 20)
+                                            .foregroundStyle(Color(.white).opacity(uiViewModel.hoveringID == "newTab" ? 0.5: 0.0))
+                                            .frame(height: 50)
+                                        HStack {
+                                            Label("New Tab", systemImage: "plus")
+                                                .foregroundStyle(Color(hex: space.textColor))
+                                                .font(.system(.headline, design: .rounded, weight: .bold))
+                                                .padding(.leading, 10)
+                                            
+                                            Spacer()
+                                        }
+                                    }.foregroundStyle(Color(hex: space.textColor))
+                                        .onHover { hover in
+                                            withAnimation {
+                                                let hoverID = "newTab"
+                                                if uiViewModel.hoveringID == hoverID {
+                                                    uiViewModel.hoveringID = ""
+                                                }
+                                                else {
+                                                    uiViewModel.hoveringID = hoverID
                                                 }
                                             }
-                                    }.keyboardShortcut("t", modifiers: .command)
+                                        }
+                                }
                                     
-                                    // MARK: - Primary Tabs
+                                // MARK: - Primary Tabs
                                 VStack {
-//                                    ForEach(space.primaryTabs, id: \.id) { tab in
                                     let orderedTabs = space.primaryTabs.sorted { $0.orderIndex < $1.orderIndex }
                                     ForEach(orderedTabs, id: \.id) { tab in
                                         ZStack {
@@ -194,7 +237,7 @@ struct Sidebar: View {
                                             HStack {
                                                 Favicon(url: tab.url)
                                                 Text(tabsManager.linksWithTitles[tab.url] ?? tab.url)
-                                                //                                                Text(tab.timestamp.description)
+                                                    .foregroundStyle(Color(hex: space.textColor))
                                                     .lineLimit(1)
                                                     .onAppear {
                                                         Task {
@@ -202,10 +245,22 @@ struct Sidebar: View {
                                                         }
                                                     }
                                                 Spacer()
-                                                Button {
-                                                    storageManager.closeTab(tabObject: tab, tabType: .primary)
-                                                } label: {
-                                                    Image(systemName: "xmark")
+                                                
+                                                if uiViewModel.currentSelectedTab == tab.id || uiViewModel.currentHoverTab?.id ?? "rat" == tab.id {
+                                                    Button {
+                                                        withAnimation {
+                                                            uiViewModel.currentSelectedTab = storageManager.closeTab(tabObject: tab, tabType: .primary)?.id ?? ""
+                                                        }
+//                                                        storageManager.closeTab(tabObject: tab, tabType: .primary)
+                                                    } label: {
+                                                        Image(systemName: "xmark")
+                                                            .resizable()
+                                                            .scaledToFit()
+                                                            .frame(width: 15, height: 15)
+                                                            .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
+                                                            .opacity(uiViewModel.hoveringID == "addNewSpace" ? 1.0: 0.5)
+                                                            .padding(.trailing, 10)
+                                                    }
                                                 }
                                             }
                                             .padding(.vertical, 10)
@@ -231,8 +286,27 @@ struct Sidebar: View {
                                                 }
                                             }
                                         }
+                                        .contextMenu(menuItems: {
+                                            Button {
+                                                UIPasteboard.general.string = tab.url
+                                            } label: {
+                                                Label("Copy URL", systemImage: "link")
+                                            }
+                                            
+                                            Button {
+                                                withAnimation {
+                                                    uiViewModel.currentSelectedTab = storageManager.closeTab(tabObject: tab, tabType: .primary)?.id ?? ""
+                                                }
+                                            } label: {
+                                                Label("Close Tab", systemImage: "rectangle.badge.xmark")
+                                            }
+                                            
+                                            
+                                        }, preview: {
+                                            // Add website snapshot preview here
+                                        })
                                         .onDrag {
-                                            let tabID = tab.id // Copy id to a local variable (String is Sendable)
+                                            let tabID = tab.id
                                             draggingTabID = tabID
                                             let provider = NSItemProvider()
                                             provider.registerDataRepresentation(forTypeIdentifier: UTType.text.identifier, visibility: .ownProcess) { [tabID] completion in
@@ -244,10 +318,6 @@ struct Sidebar: View {
                                         .onDrop(of: [UTType.text], delegate: TabDropDelegate(tab: tab, space: space, draggingTabID: $draggingTabID, modelContext: modelContext))
                                     }
                                 }
-//                                .dragContainer(for: StoredTab.self, selection: $uiViewModel.selectedTabs) { draggedTabs in
-//                                    
-//                                }
-                                //}
                             }
                         }.scrollEdgeEffectDisabled(true)
                             .tag(space)

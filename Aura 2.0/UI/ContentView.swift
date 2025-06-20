@@ -17,10 +17,14 @@ struct ContentView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var spaces: [SpaceData]
     
-    @StateObject var storageManager = StorageManager()
-    @StateObject var uiViewModel = UIViewModel()
-    @StateObject var tabsManager = TabsManager()
-    @StateObject var settingsManager = SettingsManager()
+//    @StateObject var storageManager = StorageManager()
+//    @StateObject var uiViewModel = UIViewModel()
+//    @StateObject var tabsManager = TabsManager()
+//    @StateObject var settingsManager = SettingsManager()
+    @EnvironmentObject var storageManager: StorageManager
+    @EnvironmentObject var uiViewModel: UIViewModel
+    @EnvironmentObject var tabsManager: TabsManager
+    @EnvironmentObject var settingsManager: SettingsManager
     
     @State var selectedSpace: SpaceData
     
@@ -56,8 +60,19 @@ struct ContentView: View {
                         }
                         
                         ZStack {
+//                            Group {
+//                                Button {
+//                                    if storageManager.currentTabs[0][0].storedTab != nil {
+//                                        storageManager.closeTab(tabObject: storageManager.currentTabs[0][0].storedTab, tabType: storageManager.currentTabs[0][0].storedTab.tabType)
+//                                    }
+//                                } label: {
+//                                    Color.white.opacity(0.001)
+//                                }.keyboardShortcut("w", modifiers: .command)
+//                            }
+                            
                             WebsitePanel()
                                 .scrollEdgeEffectStyle(.none, for: .all)
+                                .padding([.top, .bottom, settingsManager.tabsPosition == "right" ? .leading: .trailing], settingsManager.showBorder ? 15: 0)
                                 .overlay {
                                     if !uiViewModel.sidebarOffset && !uiViewModel.showSidebar {
                                         Color.white.opacity(0.001)

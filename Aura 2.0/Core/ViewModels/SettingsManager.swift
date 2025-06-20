@@ -20,9 +20,9 @@ class SettingsManager: ObservableObject {
     @AppStorage("searchEngine") var searchEngine = "https://www.google.com/search?q="
     
     // Color settings
-    @AppStorage("prefferedColorScheme") var prefferedColorScheme = "automatic"
-    @AppStorage("forceDarkMode") var forceDarkMode = "advanced"
-    @AppStorage("forceDarkModeTime") var forceDarkModeTime = "system"
+    @AppStorage("prefferedColorScheme") var prefferedColorScheme = "automatic" // automatic, light, dark
+    @AppStorage("forceDarkMode") var forceDarkMode = "advanced" // none, basic, advanced
+    @AppStorage("forceDarkModeTime") var forceDarkModeTime = "system" // system, light, dark
     
     @AppStorage("faviconShape") var faviconShape = "circle"
     
@@ -39,6 +39,8 @@ class SettingsManager: ObservableObject {
     @AppStorage("hideResizingHandles") var hideResizingHandles = false
     
     @AppStorage("commandBarOnLaunch") var commandBarOnLaunch = false
+    @AppStorage("liquidGlassCommandBar") var liquidGlassCommandBar = true
+//    @Published var liquidGlassCommandBar = true
     
     @AppStorage("adBlock") var adBlock = false
 }

@@ -159,32 +159,89 @@ class StorageManager: ObservableObject {
         appendAndRemove(addingTab: createdTab)
     }
     
-    func closeTab(tabObject: StoredTab, tabType: TabType) {
+//    func closeTab(tabObject: StoredTab, tabType: TabType) {
+//        switch tabType {
+//        case .primary:
+//            if let index = selectedSpace?.primaryTabs.firstIndex(where: { $0.id == tabObject.id }) {
+//                selectedSpace?.primaryTabs.remove(at: index)
+//                // Re-index remaining tabs so orderIndex stays in sync
+//                if let tabs = selectedSpace?.primaryTabs {
+//                    for (idx, tab) in tabs.enumerated() {
+//                        tab.orderIndex = idx
+//                    }
+//                }
+//                print("Removed tab \(tabObject.id). New order: \(selectedSpace?.primaryTabs.map { $0.orderIndex } ?? [])")
+//            }
+//
+//        case .pinned:
+//            if let index = selectedSpace?.pinnedTabs.firstIndex(where: { $0.id == tabObject.id }) {
+//                selectedSpace?.pinnedTabs.remove(at: index)
+//            }
+//        case .favorites:
+//            if let index = selectedSpace?.favoriteTabs.firstIndex(where: { $0.id == tabObject.id }) {
+//                selectedSpace?.favoriteTabs.remove(at: index)
+//            }
+//        }
+//        if currentTabs.joined().contains(where: { $0.storedTab.id == tabObject.id }) {
+//            currentTabs = [[]]
+//        }
+//    }
+    
+    func closeTab(tabObject: StoredTab, tabType: TabType) -> StoredTab? {
         switch tabType {
         case .primary:
-            if let index = selectedSpace?.primaryTabs.firstIndex(where: { $0.id == tabObject.id }) {
-                selectedSpace?.primaryTabs.remove(at: index)
-                // Re-index remaining tabs so orderIndex stays in sync
-                if let tabs = selectedSpace?.primaryTabs {
-                    for (idx, tab) in tabs.enumerated() {
-                        tab.orderIndex = idx
-                    }
-                }
-                print("Removed tab \(tabObject.id). New order: \(selectedSpace?.primaryTabs.map { $0.orderIndex } ?? [])")
+            guard let space = selectedSpace,
+                  let removedIdx = space.primaryTabs.firstIndex(where: { $0.id == tabObject.id })
+            else { return nil }
+            space.primaryTabs.remove(at: removedIdx)
+            for (i, tab) in space.primaryTabs.enumerated() { tab.orderIndex = i }
+            let nextIdx = removedIdx, prevIdx = removedIdx - 1
+            let replacement: StoredTab? = space.primaryTabs.indices.contains(nextIdx)
+                ? space.primaryTabs[nextIdx]
+                : (space.primaryTabs.indices.contains(prevIdx) ? space.primaryTabs[prevIdx] : nil)
+            if let tab = replacement {
+                Task { await selectOrLoadTab(tabObject: tab) }
+            } else {
+                currentTabs = [[]]
             }
+            return replacement
+
         case .pinned:
-            if let index = selectedSpace?.pinnedTabs.firstIndex(where: { $0.id == tabObject.id }) {
-                selectedSpace?.pinnedTabs.remove(at: index)
+            guard let space = selectedSpace,
+                  let removedIdx = space.pinnedTabs.firstIndex(where: { $0.id == tabObject.id })
+            else { return nil }
+            space.pinnedTabs.remove(at: removedIdx)
+            for (i, tab) in space.pinnedTabs.enumerated() { tab.orderIndex = i }
+            let nextPinned = removedIdx, prevPinned = removedIdx - 1
+            let replacementPinned: StoredTab? = space.pinnedTabs.indices.contains(nextPinned)
+                ? space.pinnedTabs[nextPinned]
+                : (space.pinnedTabs.indices.contains(prevPinned) ? space.pinnedTabs[prevPinned] : nil)
+            if let tab = replacementPinned {
+                Task { await selectOrLoadTab(tabObject: tab) }
+            } else {
+                currentTabs = [[]]
             }
+            return replacementPinned
+
         case .favorites:
-            if let index = selectedSpace?.favoriteTabs.firstIndex(where: { $0.id == tabObject.id }) {
-                selectedSpace?.favoriteTabs.remove(at: index)
+            guard let space = selectedSpace,
+                  let removedIdx = space.favoriteTabs.firstIndex(where: { $0.id == tabObject.id })
+            else { return nil }
+            space.favoriteTabs.remove(at: removedIdx)
+            for (i, tab) in space.favoriteTabs.enumerated() { tab.orderIndex = i }
+            let nextFav = removedIdx, prevFav = removedIdx - 1
+            let replacementFav: StoredTab? = space.favoriteTabs.indices.contains(nextFav)
+                ? space.favoriteTabs[nextFav]
+                : (space.favoriteTabs.indices.contains(prevFav) ? space.favoriteTabs[prevFav] : nil)
+            if let tab = replacementFav {
+                Task { await selectOrLoadTab(tabObject: tab) }
+            } else {
+                currentTabs = [[]]
             }
-        }
-        if currentTabs.joined().contains(where: { $0.storedTab.id == tabObject.id }) {
-            currentTabs = [[]]
+            return replacementFav
         }
     }
+
     
     func appendAndRemove(addingTab: BrowserTab) {
         loadedTabs.append(addingTab)
