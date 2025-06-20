@@ -284,5 +284,29 @@ class StorageManager: ObservableObject {
             return tab.timestamp >= cutoff
         }
     }
+
+    /// Update a tab's URL across all in-memory representations and persist the change.
+    @MainActor
+    func updateURL(for tabID: UUID, newURL: String, modelContext: ModelContext) {
+        // Update currently displayed tabs
+        for rowIdx in currentTabs.indices {
+            for colIdx in currentTabs[rowIdx].indices where currentTabs[rowIdx][colIdx].id == tabID {
+                currentTabs[rowIdx][colIdx].storedTab.url = newURL
+            }
+        }
+
+        // Update any preloaded tabs
+        for idx in loadedTabs.indices where loadedTabs[idx].id == tabID {
+            loadedTabs[idx].storedTab.url = newURL
+        }
+
+        // Update tabs stored in split view containers
+        let storedID = currentTabs.flatMap { $0 }.first(where: { $0.id == tabID })?.storedTab.id
+        for idx in splitViewTabs.indices where splitViewTabs[idx].mainTab.id == storedID {
+            splitViewTabs[idx].mainTab.url = newURL
+        }
+
+        try? modelContext.save()
+    }
 }
 
