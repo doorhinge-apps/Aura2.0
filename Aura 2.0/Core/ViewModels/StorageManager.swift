@@ -14,25 +14,25 @@ import WebKit
 import SwiftData
 
 class StorageManager: ObservableObject {
-    @Published var currentTabs: [[BrowserTab]]
-    init() {
-        self.currentTabs = []
-
-        self.currentTabs.append([
-            makeTab(url: "https://apple.com"),
-            makeTab(url: "https://figma.com")
-        ])
-
-        self.currentTabs.append([
-            makeTab(url: "https://arc.net"),
-            makeTab(url: "https://google.com"),
-            makeTab(url: "https://thebrowser.company")
-        ])
-
-        self.currentTabs.append([
-            makeTab(url: "https://doorhingeapps.com")
-        ])
-    }
+//    @Published var currentTabs: [[BrowserTab]]
+//    init() {
+//        self.currentTabs = []
+//
+//        self.currentTabs.append([
+//            makeTab(url: "https://apple.com"),
+//            makeTab(url: "https://figma.com")
+//        ])
+//
+//        self.currentTabs.append([
+//            makeTab(url: "https://arc.net"),
+//            makeTab(url: "https://google.com"),
+//            makeTab(url: "https://thebrowser.company")
+//        ])
+//
+//        self.currentTabs.append([
+//            makeTab(url: "https://doorhingeapps.com")
+//        ])
+//    }
     
     private func makeTab(url: String) -> BrowserTab {
             let page = WebPage()
@@ -59,7 +59,7 @@ class StorageManager: ObservableObject {
     // This update will allow for split view. This will work with nested arrays.
     // Each array is a row. The number of items in each array is the number of collumns.
     // Aura will load all of these at the same time
-//    @Published var currentTabs: [[BrowserTab]] = []
+    @Published var currentTabs: [[BrowserTab]] = []
     
     
 //    @Published var currentTabs: [[BrowserTab]] = [
@@ -129,7 +129,7 @@ class StorageManager: ObservableObject {
         }
     }
     
-    func newTab(unformattedString: String, space: SpaceData, modelContext: ModelContext) {
+    func newTab(unformattedString: String, space: SpaceData, modelContext: ModelContext) -> StoredTab {
         let formattedURL = formatURL(from: unformattedString)
         let page = WebPage()
         var request = URLRequest(url: URL(string: formattedURL)!)
@@ -157,6 +157,8 @@ class StorageManager: ObservableObject {
         currentTabs = [[createdTab]]
         
         appendAndRemove(addingTab: createdTab)
+        
+        return storedTabObject
     }
     
 //    func closeTab(tabObject: StoredTab, tabType: TabType) {

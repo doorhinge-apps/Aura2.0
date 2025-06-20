@@ -210,19 +210,70 @@ struct GeneralSettings: View {
                         Text("Loaded Websites in Background")
                             .font(.system(.headline, design: .rounded, weight: .bold))
                         HStack {
-                            Text("1")
+                            Text(String(Int(settingsManager.preloadingWebsites-2)))
                                 .font(.system(.body, design: .rounded, weight: .bold))
                             
-                            Slider(value: $settingsManager.preloadingWebsites, in: 1...30, step: 1)
+                            Slider(value: $settingsManager.preloadingWebsites, in: 4...30, step: 1)
                                 .tint(backgroundGradientColors.first?.opacity(0.5))
-                            
-                            Text("30")
-                                .font(.system(.body, design: .rounded, weight: .bold))
                         }
+                    }
+                    
+                    Group {
+                        Text("Close Tabs After")
+                            .font(.system(.headline, design: .rounded, weight: .bold))
+                        
+                        Picker(selection: $settingsManager.closePrimaryTabsAfter) {
+                            Text("Never").tag(26297460.0)
+                            Text("12 Hours").tag(720.0)
+                            Text("1 Day").tag(1440.0)
+                            Text("2 Days").tag(2880.0)
+                            Text("3 Days").tag(4320.0)
+                            Text("4 Days").tag(5760.0)
+                            Text("5 Days").tag(7200.0)
+                            Text("6 Days").tag(8640.0)
+                            Text("7 Days").tag(10080.0)
+                            Text("14 Days").tag(20160.0)
+                            Text("30 Days").tag(43200.0)
+                            Text("60 Days").tag(86400.0)
+                        } label: {
+                            HStack {
+                                Text("Auto-Close Tabs After")
+                                Spacer()
+                                Text(displayLabel(for: settingsManager.closePrimaryTabsAfter))
+                                    .foregroundColor(.secondary)
+                                Image(systemName: "chevron.down")
+                                    .font(.system(size: 13, weight: .semibold))
+                                    .foregroundColor(.gray)
+                            }
+                            .padding()
+                            .background(
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(Color(.secondarySystemBackground))
+                            )
+                        }
+                        .pickerStyle(.menu)
                     }
                 }.foregroundStyle(Color.white)
                     .padding(15)
             }
+        }
+    }
+    
+    func displayLabel(for minutes: Double) -> String {
+        switch minutes {
+        case 26297460.0: return "Never"
+        case 720.0: return "12 Hours"
+        case 1440.0: return "1 Day"
+        case 2880.0: return "2 Days"
+        case 4320.0: return "3 Days"
+        case 5760.0: return "4 Days"
+        case 7200.0: return "5 Days"
+        case 8640.0: return "6 Days"
+        case 10080.0: return "7 Days"
+        case 20160.0: return "14 Days"
+        case 43200.0: return "30 Days"
+        case 86400.0: return "60 Days"
+        default: return "\(Int(minutes)) min"
         }
     }
     

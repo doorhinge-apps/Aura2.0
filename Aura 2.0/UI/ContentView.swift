@@ -98,7 +98,7 @@ struct ContentView: View {
                                             GeometryReader { sideGeo in
                                                 ZStack {
                                                     LinearGradient(
-                                                        colors: backgroundGradientColors,
+                                                        colors: firstHalfGradientColors,
                                                         startPoint: .bottomLeading,
                                                         endPoint: .topTrailing
                                                     )
@@ -226,6 +226,24 @@ struct ContentView: View {
     var backgroundGradientColors: [Color] {
         let hexes = storageManager.selectedSpace?.spaceBackgroundColors ?? ["8041E6", "A0F2FC"]
         return hexes.map { Color(hex: $0) }
+    }
+    
+    var firstHalfGradientColors: [Color] {
+        let hexes = storageManager.selectedSpace?.spaceBackgroundColors ?? ["8041E6", "A0F2FC"]
+        guard !hexes.isEmpty else { return [] }
+
+        let count = hexes.count
+        let half  = (count + 1) / 2  // rounds up for odd counts
+
+        if count.isMultiple(of: 2) {
+            // mix the two middle colors correctly using `by`
+            let mixed = Color(hex: hexes[half - 1])
+                .mix(with: Color(hex: hexes[half]), by: 0.5)
+            
+            return hexes.prefix(half - 1).map { Color(hex: $0) } + [mixed]
+        } else {
+            return hexes.prefix(half).map { Color(hex: $0) }
+        }
     }
 }
 

@@ -43,5 +43,7 @@ class SettingsManager: ObservableObject {
 //    @Published var liquidGlassCommandBar = true
     
     @AppStorage("adBlock") var adBlock = false
+    
+    @AppStorage("closePrimaryTabsAfter") var closePrimaryTabsAfter = 1.0 // In minutes
 }
 

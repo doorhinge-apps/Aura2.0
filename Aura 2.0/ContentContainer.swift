@@ -14,7 +14,12 @@ import SwiftData
 struct ContentContainerView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var spaces: [SpaceData]
-
+    
+    @EnvironmentObject var storageManager: StorageManager
+    @EnvironmentObject var uiViewModel: UIViewModel
+    @EnvironmentObject var tabsManager: TabsManager
+    @EnvironmentObject var settingsManager: SettingsManager
+    
     var body: some View {
         Group {
             if let selected = spaces.first {
@@ -22,6 +27,25 @@ struct ContentContainerView: View {
                     .scrollEdgeEffectDisabled(true)
                     .scrollEdgeEffectStyle(.hard, for: .top)
                     .statusBarHidden(true)
+                    .onAppear {
+                        let cutoff = Date().addingTimeInterval(-Double(settingsManager.closePrimaryTabsAfter) * 60)
+
+                        for space in spaces {
+                            let oldTabs = space.primaryTabs.filter { $0.timestamp < cutoff }
+
+                            for tab in oldTabs {
+                                if let index = space.primaryTabs.firstIndex(where: { $0.id == tab.id }) {
+                                    space.primaryTabs.remove(at: index)
+                                    modelContext.delete(tab)
+                                }
+                            }
+                        }
+                        
+                        try? modelContext.save()
+                    }
+                    .onOpenURL { url in
+                        uiViewModel.currentSelectedTab = storageManager.newTab(unformattedString: url.absoluteString, space: selected, modelContext: modelContext).id
+                    }
             } else {
                 ProgressView()
                     .task {

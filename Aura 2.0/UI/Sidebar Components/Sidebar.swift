@@ -300,11 +300,11 @@ struct Sidebar: View {
                                             } label: {
                                                 Label("Close Tab", systemImage: "rectangle.badge.xmark")
                                             }
-                                            
-                                            
-                                        }, preview: {
-                                            // Add website snapshot preview here
                                         })
+//                                        .contextMenu(menuItems: {
+//                                        }, preview: {
+//                                            // Add website snapshot preview here
+//                                        })
                                         .onDrag {
                                             let tabID = tab.id
                                             draggingTabID = tabID

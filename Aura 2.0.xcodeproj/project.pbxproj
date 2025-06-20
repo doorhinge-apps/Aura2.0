@@ -317,11 +317,11 @@
 				B978E16E2E038D9D00146E9B /* Aura.icon */,
 				B9BB57322DF8CE6F00B7E1E7 /* Aura_2_0.entitlements */,
 				B9BB57332DF8CE6F00B7E1E7 /* Aura_2_0App.swift */,
+				B9BB57352DF8CE6F00B7E1E7 /* Info.plist */,
 				B9B0050A2DFA16CF00B79152 /* ContentContainer.swift */,
 				B9BB573D2DF8CE7D00B7E1E7 /* UI */,
 				B9B004F02DF96C0E00B79152 /* Core */,
 				B9B004FB2DF97EFB00B79152 /* Helpers */,
-				B9BB57352DF8CE6F00B7E1E7 /* Info.plist */,
 			);
 			path = "Aura 2.0";
 			sourceTree = "<group>";
@@ -591,6 +591,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Aura 2.0/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Aura 2.0";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -601,7 +602,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.doorhingeapps.Aura-2-0";
+				PRODUCT_BUNDLE_IDENTIFIER = com.doorhingeapps.browser;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -626,6 +627,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Aura 2.0/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Aura 2.0";
+				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -636,7 +638,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.doorhingeapps.Aura-2-0";
+				PRODUCT_BUNDLE_IDENTIFIER = com.doorhingeapps.browser;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
