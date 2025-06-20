@@ -72,7 +72,10 @@ struct ContentView: View {
                             
                             WebsitePanel()
                                 .scrollEdgeEffectStyle(.none, for: .all)
-                                .padding([.top, .bottom, settingsManager.tabsPosition == "right" ? .leading: .trailing], settingsManager.showBorder ? 15: 0)
+                                .padding(.top, settingsManager.showBorder ? 15 : 0)
+                                .padding(.bottom, settingsManager.showBorder ? 15 : 0)
+                                .padding(.leading, (settingsManager.tabsPosition == "right" || !uiViewModel.showSidebar) ? (settingsManager.showBorder ? 15 : 0) : 0)
+                                .padding(.trailing, (settingsManager.tabsPosition == "left" || !uiViewModel.showSidebar) ? (settingsManager.showBorder ? 15 : 0) : 0)
                                 .overlay {
                                     if !uiViewModel.sidebarOffset && !uiViewModel.showSidebar {
                                         Color.white.opacity(0.001)
@@ -93,13 +96,17 @@ struct ContentView: View {
                                         .padding(.leading, 20)
                                         .background {
                                             GeometryReader { sideGeo in
-                                                LinearGradient(
-                                                    colors: backgroundGradientColors,
-                                                    startPoint: .bottomLeading,
-                                                    endPoint: .topTrailing
-                                                )
-                                                .ignoresSafeArea()
-                                                .frame(width: sideGeo.size.width)
+                                                ZStack {
+                                                    LinearGradient(
+                                                        colors: backgroundGradientColors,
+                                                        startPoint: .bottomLeading,
+                                                        endPoint: .topTrailing
+                                                    )
+                                                    .ignoresSafeArea()
+                                                    .frame(width: sideGeo.size.width)
+                                                }//.frame(width: sideGeo.size.width)
+                                                    .cornerRadius(20)
+//                                                    .clipped()
                                             }
                                         }
                                         .padding(.top, 40)

@@ -23,9 +23,27 @@ struct Toolbar: View {
                     uiViewModel.showSidebar.toggle()
                 }
             } label: {
-                Image(systemName: "sidebar.left")
-                    .frame(width: 50, height: 50)
-                    .foregroundColor(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
+                ZStack {
+                    Color.white.opacity(uiViewModel.hoveringID == "sidebarShowHide" ? 0.25: 0.0)
+                    
+                    Image(systemName: "sidebar.left")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                        .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
+                        .opacity(uiViewModel.hoveringID == "sidebarShowHide" ? 1.0: 0.5)
+                    
+                }.frame(width: 40, height: 40).cornerRadius(7)
+                    .onHover { hover in
+                        withAnimation {
+                            if uiViewModel.hoveringID == "sidebarShowHide" {
+                                uiViewModel.hoveringID = ""
+                            }
+                            else {
+                                uiViewModel.hoveringID = "sidebarShowHide"
+                            }
+                        }
+                    }
             }
         }
     }
