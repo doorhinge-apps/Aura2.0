@@ -10,9 +10,11 @@
 
 import SwiftUI
 import WebKit
+import SwiftData
 
 struct WebsitePanel: View {
     @EnvironmentObject var storageManager: StorageManager
+    @Environment(\.modelContext) private var modelContext
     
     @State var scrollPosition = ScrollPosition()
     
@@ -33,9 +35,9 @@ struct WebsitePanel: View {
                 VStack {
 //                    Spacer()
 //                        .frame(height: 50)
-                    ForEach(storageManager.currentTabs, id:\.self) { tabRow in
+                    ForEach(Array(storageManager.currentTabs.enumerated()), id:\.offset) { rowIdx, tabRow in
                         HStack {
-                            ForEach(tabRow, id:\.id) { website in
+                            ForEach(Array(tabRow.enumerated()), id:\.element.id) { colIdx, website in
                                 GeometryReader { geo in
                                     ZStack {
                                         WebView(website.page)
@@ -49,6 +51,11 @@ struct WebsitePanel: View {
                                     .frame(height: geo.size.height)
                                     .cornerRadius(10)
                                     .clipped()
+                                    .onChange(of: website.page.url) { _, newVal in
+                                        if let url = newVal {
+                                            storageManager.updateURL(for: website.id, newURL: url.absoluteString, modelContext: modelContext)
+                                        }
+                                    }
                                 }
                             }
                         }
