@@ -36,11 +36,11 @@ struct CommandBar: View {
             }
             else {
                 content
-                    .padding(10)
+                    .padding(5)
                     .background(
                         RoundedRectangle(cornerRadius: 20)
                             .fill(.regularMaterial)
-                            .shadow(color: Color.black.opacity(0.5), radius: 10, x: 0, y: 0)
+                            .shadow(color: Color.black.opacity(0.5), radius: 20, x: 0, y: 0)
                     )
             }
         }

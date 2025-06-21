@@ -34,16 +34,20 @@ class SettingsManager: ObservableObject {
     
     @AppStorage("hideMagnifyingGlassSearch") var hideMagnifyingGlassSearch = true
     
-    @AppStorage("useUnifiedToolbar") var useUnifiedToolbar = true
+    @AppStorage("useUnifiedToolbar") var useUnifiedToolbar = false
     
     @AppStorage("hideResizingHandles") var hideResizingHandles = false
     
     @AppStorage("commandBarOnLaunch") var commandBarOnLaunch = false
     @AppStorage("liquidGlassCommandBar") var liquidGlassCommandBar = true
-//    @Published var liquidGlassCommandBar = true
     
     @AppStorage("adBlock") var adBlock = false
     
     @AppStorage("closePrimaryTabsAfter") var closePrimaryTabsAfter = 26297460.0 // In minutes
+    
+    @AppStorage("favoritesDisplayMode") var favoritesDisplayMode = "icon" // icon, title, icon+title
+    
+    @AppStorage("pinnedTabCornerRadius") var favoriteTabCornerRadius = 20.0
+    @AppStorage("pinnedTabBorderWidth") var favoriteTabBorderWidth = 2.0
 }
 

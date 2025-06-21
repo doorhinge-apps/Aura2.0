@@ -39,6 +39,9 @@
 		B9B0051D2DFA834500B79152 /* TabsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B0051C2DFA834500B79152 /* TabsManager.swift */; };
 		B9B0051F2DFAA2BC00B79152 /* CommandBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B0051E2DFAA2BC00B79152 /* CommandBar.swift */; };
 		B9B0052E2DFC045F00B79152 /* Inspector.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B0052D2DFC045F00B79152 /* Inspector.swift */; };
+		B9B060722E07709E00480CEF /* SpaceToolsBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060712E07709E00480CEF /* SpaceToolsBar.swift */; };
+		B9B060742E07775C00480CEF /* IconsPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060732E07775C00480CEF /* IconsPicker.swift */; };
+		B9B060762E07787400480CEF /* IconsArrayStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060752E07787400480CEF /* IconsArrayStorage.swift */; };
 		B9BB57382DF8CE6F00B7E1E7 /* Aura_2_0App.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BB57332DF8CE6F00B7E1E7 /* Aura_2_0App.swift */; };
 		B9BB57392DF8CE6F00B7E1E7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BB57342DF8CE6F00B7E1E7 /* ContentView.swift */; };
 		B9BB573B2DF8CE6F00B7E1E7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9BB57312DF8CE6F00B7E1E7 /* Assets.xcassets */; };
@@ -47,6 +50,9 @@
 		B9D455032E06525100CB1E24 /* FavoriteTabsGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D454FE2E06525100CB1E24 /* FavoriteTabsGridView.swift */; };
 		B9D455042E06525100CB1E24 /* PrimaryTabsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D455002E06525100CB1E24 /* PrimaryTabsView.swift */; };
 		B9D455052E06525100CB1E24 /* TabRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D455012E06525100CB1E24 /* TabRowView.swift */; };
+		B9D455132E0667C900CB1E24 /* FavoriteTabRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D455122E0667C900CB1E24 /* FavoriteTabRowView.swift */; };
+		B9D455152E06A69900CB1E24 /* SearchSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D455142E06A69900CB1E24 /* SearchSettings.swift */; };
+		B9D455172E06A80800CB1E24 /* someKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D455162E06A80800CB1E24 /* someKey.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -98,6 +104,9 @@
 		B9B0051C2DFA834500B79152 /* TabsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabsManager.swift; sourceTree = "<group>"; };
 		B9B0051E2DFAA2BC00B79152 /* CommandBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandBar.swift; sourceTree = "<group>"; };
 		B9B0052D2DFC045F00B79152 /* Inspector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Inspector.swift; sourceTree = "<group>"; };
+		B9B060712E07709E00480CEF /* SpaceToolsBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceToolsBar.swift; sourceTree = "<group>"; };
+		B9B060732E07775C00480CEF /* IconsPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconsPicker.swift; sourceTree = "<group>"; };
+		B9B060752E07787400480CEF /* IconsArrayStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconsArrayStorage.swift; sourceTree = "<group>"; };
 		B9BB57022DF8CE4500B7E1E7 /* Aura 2.0.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Aura 2.0.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9BB57132DF8CE4700B7E1E7 /* Aura 2.0Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Aura 2.0Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9BB571D2DF8CE4700B7E1E7 /* Aura 2.0UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Aura 2.0UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -111,6 +120,9 @@
 		B9D454FF2E06525100CB1E24 /* PinnedTabsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedTabsView.swift; sourceTree = "<group>"; };
 		B9D455002E06525100CB1E24 /* PrimaryTabsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryTabsView.swift; sourceTree = "<group>"; };
 		B9D455012E06525100CB1E24 /* TabRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabRowView.swift; sourceTree = "<group>"; };
+		B9D455122E0667C900CB1E24 /* FavoriteTabRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteTabRowView.swift; sourceTree = "<group>"; };
+		B9D455142E06A69900CB1E24 /* SearchSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSettings.swift; sourceTree = "<group>"; };
+		B9D455162E06A80800CB1E24 /* someKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = someKey.swift; path = "Aura 2.0/UI/Settings/Subpages/someKey.swift"; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -156,11 +168,14 @@
 			isa = PBXGroup;
 			children = (
 				B9B004F72DF97CAA00B79152 /* Sidebar.swift */,
+				B9B060712E07709E00480CEF /* SpaceToolsBar.swift */,
 				B95A809D2DFD26BA007FE1F4 /* Toolbar.swift */,
 				B9D454FE2E06525100CB1E24 /* FavoriteTabsGridView.swift */,
 				B9D454FF2E06525100CB1E24 /* PinnedTabsView.swift */,
 				B9D455002E06525100CB1E24 /* PrimaryTabsView.swift */,
 				B9D455012E06525100CB1E24 /* TabRowView.swift */,
+				B9D455122E0667C900CB1E24 /* FavoriteTabRowView.swift */,
+				B9B060772E07789500480CEF /* Icons Picker */,
 			);
 			path = "Sidebar Components";
 			sourceTree = "<group>";
@@ -196,6 +211,7 @@
 			children = (
 				B95A80D42E02BAAF007FE1F4 /* GeneralSettings.swift */,
 				B95A80E02E035199007FE1F4 /* AppearanceSettings.swift */,
+				B9D455142E06A69900CB1E24 /* SearchSettings.swift */,
 			);
 			path = Subpages;
 			sourceTree = "<group>";
@@ -248,6 +264,7 @@
 			isa = PBXGroup;
 			children = (
 				B9B004FC2DF97F0200B79152 /* hex.swift */,
+				B9D455162E06A80800CB1E24 /* someKey.swift */,
 				B9B005082DFA10B000B79152 /* URLFormatters.swift */,
 				B95A80D82E02C0DC007FE1F4 /* HoverDisabledVision.swift */,
 			);
@@ -296,6 +313,15 @@
 				B9B0052D2DFC045F00B79152 /* Inspector.swift */,
 			);
 			path = Inspector;
+			sourceTree = "<group>";
+		};
+		B9B060772E07789500480CEF /* Icons Picker */ = {
+			isa = PBXGroup;
+			children = (
+				B9B060732E07775C00480CEF /* IconsPicker.swift */,
+				B9B060752E07787400480CEF /* IconsArrayStorage.swift */,
+			);
+			path = "Icons Picker";
 			sourceTree = "<group>";
 		};
 		B9BB56F92DF8CE4500B7E1E7 = {
@@ -518,12 +544,14 @@
 				B9D455042E06525100CB1E24 /* PrimaryTabsView.swift in Sources */,
 				B9D455052E06525100CB1E24 /* TabRowView.swift in Sources */,
 				B9B005152DFA7D3300B79152 /* Favicon.swift in Sources */,
+				B9D455172E06A80800CB1E24 /* someKey.swift in Sources */,
 				B95A80D72E02BD10007FE1F4 /* MotionManager.swift in Sources */,
 				B95A809E2DFD26BA007FE1F4 /* Toolbar.swift in Sources */,
 				B9B0051D2DFA834500B79152 /* TabsManager.swift in Sources */,
 				B9B0050D2DFA71BF00B79152 /* WebMetadata.swift in Sources */,
 				B9B004FA2DF97CB400B79152 /* WebsitePanel.swift in Sources */,
 				B95A80D92E02C0DC007FE1F4 /* HoverDisabledVision.swift in Sources */,
+				B9B060722E07709E00480CEF /* SpaceToolsBar.swift in Sources */,
 				B9B0050B2DFA16CF00B79152 /* ContentContainer.swift in Sources */,
 				B9B004F62DF96E5100B79152 /* SpaceBackgroundType.swift in Sources */,
 				B9BB57382DF8CE6F00B7E1E7 /* Aura_2_0App.swift in Sources */,
@@ -537,6 +565,7 @@
 				B9B005092DFA10B000B79152 /* URLFormatters.swift in Sources */,
 				B9B0052E2DFC045F00B79152 /* Inspector.swift in Sources */,
 				B9B004F32DF96DC400B79152 /* SpaceData.swift in Sources */,
+				B9D455152E06A69900CB1E24 /* SearchSettings.swift in Sources */,
 				B9B004E82DF8D18200B79152 /* BrowserTab.swift in Sources */,
 				B95A80E12E035199007FE1F4 /* AppearanceSettings.swift in Sources */,
 				B95A80D52E02BAAF007FE1F4 /* GeneralSettings.swift in Sources */,
@@ -546,8 +575,11 @@
 				B9B004EC2DF8D35A00B79152 /* TabLoadingData.swift in Sources */,
 				B9B004F82DF97CAA00B79152 /* Sidebar.swift in Sources */,
 				B95A80A32DFD4D41007FE1F4 /* Settings.swift in Sources */,
+				B9D455132E0667C900CB1E24 /* FavoriteTabRowView.swift in Sources */,
 				B9B004EF2DF96BE600B79152 /* AuraSchemeHandler.swift in Sources */,
+				B9B060742E07775C00480CEF /* IconsPicker.swift in Sources */,
 				B9B004EA2DF8D1F400B79152 /* TabType.swift in Sources */,
+				B9B060762E07787400480CEF /* IconsArrayStorage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

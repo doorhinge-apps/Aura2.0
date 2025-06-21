@@ -90,13 +90,41 @@ struct Sidebar: View {
                                 Spacer()
                             }
                             
-                            Label(hoverSearch || !settingsManager.useUnifiedToolbar ? unformatURL(url: storageManager.currentTabs.first?.first?.storedTab.url ?? "Search or Enter URL"): "", systemImage: "magnifyingglass")
-                                .lineLimit(1)
-                                .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff").opacity(0.5))
+                            HStack {
+                                if storageManager.currentTabs.first?.first?.page != nil {
+                                    Menu {
+                                        if storageManager.currentTabs.first?.first?.page.hasOnlySecureContent ?? false {
+                                            Label("Secure", systemImage: "lock.fill")
+                                                .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff").opacity(0.5))
+                                        }
+                                        else {
+                                            Label("Not Secure", systemImage: "lock.open.fill")
+                                                .foregroundStyle(Color.red)
+                                        }
+                                    } label: {
+                                        Image(systemName: storageManager.currentTabs.first?.first?.page.hasOnlySecureContent ?? false ? "lock.fill": "lock.open.fill")
+                                            .font(.system(.body, design: .rounded, weight: .semibold))
+                                            .foregroundStyle(storageManager.currentTabs.first?.first?.page.hasOnlySecureContent ?? false ? Color.white: Color.red)
+                                    }
+
+                                }
+                                else {
+                                    Image(systemName: "magnifyingglass")
+                                        .font(.system(.body, design: .rounded, weight: .semibold))
+                                        .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff").opacity(0.5))
+                                }
+                                
+                                Text(hoverSearch || !settingsManager.useUnifiedToolbar ? unformatURL(url: storageManager.currentTabs.first?.first?.storedTab.url ?? "Search or Enter URL"): "")
+                                    .lineLimit(1)
+                                    .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff").opacity(0.5))
+                            }
+//                            Label(hoverSearch || !settingsManager.useUnifiedToolbar ? unformatURL(url: storageManager.currentTabs.first?.first?.storedTab.url ?? "Search or Enter URL"): "", systemImage: "magnifyingglass")
+//                                .lineLimit(1)
+//                                .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff").opacity(0.5))
                             
                             Spacer()
                             
-                            if (hoverSearch || !settingsManager.useUnifiedToolbar) && storageManager.currentTabs.first?.first?.page != nil {
+                            if (hoverSearch) && storageManager.currentTabs.first?.first?.page != nil {
                                 Button {
                                     UIPasteboard.general.string = storageManager.currentTabs[0][0].storedTab.url
                                 } label: {
@@ -190,6 +218,8 @@ struct Sidebar: View {
                             VStack {
                                 FavoriteTabsGridView(space: space, draggingTabID: $draggingTabID)
                                 PinnedTabsView(space: space, draggingTabID: $draggingTabID)
+                                
+                                SpaceToolsBar()
 
                                 // MARK: - New Tab
                                 Button {

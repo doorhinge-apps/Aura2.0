@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 
-struct TabRowView: View {
+struct FavoriteTabRowView: View {
     var tab: StoredTab
     var space: SpaceData
     var tabType: TabType
@@ -11,50 +11,35 @@ struct TabRowView: View {
     @EnvironmentObject var storageManager: StorageManager
     @EnvironmentObject var uiViewModel: UIViewModel
     @EnvironmentObject var tabsManager: TabsManager
+    @EnvironmentObject var settingsManager: SettingsManager
     @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 15)
+            RoundedRectangle(cornerRadius: settingsManager.favoriteTabCornerRadius)
                 .fill(Color.white.opacity(0.001))
+            
+            RoundedRectangle(cornerRadius: settingsManager.favoriteTabCornerRadius)
+                .stroke(Color.white.opacity(0.5), lineWidth: settingsManager.favoriteTabBorderWidth)
+                .fill(Color.white.opacity(uiViewModel.currentSelectedTab == tab.id ? 0.5 : uiViewModel.currentHoverTab == tab ? 0.25 : 0.001))
+                .animation(.easeInOut, value: storageManager.currentTabs.first?.first?.storedTab == tab)
+                .frame(height: 75)
 
-            if !storageManager.currentTabs.isEmpty {
-                if !storageManager.currentTabs[0].isEmpty {
-                    RoundedRectangle(cornerRadius: 15)
-                        .fill(Color.white.opacity(uiViewModel.currentSelectedTab == tab.id ? 0.5 : uiViewModel.currentHoverTab == tab ? 0.25 : 0.001))
-                        .animation(.easeInOut, value: storageManager.currentTabs[0][0].storedTab == tab)
+            VStack(alignment: .center) {
+                if settingsManager.favoritesDisplayMode.contains("icon") {
+                    Favicon(url: tab.url)
                 }
-            }
-
-            HStack {
-                Favicon(url: tab.url)
-                Text(tabsManager.linksWithTitles[tab.url] ?? tab.url)
-                    .foregroundStyle(Color(hex: space.textColor))
-                    .lineLimit(1)
-                    .onAppear {
-                        Task { await tabsManager.fetchTitlesIfNeeded(for: [tab.url]) }
-                    }
-                Spacer()
-
-                if uiViewModel.currentSelectedTab == tab.id || uiViewModel.currentHoverTab?.id ?? "rat" == tab.id {
-                    Button {
-                        withAnimation {
-                            uiViewModel.currentSelectedTab = storageManager.closeTab(tabObject: tab, tabType: tabType)?.id ?? ""
+                if settingsManager.favoritesDisplayMode.contains("title") {
+                    Text(tabsManager.linksWithTitles[tab.url] ?? tab.url)
+                        .foregroundStyle(Color(hex: space.textColor))
+                        .lineLimit(1)
+                        .onAppear {
+                            Task { await tabsManager.fetchTitlesIfNeeded(for: [tab.url]) }
                         }
-                    } label: {
-                        Image(systemName: "xmark")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 15, height: 15)
-                            .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
-                            .opacity(uiViewModel.hoveringID == "addNewSpace" ? 1.0 : 0.5)
-                            .padding(.trailing, 10)
-                    }
                 }
             }
-            .padding(.vertical, 10)
-            .padding(.horizontal, 5)
         }
+        .padding(.vertical, 5)
         .contentShape(Rectangle())
         .onTapGesture {
             Task {

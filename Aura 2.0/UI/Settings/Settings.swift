@@ -78,6 +78,30 @@ struct Settings: View {
                             Text("Appearance")
                         }
                     }
+                    
+                    NavigationLink {
+                        SearchSettings()
+                    } label: {
+                        HStack {
+                            Image("Search Icon")
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 25, height: 25)
+                                .padding(2)
+                                .background {
+                                    ZStack {
+                                        LinearGradient(
+                                            colors: backgroundGradientColors,
+                                            startPoint: .bottomLeading,
+                                            endPoint: .topTrailing
+                                        ).ignoresSafeArea()
+                                        
+                                        Color.black.opacity(0.25)
+                                    }.cornerRadius(5)
+                                }
+                            Text("Search Settings")
+                        }
+                    }
                 }
                 .scrollContentBackground(.hidden)
                 .navigationTitle("Settings")

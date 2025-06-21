@@ -35,81 +35,76 @@ struct Aura_2_0App: App {
                 .focusedSceneObject(uiViewModel)
         }
         .modelContainer(sharedModelContainer)
-        .commands { SceneCommands() }
+//        .commands { SceneCommands() }
+        .commands {
+            CommandsBridge()
+        }
     }
 }
 
+private struct CommandsBridge: Commands {
+    @FocusedObject private var uiViewModel: UIViewModel?
+
+    var body: some Commands {
+        SceneCommands(selectedTabID: uiViewModel?.currentSelectedTab ?? "none")
+    }
+}
 
 private struct SceneCommands: Commands {
     @Environment(\.modelContext) private var modelContext
-    
     @FocusedObject private var storageManager: StorageManager?
-    @FocusedObject private var uiViewModel:    UIViewModel?
+    @FocusedObject private var uiViewModel: UIViewModel?
+
+    let selectedTabID: String
 
     var body: some Commands {
         CommandGroup(after: .newItem) {
+            let currentTab = storageManager?.currentTabs.first?.first?.storedTab
+
             Button {
                 uiViewModel?.showCommandBar.toggle()
             } label: {
                 Label("New Tab", systemImage: "plus.square.on.square")
             }.keyboardShortcut("t", modifiers: .command)
-            
-            Button {
-                guard
-                    let sm  = storageManager,
-                    let tab = sm.currentTabs.first?.first?.storedTab
-                else { return }
-                
-                withAnimation {
-                    uiViewModel?.currentSelectedTab =
-                    sm.closeTab(tabObject: tab, tabType: tab.tabType)?.id ?? ""
-                }
-            } label: {
-                Label("Close Tab", systemImage: "rectangle.badge.xmark")
-            }.keyboardShortcut("w", modifiers: .command)
-            
-            Divider()
-            
-            Button {
-                guard
-                    let sm  = storageManager,
-                    let tab = sm.currentTabs.first?.first?.storedTab
-                else { return }
-                
-                if storageManager?.currentTabs.first?.first?.tabType == .favorites {
+
+            if let tab = currentTab {
+                Button {
                     withAnimation {
-                        sm.updateTabType(for: tab, to: .primary, modelContext: modelContext)
+                        uiViewModel?.currentSelectedTab =
+                            storageManager?.closeTab(tabObject: tab, tabType: tab.tabType)?.id ?? ""
                     }
-                }
-                else {
+                } label: {
+                    Label("Close Tab", systemImage: "rectangle.badge.xmark")
+                }.keyboardShortcut("w", modifiers: .command)
+
+                Divider()
+
+                Button {
                     withAnimation {
-                        sm.updateTabType(for: tab, to: .favorites, modelContext: modelContext)
+                        storageManager?.updateTabType(
+                            for: tab,
+                            to: tab.tabType == .favorites ? .primary : .favorites,
+                            modelContext: modelContext
+                        )
                     }
+                } label: {
+                    Label(tab.tabType == .favorites ? "Unfavorite" : "Favorite",
+                          systemImage: tab.tabType == .favorites ? "star.fill" : "star")
                 }
-            } label: {
-                Label(storageManager?.currentTabs.first?.first?.tabType == .favorites ? "Unfavorite": "Favorite", systemImage: storageManager?.currentTabs.first?.first?.tabType == .favorites ? "star.fill": "star")
-            }
-            
-            Button {
-                guard
-                    let sm  = storageManager,
-                    let tab = sm.currentTabs.first?.first?.storedTab
-                else { return }
-                
-                if storageManager?.currentTabs.first?.first?.tabType == .pinned {
+
+                Button {
                     withAnimation {
-                        sm.updateTabType(for: tab, to: .primary, modelContext: modelContext)
+                        storageManager?.updateTabType(
+                            for: tab,
+                            to: tab.tabType == .pinned ? .primary : .pinned,
+                            modelContext: modelContext
+                        )
                     }
+                } label: {
+                    Label(tab.tabType == .pinned ? "Unpin" : "Pin",
+                          systemImage: tab.tabType == .pinned ? "pin.fill" : "pin")
                 }
-                else {
-                    withAnimation {
-                        sm.updateTabType(for: tab, to: .pinned, modelContext: modelContext)
-                    }
-                }
-            } label: {
-                Label(storageManager?.currentTabs.first?.first?.tabType == .pinned ? "Unpin": "Pin", systemImage: storageManager?.currentTabs.first?.first?.tabType == .pinned ? "pin.fill": "pin")
             }
         }
     }
 }
-

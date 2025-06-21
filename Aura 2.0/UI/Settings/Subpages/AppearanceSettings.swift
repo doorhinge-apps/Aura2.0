@@ -244,6 +244,20 @@ struct AppearanceSettings: View {
                     Divider()
                     
                     Group {
+                        Text("Favorites Display Mode")
+                            .font(.system(.headline, design: .rounded, weight: .bold))
+                        
+                        Picker(selection: $settingsManager.favoritesDisplayMode) {
+                            Text("Title").tag("title")
+                            Text("Icon").tag("icon")
+                            Text("Title & Icon").tag("title+icon")
+                        } label: {
+                        }.pickerStyle(.segmented)
+                    }
+                    
+                    Divider()
+                    
+                    Group {
                         Text("Color Settings")
                             .font(.system(.headline, design: .rounded, weight: .bold))
                         
