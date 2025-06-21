@@ -161,34 +161,6 @@ class StorageManager: ObservableObject {
         return storedTabObject
     }
     
-//    func closeTab(tabObject: StoredTab, tabType: TabType) {
-//        switch tabType {
-//        case .primary:
-//            if let index = selectedSpace?.primaryTabs.firstIndex(where: { $0.id == tabObject.id }) {
-//                selectedSpace?.primaryTabs.remove(at: index)
-//                // Re-index remaining tabs so orderIndex stays in sync
-//                if let tabs = selectedSpace?.primaryTabs {
-//                    for (idx, tab) in tabs.enumerated() {
-//                        tab.orderIndex = idx
-//                    }
-//                }
-//                print("Removed tab \(tabObject.id). New order: \(selectedSpace?.primaryTabs.map { $0.orderIndex } ?? [])")
-//            }
-//
-//        case .pinned:
-//            if let index = selectedSpace?.pinnedTabs.firstIndex(where: { $0.id == tabObject.id }) {
-//                selectedSpace?.pinnedTabs.remove(at: index)
-//            }
-//        case .favorites:
-//            if let index = selectedSpace?.favoriteTabs.firstIndex(where: { $0.id == tabObject.id }) {
-//                selectedSpace?.favoriteTabs.remove(at: index)
-//            }
-//        }
-//        if currentTabs.joined().contains(where: { $0.storedTab.id == tabObject.id }) {
-//            currentTabs = [[]]
-//        }
-//    }
-    
     func closeTab(tabObject: StoredTab, tabType: TabType) -> StoredTab? {
         switch tabType {
         case .primary:
@@ -308,6 +280,20 @@ class StorageManager: ObservableObject {
             splitViewTabs[idx].mainTab.url = newURL
         }
 
+        try? modelContext.save()
+    }
+    
+    @MainActor
+    func updateTabType(for storedTab: StoredTab, to newType: TabType, modelContext: ModelContext) {
+        storedTab.tabType = newType
+        
+        for rowIdx in currentTabs.indices {
+            for colIdx in currentTabs[rowIdx].indices where currentTabs[rowIdx][colIdx].storedTab.id == storedTab.id {
+                currentTabs[rowIdx][colIdx].tabType = newType
+                currentTabs[rowIdx][colIdx].storedTab.tabType = newType
+            }
+        }
+        
         try? modelContext.save()
     }
 }

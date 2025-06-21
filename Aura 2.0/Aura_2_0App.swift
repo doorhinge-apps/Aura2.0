@@ -41,6 +41,8 @@ struct Aura_2_0App: App {
 
 
 private struct SceneCommands: Commands {
+    @Environment(\.modelContext) private var modelContext
+    
     @FocusedObject private var storageManager: StorageManager?
     @FocusedObject private var uiViewModel:    UIViewModel?
 
@@ -75,12 +77,11 @@ private struct SceneCommands: Commands {
                 else { return }
                 
                 withAnimation {
-                    uiViewModel?.currentSelectedTab =
-                    sm.closeTab(tabObject: tab, tabType: tab.tabType)?.id ?? ""
+                    sm.updateTabType(for: tab, to: .pinned, modelContext: modelContext)
                 }
             } label: {
-                Label(storageManager?.currentTabs[0][0].tabType == .favorites ? "Unfavorite": "Favorite", systemImage: "rectangle.badge.xmark")
-            }.keyboardShortcut("w", modifiers: .command)
+                Label(storageManager?.currentTabs.first?.first?.tabType == .favorites ? "Unfavorite": "Favorite", systemImage: "rectangle.badge.xmark")
+            }
         }
     }
 }
