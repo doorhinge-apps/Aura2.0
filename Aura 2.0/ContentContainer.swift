@@ -35,7 +35,7 @@ struct ContentContainerView: View {
 
                             for tab in oldTabs {
                                 if let index = space.primaryTabs.firstIndex(where: { $0.id == tab.id }) {
-                                    space.primaryTabs.remove(at: index)
+                                    space.tabs.remove(at: index)
                                     modelContext.delete(tab)
                                 }
                             }

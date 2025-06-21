@@ -1,7 +1,7 @@
+// StoredTab.swift
 import Foundation
 import SwiftData
 
-/// A persisted representation of a browser tab.
 @Model
 final class StoredTab {
     var id: String
@@ -10,17 +10,18 @@ final class StoredTab {
     var orderIndex: Int
     var tabType: TabType
     var folderName: String?
-
-    /// The space that owns this tab.
-    @Relationship var parentSpace: SpaceData?
-
-    init(id: String,
-         timestamp: Date,
-         url: String,
-         orderIndex: Int,
-         tabType: TabType,
-         folderName: String? = nil,
-         parentSpace: SpaceData? = nil) {
+    
+    @Relationship var parentSpace: SpaceData?   // inverse handled above
+    
+    init(
+        id: String,
+        timestamp: Date = .now,
+        url: String,
+        orderIndex: Int,
+        tabType: TabType,
+        folderName: String? = nil,
+        parentSpace: SpaceData? = nil
+    ) {
         self.id = id
         self.timestamp = timestamp
         self.url = url
