@@ -13,55 +13,75 @@ import SwiftData
 
 @main
 struct Aura_2_0App: App {
-    var sharedModelContainer: ModelContainer = {
-        let schema = Schema([
-            SpaceData.self,
-        ])
-        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
-
-        do {
-            return try ModelContainer(for: schema, configurations: [modelConfiguration])
-        } catch {
-            fatalError("Could not create ModelContainer: \(error)")
-        }
+    private let sharedModelContainer: ModelContainer = {
+        let schema = Schema([SpaceData.self])
+        return try! ModelContainer(for: schema)
     }()
-    
-    @StateObject var storageManager = StorageManager()
-    @StateObject var uiViewModel = UIViewModel()
-    @StateObject var tabsManager = TabsManager()
-    @StateObject var settingsManager = SettingsManager()
 
     var body: some Scene {
         WindowGroup(id: "mainWindow") {
+            let storageManager = StorageManager()
+            let uiViewModel = UIViewModel()
+            let tabsManager = TabsManager()
+            let settingsManager = SettingsManager()
+
             ContentContainerView()
                 .ignoresSafeArea(edges: .all)
                 .environmentObject(storageManager)
                 .environmentObject(uiViewModel)
                 .environmentObject(tabsManager)
                 .environmentObject(settingsManager)
+                .focusedSceneObject(storageManager)
+                .focusedSceneObject(uiViewModel)
         }
         .modelContainer(sharedModelContainer)
-        .commands {
-            CommandGroup(replacing: .newItem) {
-                Button {
-                    uiViewModel.showCommandBar.toggle()
-                } label: {
-                    Label("New Tab", systemImage: "plus.square.on.square")
-                }.keyboardShortcut("t", modifiers: .command)
-                
-                Button {
-                    if storageManager.currentTabs[0][0].storedTab != nil {
-//                        storageManager.closeTab(tabObject: storageManager.currentTabs[0][0].storedTab, tabType: storageManager.currentTabs[0][0].storedTab.tabType)
-                        withAnimation {
-                            uiViewModel.currentSelectedTab = storageManager.closeTab(tabObject: storageManager.currentTabs[0][0].storedTab, tabType: storageManager.currentTabs[0][0].storedTab.tabType)?.id ?? ""
-                        }
-                    }
-                } label: {
-                    Label("Close Tab", systemImage: "rectangle.badge.xmark")
-                }.keyboardShortcut("w", modifiers: .command)
-            }
-            CommandGroup(replacing: .toolbar) {}
-        }
-        
+        .commands { SceneCommands() }
     }
 }
+
+
+private struct SceneCommands: Commands {
+    @FocusedObject private var storageManager: StorageManager?
+    @FocusedObject private var uiViewModel:    UIViewModel?
+
+    var body: some Commands {
+        CommandGroup(replacing: .newItem) {
+            Button {
+                uiViewModel?.showCommandBar.toggle()
+            } label: {
+                Label("New Tab", systemImage: "plus.square.on.square")
+            }.keyboardShortcut("t", modifiers: .command)
+            
+            Button {
+                guard
+                    let sm  = storageManager,
+                    let tab = sm.currentTabs.first?.first?.storedTab
+                else { return }
+                
+                withAnimation {
+                    uiViewModel?.currentSelectedTab =
+                    sm.closeTab(tabObject: tab, tabType: tab.tabType)?.id ?? ""
+                }
+            } label: {
+                Label("Close Tab", systemImage: "rectangle.badge.xmark")
+            }.keyboardShortcut("w", modifiers: .command)
+            
+            Divider()
+            
+            Button {
+                guard
+                    let sm  = storageManager,
+                    let tab = sm.currentTabs.first?.first?.storedTab
+                else { return }
+                
+                withAnimation {
+                    uiViewModel?.currentSelectedTab =
+                    sm.closeTab(tabObject: tab, tabType: tab.tabType)?.id ?? ""
+                }
+            } label: {
+                Label(storageManager?.currentTabs[0][0].tabType == .favorites ? "Unfavorite": "Favorite", systemImage: "rectangle.badge.xmark")
+            }.keyboardShortcut("w", modifiers: .command)
+        }
+    }
+}
+

@@ -43,7 +43,6 @@
 		B9BB57392DF8CE6F00B7E1E7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BB57342DF8CE6F00B7E1E7 /* ContentView.swift */; };
 		B9BB573B2DF8CE6F00B7E1E7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9BB57312DF8CE6F00B7E1E7 /* Assets.xcassets */; };
 		B9BB573F2DF8D07200B7E1E7 /* StorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BB573E2DF8D07200B7E1E7 /* StorageManager.swift */; };
-		B9EDF1492E051DFA00A4E63A /* PrimaryTabs.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9EDF1482E051DFA00A4E63A /* PrimaryTabs.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -104,7 +103,6 @@
 		B9BB57342DF8CE6F00B7E1E7 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		B9BB57352DF8CE6F00B7E1E7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		B9BB573E2DF8D07200B7E1E7 /* StorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StorageManager.swift; sourceTree = "<group>"; };
-		B9EDF1482E051DFA00A4E63A /* PrimaryTabs.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrimaryTabs.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -150,7 +148,6 @@
 			isa = PBXGroup;
 			children = (
 				B9B004F72DF97CAA00B79152 /* Sidebar.swift */,
-				B9EDF1472E051DC800A4E63A /* Tab Sections */,
 				B95A809D2DFD26BA007FE1F4 /* Toolbar.swift */,
 			);
 			path = "Sidebar Components";
@@ -355,14 +352,6 @@
 			path = Storage;
 			sourceTree = "<group>";
 		};
-		B9EDF1472E051DC800A4E63A /* Tab Sections */ = {
-			isa = PBXGroup;
-			children = (
-				B9EDF1482E051DFA00A4E63A /* PrimaryTabs.swift */,
-			);
-			path = "Tab Sections";
-			sourceTree = "<group>";
-		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -538,7 +527,6 @@
 				B9B005072DFA0AF500B79152 /* SplitViewTab.swift in Sources */,
 				B9B0051A2DFA7E1600B79152 /* LoadingIndicators.swift in Sources */,
 				B9B0050F2DFA740700B79152 /* SettingsManager.swift in Sources */,
-				B9EDF1492E051DFA00A4E63A /* PrimaryTabs.swift in Sources */,
 				B9B004EC2DF8D35A00B79152 /* TabLoadingData.swift in Sources */,
 				B9B004F82DF97CAA00B79152 /* Sidebar.swift in Sources */,
 				B95A80A32DFD4D41007FE1F4 /* Settings.swift in Sources */,
