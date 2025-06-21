@@ -47,7 +47,7 @@ private struct SceneCommands: Commands {
     @FocusedObject private var uiViewModel:    UIViewModel?
 
     var body: some Commands {
-        CommandGroup(replacing: .newItem) {
+        CommandGroup(after: .newItem) {
             Button {
                 uiViewModel?.showCommandBar.toggle()
             } label: {
@@ -76,11 +76,38 @@ private struct SceneCommands: Commands {
                     let tab = sm.currentTabs.first?.first?.storedTab
                 else { return }
                 
-                withAnimation {
-                    sm.updateTabType(for: tab, to: .pinned, modelContext: modelContext)
+                if storageManager?.currentTabs.first?.first?.tabType == .favorites {
+                    withAnimation {
+                        sm.updateTabType(for: tab, to: .primary, modelContext: modelContext)
+                    }
+                }
+                else {
+                    withAnimation {
+                        sm.updateTabType(for: tab, to: .favorites, modelContext: modelContext)
+                    }
                 }
             } label: {
-                Label(storageManager?.currentTabs.first?.first?.tabType == .favorites ? "Unfavorite": "Favorite", systemImage: "rectangle.badge.xmark")
+                Label(storageManager?.currentTabs.first?.first?.tabType == .favorites ? "Unfavorite": "Favorite", systemImage: storageManager?.currentTabs.first?.first?.tabType == .favorites ? "star.fill": "star")
+            }
+            
+            Button {
+                guard
+                    let sm  = storageManager,
+                    let tab = sm.currentTabs.first?.first?.storedTab
+                else { return }
+                
+                if storageManager?.currentTabs.first?.first?.tabType == .pinned {
+                    withAnimation {
+                        sm.updateTabType(for: tab, to: .primary, modelContext: modelContext)
+                    }
+                }
+                else {
+                    withAnimation {
+                        sm.updateTabType(for: tab, to: .pinned, modelContext: modelContext)
+                    }
+                }
+            } label: {
+                Label(storageManager?.currentTabs.first?.first?.tabType == .pinned ? "Unpin": "Pin", systemImage: storageManager?.currentTabs.first?.first?.tabType == .pinned ? "pin.fill": "pin")
             }
         }
     }
