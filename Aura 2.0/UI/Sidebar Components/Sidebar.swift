@@ -188,6 +188,9 @@ struct Sidebar: View {
                     ForEach(spaces, id:\.id) { space in
                         ScrollView {
                             VStack {
+                                FavoriteTabsGridView(space: space, draggingTabID: $draggingTabID)
+                                PinnedTabsView(space: space, draggingTabID: $draggingTabID)
+
                                 // MARK: - New Tab
                                 Button {
                                     uiViewModel.showCommandBar.toggle()
@@ -201,7 +204,7 @@ struct Sidebar: View {
                                                 .foregroundStyle(Color(hex: space.textColor))
                                                 .font(.system(.headline, design: .rounded, weight: .bold))
                                                 .padding(.leading, 10)
-                                            
+
                                             Spacer()
                                         }
                                     }.foregroundStyle(Color(hex: space.textColor))
@@ -217,107 +220,8 @@ struct Sidebar: View {
                                             }
                                         }
                                 }
-                                    
-                                // MARK: - Primary Tabs
-                                VStack {
-                                    let orderedTabs = space.primaryTabs.sorted { $0.orderIndex < $1.orderIndex }
-                                    ForEach(orderedTabs, id: \.id) { tab in
-                                        ZStack {
-                                            RoundedRectangle(cornerRadius: 15)
-                                                .fill(Color.white.opacity(0.001))
-                                            
-                                            if !storageManager.currentTabs.isEmpty {
-                                                if !storageManager.currentTabs[0].isEmpty {
-                                                    RoundedRectangle(cornerRadius: 15)
-                                                        .fill(Color.white.opacity(uiViewModel.currentSelectedTab == tab.id ? 0.5: uiViewModel.currentHoverTab == tab ? 0.25: 0.001))
-                                                        .animation(.easeInOut, value: storageManager.currentTabs[0][0].storedTab == tab)
-                                                }
-                                            }
-                                            
-                                            HStack {
-                                                Favicon(url: tab.url)
-                                                Text(tabsManager.linksWithTitles[tab.url] ?? tab.url)
-                                                    .foregroundStyle(Color(hex: space.textColor))
-                                                    .lineLimit(1)
-                                                    .onAppear {
-                                                        Task {
-                                                            await tabsManager.fetchTitlesIfNeeded(for: [tab.url])
-                                                        }
-                                                    }
-                                                Spacer()
-                                                
-                                                if uiViewModel.currentSelectedTab == tab.id || uiViewModel.currentHoverTab?.id ?? "rat" == tab.id {
-                                                    Button {
-                                                        withAnimation {
-                                                            uiViewModel.currentSelectedTab = storageManager.closeTab(tabObject: tab, tabType: .primary)?.id ?? ""
-                                                        }
-//                                                        storageManager.closeTab(tabObject: tab, tabType: .primary)
-                                                    } label: {
-                                                        Image(systemName: "xmark")
-                                                            .resizable()
-                                                            .scaledToFit()
-                                                            .frame(width: 15, height: 15)
-                                                            .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
-                                                            .opacity(uiViewModel.hoveringID == "addNewSpace" ? 1.0: 0.5)
-                                                            .padding(.trailing, 10)
-                                                    }
-                                                }
-                                            }
-                                            .padding(.vertical, 10)
-                                            .padding(.horizontal, 5)
-                                        }
-                                        .contentShape(Rectangle())
-                                        .onTapGesture {
-                                            Task {
-                                                await storageManager.selectOrLoadTab(tabObject: tab)
-                                                
-                                                tab.timestamp = Date.now
-                                                try? modelContext.save()
-                                            }
-                                            uiViewModel.currentSelectedTab = tab.id
-                                        }
-                                        .onHover { hover in
-                                            withAnimation {
-                                                if uiViewModel.currentHoverTab == tab {
-                                                    uiViewModel.currentHoverTab = nil
-                                                }
-                                                else {
-                                                    uiViewModel.currentHoverTab = tab
-                                                }
-                                            }
-                                        }
-                                        .contextMenu(menuItems: {
-                                            Button {
-                                                UIPasteboard.general.string = tab.url
-                                            } label: {
-                                                Label("Copy URL", systemImage: "link")
-                                            }
-                                            
-                                            Button {
-                                                withAnimation {
-                                                    uiViewModel.currentSelectedTab = storageManager.closeTab(tabObject: tab, tabType: .primary)?.id ?? ""
-                                                }
-                                            } label: {
-                                                Label("Close Tab", systemImage: "rectangle.badge.xmark")
-                                            }
-                                        })
-//                                        .contextMenu(menuItems: {
-//                                        }, preview: {
-//                                            // Add website snapshot preview here
-//                                        })
-                                        .onDrag {
-                                            let tabID = tab.id
-                                            draggingTabID = tabID
-                                            let provider = NSItemProvider()
-                                            provider.registerDataRepresentation(forTypeIdentifier: UTType.text.identifier, visibility: .ownProcess) { [tabID] completion in
-                                                completion(Data(tabID.utf8), nil)
-                                                return nil
-                                            }
-                                            return provider
-                                        }
-                                        .onDrop(of: [UTType.text], delegate: TabDropDelegate(tab: tab, space: space, draggingTabID: $draggingTabID, modelContext: modelContext))
-                                    }
-                                }
+
+                                PrimaryTabsView(space: space, draggingTabID: $draggingTabID)
                             }
                         }.scrollEdgeEffectDisabled(true)
                             .tag(space)
@@ -460,6 +364,7 @@ private extension Comparable {
 struct TabDropDelegate: DropDelegate {
     let tab: StoredTab
     let space: SpaceData
+    let tabType: TabType
     @Binding var draggingTabID: String?
     var modelContext: ModelContext
 
@@ -471,7 +376,15 @@ struct TabDropDelegate: DropDelegate {
         else { return }
 
         // Work on a snapshot that reflects the on-screen order
-        var ordered = space.primaryTabs.sorted { $0.orderIndex < $1.orderIndex }
+        var ordered: [StoredTab]
+        switch tabType {
+        case .primary:
+            ordered = space.primaryTabs.sorted { $0.orderIndex > $1.orderIndex }
+        case .pinned:
+            ordered = space.pinnedTabs.sorted { $0.orderIndex < $1.orderIndex }
+        case .favorites:
+            ordered = space.favoriteTabs.sorted { $0.orderIndex < $1.orderIndex }
+        }
 
         guard
             let from = ordered.firstIndex(where: { $0.id == draggingID }),

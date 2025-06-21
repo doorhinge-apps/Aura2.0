@@ -1,40 +1,36 @@
-//
-// Aura 2.0
 // SpaceData.swift
-//
-// Created on 6/11/25
-//
-// Copyright ©2025 DoorHinge Apps.
-//
-
-
 import Foundation
 import SwiftData
 
 @Model
 final class SpaceData {
-    // A unique identifier assigned to the space when it is created.
-    // This is shared by all tabs in the space and is what sorts them.
     var spaceIdentifier: String
-    
-    // The display name of the space
     var spaceName: String
-    
     var spaceIcon: String = "circle.fill"
-    
     var isIncognito: Bool
-    
-    // The color gradient of the background as hex codes
     var spaceBackgroundColors: [String]
     var textColor: String
     var adaptiveTheme: Bool = false
     
+    // Persist *all* tabs in one place
     @Relationship(deleteRule: .cascade, inverse: \StoredTab.parentSpace)
-    var primaryTabs: [StoredTab] = []
-    @Relationship(deleteRule: .cascade, inverse: \StoredTab.parentSpace)
-    var pinnedTabs: [StoredTab] = []
-    @Relationship(deleteRule: .cascade, inverse: \StoredTab.parentSpace)
-    var favoriteTabs: [StoredTab] = []
+    var tabs: [StoredTab] = []
+    
+    // --- Derived sections (not stored) ---
+    var primaryTabs: [StoredTab] {
+        tabs.filter { $0.tabType == .primary }
+            .sorted { $0.orderIndex < $1.orderIndex }
+    }
+    
+    var pinnedTabs: [StoredTab] {
+        tabs.filter { $0.tabType == .pinned }
+            .sorted { $0.orderIndex < $1.orderIndex }
+    }
+    
+    var favoriteTabs: [StoredTab] {
+        tabs.filter { $0.tabType == .favorites }
+            .sorted { $0.orderIndex < $1.orderIndex }
+    }
     
     init(
         spaceIdentifier: String,
