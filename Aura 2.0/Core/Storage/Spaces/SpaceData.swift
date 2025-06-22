@@ -14,22 +14,48 @@ final class SpaceData {
     
     // Persist *all* tabs in one place
     @Relationship(deleteRule: .cascade, inverse: \StoredTab.parentSpace)
-    var tabs: [StoredTab] = []
+    var tabs: [[StoredTab]] = [[]]
+
+    /// Flattened collection of every stored tab. This mirrors the previous
+    /// single dimensional storage while supporting nested layouts.
+    var allTabs: [StoredTab] { tabs.flatMap { $0 } }
     
     // --- Derived sections (not stored) ---
     var primaryTabs: [StoredTab] {
-        tabs.filter { $0.tabType == .primary }
+        allTabs.filter { $0.tabType == .primary }
             .sorted { $0.orderIndex < $1.orderIndex }
     }
     
     var pinnedTabs: [StoredTab] {
-        tabs.filter { $0.tabType == .pinned }
+        allTabs.filter { $0.tabType == .pinned }
             .sorted { $0.orderIndex < $1.orderIndex }
     }
     
     var favoriteTabs: [StoredTab] {
-        tabs.filter { $0.tabType == .favorites }
+        allTabs.filter { $0.tabType == .favorites }
             .sorted { $0.orderIndex < $1.orderIndex }
+    }
+
+    /// Remove the provided tab from the nested `tabs` collection.
+    func removeTab(_ tab: StoredTab) {
+        for rowIndex in tabs.indices {
+            if let idx = tabs[rowIndex].firstIndex(where: { $0.id == tab.id }) {
+                tabs[rowIndex].remove(at: idx)
+                if tabs[rowIndex].isEmpty && tabs.count > 1 {
+                    tabs.remove(at: rowIndex)
+                }
+                return
+            }
+        }
+    }
+
+    /// Append a tab to the specified row, creating rows as needed.
+    func addTab(_ tab: StoredTab, toRow row: Int = 0) {
+        if tabs.isEmpty { tabs.append([]) }
+        if row >= tabs.count {
+            tabs.append(contentsOf: Array(repeating: [], count: row - tabs.count + 1))
+        }
+        tabs[row].append(tab)
     }
     
     init(

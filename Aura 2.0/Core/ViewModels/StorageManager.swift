@@ -149,7 +149,7 @@ class StorageManager: ObservableObject {
 
         // Add to the space's storedTabs and persist
         modelContext.insert(storedTabObject)
-        space.tabs.append(storedTabObject)
+        space.addTab(storedTabObject)
         try? modelContext.save()
         
         let createdTab = BrowserTab(lastActiveTime: Date.now, tabType: .primary, page: page, storedTab: storedTabObject)
@@ -167,7 +167,7 @@ class StorageManager: ObservableObject {
             guard let space = selectedSpace,
                   let removedIdx = space.primaryTabs.firstIndex(where: { $0.id == tabObject.id })
             else { return nil }
-            space.tabs.remove(at: removedIdx)
+            space.removeTab(tabObject)
             for (i, tab) in space.primaryTabs.enumerated() { tab.orderIndex = i }
             let nextIdx = removedIdx, prevIdx = removedIdx - 1
             let replacement: StoredTab? = space.primaryTabs.indices.contains(nextIdx)
@@ -184,7 +184,7 @@ class StorageManager: ObservableObject {
             guard let space = selectedSpace,
                   let removedIdx = space.pinnedTabs.firstIndex(where: { $0.id == tabObject.id })
             else { return nil }
-            space.tabs.remove(at: removedIdx)
+            space.removeTab(tabObject)
             for (i, tab) in space.pinnedTabs.enumerated() { tab.orderIndex = i }
             let nextPinned = removedIdx, prevPinned = removedIdx - 1
             let replacementPinned: StoredTab? = space.pinnedTabs.indices.contains(nextPinned)
@@ -201,7 +201,7 @@ class StorageManager: ObservableObject {
             guard let space = selectedSpace,
                   let removedIdx = space.favoriteTabs.firstIndex(where: { $0.id == tabObject.id })
             else { return nil }
-            space.tabs.remove(at: removedIdx)
+            space.removeTab(tabObject)
             for (i, tab) in space.favoriteTabs.enumerated() { tab.orderIndex = i }
             let nextFav = removedIdx, prevFav = removedIdx - 1
             let replacementFav: StoredTab? = space.favoriteTabs.indices.contains(nextFav)
