@@ -3,7 +3,7 @@ import Foundation
 import SwiftData
 
 @Model
-final class StoredTab {
+final class StoredTab: Codable {
     var id: String
     var timestamp: Date
     var url: String
