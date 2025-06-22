@@ -24,8 +24,6 @@ struct WebsitePanel: View {
     
     @State var findNavigatorIsPresent: Bool = false
     
-    @State var websiteFocus: [Int] = []
-    
     @State var presentWebsiteNavigatorIn: [Int] = []
     
     @State var temporaryEditText = ""
@@ -34,7 +32,7 @@ struct WebsitePanel: View {
         GeometryReader { geo in
             ZStack {
                 Button {
-                    presentWebsiteNavigatorIn = websiteFocus
+                    presentWebsiteNavigatorIn = storageManager.focusedWebsite
                 } label: {
                     Color.white.opacity(0.001)
                 }.keyboardShortcut("t", modifiers: [.command, .option])
@@ -64,10 +62,10 @@ struct WebsitePanel: View {
                                                 .findNavigator(isPresented: $findNavigatorIsPresent)
                                                 .padding(.vertical, 10)
                                                 .frame(height: geo.size.height + 20)
-                                                .shadow(color: Color(.systemBlue).opacity(websiteFocus == [rowIdx, colIdx] ? 0.5: 0.0), radius: 5, x: 0, y: 0)
+                                                .shadow(color: Color(.systemBlue).opacity(storageManager.focusedWebsite == [rowIdx, colIdx] ? 0.5: 0.0), radius: 5, x: 0, y: 0)
                                                 .onTapGesture {
-                                                    if websiteFocus != [rowIdx, colIdx] {
-                                                        websiteFocus = [rowIdx, colIdx]
+                                                    if storageManager.focusedWebsite != [rowIdx, colIdx] {
+                                                        storageManager.updateFocusedWebsite([rowIdx, colIdx])
                                                     }
                                                 }
                                             
@@ -97,7 +95,8 @@ struct WebsitePanel: View {
                             HStack {
                                 Spacer()
                                 Button {
-                                    
+                                    // Horizontal split - add new tab to current row
+                                    storageManager.addTabToCurrentRow(url: "https://google.com", rowIndex: rowIdx, modelContext: modelContext)
                                 } label: {
                                     ZStack {
                                         Color.white.opacity(1)
@@ -114,6 +113,28 @@ struct WebsitePanel: View {
                             }
                         }
                     }
+                    
+                    // Vertical split button - add new row
+                    HStack {
+                        Button {
+                            // Vertical split - add new row to current tabs
+                            storageManager.addNewRowToCurrentTabs(url: "https://google.com", modelContext: modelContext)
+                        } label: {
+                            ZStack {
+                                Color.white.opacity(1)
+                                
+                                Image(systemName: "plus")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .padding(2)
+                            }
+                            .frame(height: 30)
+                            .cornerRadius(10)
+                            .shadow(color: Color.black.opacity(0.4), radius: 5, x: 0, y: 0)
+                        }
+                    }
+                    .padding(.horizontal, 10)
+                    .padding(.bottom, 10)
                 }
             }
         }.scrollEdgeEffectDisabled(true)

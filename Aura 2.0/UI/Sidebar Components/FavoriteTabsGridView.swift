@@ -7,9 +7,9 @@ struct FavoriteTabsGridView: View {
 
     var body: some View {
         LazyVGrid(columns: columns, spacing: 10) {
-            let orderedTabs = space.favoriteTabs.sorted { $0.orderIndex < $1.orderIndex }
-            ForEach(orderedTabs, id: \.id) { tab in
-                FavoriteTabRowView(tab: tab, space: space, tabType: .favorites, draggingTabID: $draggingTabID)
+            let orderedGroups = space.favoriteTabGroups.sorted { $0.orderIndex < $1.orderIndex }
+            ForEach(orderedGroups, id: \.id) { tabGroup in
+                TabGroupFavoriteView(tabGroup: tabGroup, space: space, draggingTabID: $draggingTabID)
             }
         }.padding(5)
     }

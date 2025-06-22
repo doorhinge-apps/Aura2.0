@@ -43,6 +43,8 @@
 		B9B060742E07775C00480CEF /* IconsPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060732E07775C00480CEF /* IconsPicker.swift */; };
 		B9B060762E07787400480CEF /* IconsArrayStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060752E07787400480CEF /* IconsArrayStorage.swift */; };
 		B9B060792E07AFBC00480CEF /* TabGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060782E07AFBC00480CEF /* TabGroup.swift */; };
+		B9B060822E07BF2E00480CEF /* TabGroupFavoriteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060802E07BF2E00480CEF /* TabGroupFavoriteView.swift */; };
+		B9B060832E07BF2E00480CEF /* TabGroupRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060812E07BF2E00480CEF /* TabGroupRowView.swift */; };
 		B9BB57382DF8CE6F00B7E1E7 /* Aura_2_0App.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BB57332DF8CE6F00B7E1E7 /* Aura_2_0App.swift */; };
 		B9BB57392DF8CE6F00B7E1E7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BB57342DF8CE6F00B7E1E7 /* ContentView.swift */; };
 		B9BB573B2DF8CE6F00B7E1E7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9BB57312DF8CE6F00B7E1E7 /* Assets.xcassets */; };
@@ -109,6 +111,8 @@
 		B9B060732E07775C00480CEF /* IconsPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconsPicker.swift; sourceTree = "<group>"; };
 		B9B060752E07787400480CEF /* IconsArrayStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconsArrayStorage.swift; sourceTree = "<group>"; };
 		B9B060782E07AFBC00480CEF /* TabGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroup.swift; sourceTree = "<group>"; };
+		B9B060802E07BF2E00480CEF /* TabGroupFavoriteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupFavoriteView.swift; sourceTree = "<group>"; };
+		B9B060812E07BF2E00480CEF /* TabGroupRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupRowView.swift; sourceTree = "<group>"; };
 		B9BB57022DF8CE4500B7E1E7 /* Aura 2.0.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Aura 2.0.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9BB57132DF8CE4700B7E1E7 /* Aura 2.0Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Aura 2.0Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9BB571D2DF8CE4700B7E1E7 /* Aura 2.0UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Aura 2.0UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -177,6 +181,8 @@
 				B9D455002E06525100CB1E24 /* PrimaryTabsView.swift */,
 				B9D455012E06525100CB1E24 /* TabRowView.swift */,
 				B9D455122E0667C900CB1E24 /* FavoriteTabRowView.swift */,
+				B9B060802E07BF2E00480CEF /* TabGroupFavoriteView.swift */,
+				B9B060812E07BF2E00480CEF /* TabGroupRowView.swift */,
 				B9B060772E07789500480CEF /* Icons Picker */,
 			);
 			path = "Sidebar Components";
@@ -578,6 +584,8 @@
 				B9B0050F2DFA740700B79152 /* SettingsManager.swift in Sources */,
 				B9B004EC2DF8D35A00B79152 /* TabLoadingData.swift in Sources */,
 				B9B004F82DF97CAA00B79152 /* Sidebar.swift in Sources */,
+				B9B060822E07BF2E00480CEF /* TabGroupFavoriteView.swift in Sources */,
+				B9B060832E07BF2E00480CEF /* TabGroupRowView.swift in Sources */,
 				B95A80A32DFD4D41007FE1F4 /* Settings.swift in Sources */,
 				B9D455132E0667C900CB1E24 /* FavoriteTabRowView.swift in Sources */,
 				B9B004EF2DF96BE600B79152 /* AuraSchemeHandler.swift in Sources */,

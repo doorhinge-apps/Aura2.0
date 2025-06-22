@@ -61,6 +61,9 @@ class StorageManager: ObservableObject {
     // Aura will load all of these at the same time
     @Published var currentTabs: [[BrowserTab]] = []
     
+    // Focus state for website panel - [rowIndex, columnIndex]
+    @Published var focusedWebsite: [Int] = []
+    
     
 //    @Published var currentTabs: [[BrowserTab]] = [
 //        BrowserTab(lastActiveTime: Date.now, tabType: .primary, page: <#T##WebPage#>, storedTab: StoredTab(timestamp: Date.now, url: "https://apple.com", tabType: .primary))
@@ -85,47 +88,109 @@ class StorageManager: ObservableObject {
     }
     
     func selectOrLoadTab(tabObject: StoredTab) async {
+        guard let space = selectedSpace else { return }
+        
         if let index = splitViewTabs.firstIndex(where: { $0.mainTab == tabObject }) {
             splitViewTabs[index].subTabLayout = currentTabs
-        } else if let existingTab = loadedTabs.first(where: { $0.storedTab == tabObject }) {
-            currentTabs = [[existingTab]]
         } else {
-            let newWebPage = WebPage()
-            var request = URLRequest(url: URL(string: tabObject.url)!)
-            request.attribution = .user
-            newWebPage.load(request)
-            
-            
-            do {
-                try await newWebPage.callJavaScript(
-                    String(
-                        """
-                                (function() {
-                                  var style = document.createElement('style');
-                                  style.textContent = `.headerTitle {color: black!important;}`;
-                                  document.head.appendChild(style);
-                                })();
-                        """
-                    )
-                )
-            } catch {
-                print("JavaScript injection failed: \(error)")
+            // Find the TabGroup that contains this tab
+            if let tabGroup = findTabGroup(containingTabId: tabObject.id, space: space) {
+                // Restore the entire nested structure from the TabGroup
+                currentTabs = await loadTabGroupAsCurrentTabs(tabGroup: tabGroup)
+            } else {
+                // Fallback: create a single tab if no TabGroup found
+                await loadSingleTab(tabObject: tabObject)
             }
-                
-            
-            
-            let newTab = BrowserTab(
-                lastActiveTime: Date.now,
-                tabType: .primary,
-                page: newWebPage,
-                storedTab: tabObject
-            )
-            currentTabs = [[newTab]]
-            loadedTabs.append(newTab)
         }
         
         if loadedTabs.count >= Int(settingManager.preloadingWebsites) {
             loadedTabs.removeFirst()
+        }
+        
+        // Set focus to the selected tab
+        setFocusToTab(tabObject: tabObject)
+    }
+    
+    /// Load a TabGroup and convert it to [[BrowserTab]] structure
+    private func loadTabGroupAsCurrentTabs(tabGroup: TabGroup) async -> [[BrowserTab]] {
+        var result: [[BrowserTab]] = []
+        
+        for row in tabGroup.tabRows.sorted(by: { $0.rowIndex < $1.rowIndex }) {
+            var browserRow: [BrowserTab] = []
+            
+            for storedTab in row.tabs.sorted(by: { $0.orderIndex < $1.orderIndex }) {
+                // Check if we already have this tab loaded
+                if let existingTab = loadedTabs.first(where: { $0.storedTab.id == storedTab.id }) {
+                    browserRow.append(existingTab)
+                } else {
+                    // Create new BrowserTab
+                    let browserTab = await createBrowserTab(from: storedTab)
+                    browserRow.append(browserTab)
+                    loadedTabs.append(browserTab)
+                }
+            }
+            
+            result.append(browserRow)
+        }
+        
+        return result
+    }
+    
+    /// Create a BrowserTab from a StoredTab
+    private func createBrowserTab(from storedTab: StoredTab) async -> BrowserTab {
+        let newWebPage = WebPage()
+        var request = URLRequest(url: URL(string: storedTab.url)!)
+        request.attribution = .user
+        newWebPage.load(request)
+        
+        do {
+            try await newWebPage.callJavaScript(
+                String(
+                    """
+                            (function() {
+                              var style = document.createElement('style');
+                              style.textContent = `.headerTitle {color: black!important;}`;
+                              document.head.appendChild(style);
+                            })();
+                    """
+                )
+            )
+        } catch {
+            print("JavaScript injection failed: \(error)")
+        }
+        
+        return BrowserTab(
+            lastActiveTime: Date.now,
+            tabType: storedTab.tabType,
+            page: newWebPage,
+            storedTab: storedTab
+        )
+    }
+    
+    /// Fallback method to load a single tab
+    private func loadSingleTab(tabObject: StoredTab) async {
+        if let existingTab = loadedTabs.first(where: { $0.storedTab.id == tabObject.id }) {
+            currentTabs = [[existingTab]]
+        } else {
+            let browserTab = await createBrowserTab(from: tabObject)
+            currentTabs = [[browserTab]]
+            loadedTabs.append(browserTab)
+        }
+    }
+    
+    /// Set focus to the specified tab within currentTabs
+    private func setFocusToTab(tabObject: StoredTab) {
+        for (rowIndex, row) in currentTabs.enumerated() {
+            for (colIndex, browserTab) in row.enumerated() {
+                if browserTab.storedTab.id == tabObject.id {
+                    focusedWebsite = [rowIndex, colIndex]
+                    return
+                }
+            }
+        }
+        // Default to first tab if not found
+        if !currentTabs.isEmpty && !currentTabs[0].isEmpty {
+            focusedWebsite = [0, 0]
         }
     }
     
@@ -269,6 +334,38 @@ class StorageManager: ObservableObject {
             selectedSpace = newSpace
         } else {
             selectedSpace = spaces.first
+            // Migrate legacy tabs to TabGroups if needed
+            migrateLegacyTabsToGroups(modelContext: modelContext)
+        }
+    }
+    
+    /// Migrate any legacy individual StoredTabs to TabGroup structure
+    private func migrateLegacyTabsToGroups(modelContext: ModelContext) {
+        guard let space = selectedSpace else { return }
+        
+        // Check if we have legacy tabs that aren't in TabGroups
+        let legacyTabs = space.tabs.filter { tab in
+            findTabGroup(containingTabId: tab.id, space: space) == nil
+        }
+        
+        if !legacyTabs.isEmpty {
+            print("Migrating \(legacyTabs.count) legacy tabs to TabGroup structure")
+            
+            for tab in legacyTabs {
+                // Create a TabGroup for each individual tab
+                let tabGroup = TabGroup(
+                    timestamp: tab.timestamp,
+                    tabType: tab.tabType,
+                    orderIndex: getTabGroups(for: tab.tabType, in: space).count,
+                    parentSpace: space
+                )
+                
+                tabGroup.addTab(tab)
+                modelContext.insert(tabGroup)
+                addTabGroupToSpace(tabGroup: tabGroup, space: space)
+            }
+            
+            try? modelContext.save()
         }
     }
     
@@ -391,6 +488,270 @@ class StorageManager: ObservableObject {
                 space.favoriteTabGroups.append(newGroup)
             }
         }
+    }
+    
+    // MARK: - Split View Methods
+    
+    /// Update the focused website position
+    func updateFocusedWebsite(_ position: [Int]) {
+        focusedWebsite = position
+    }
+    
+    /// Add a new tab to the current row (horizontal split)
+    func addTabToCurrentRow(url: String, rowIndex: Int, modelContext: ModelContext) {
+        guard rowIndex < currentTabs.count,
+              let space = selectedSpace else { return }
+        
+        let page = WebPage()
+        var request = URLRequest(url: URL(string: url)!)
+        request.attribution = .user
+        page.load(request)
+        
+        // Get the tab type from the current tab in this row
+        let currentTabType = currentTabs[rowIndex].first?.tabType ?? .primary
+        
+        let storedTab = StoredTab(
+            id: createStoredTabID(url: url),
+            timestamp: Date.now,
+            url: url,
+            orderIndex: currentTabs[rowIndex].count,
+            tabType: currentTabType,
+            parentSpace: space
+        )
+        
+        let browserTab = BrowserTab(
+            lastActiveTime: Date.now,
+            tabType: currentTabType,
+            page: page,
+            storedTab: storedTab
+        )
+        
+        // Add to current tabs
+        currentTabs[rowIndex].append(browserTab)
+        
+        // Find the TabGroup that contains the current tab and add to the correct row
+        let currentTabId = currentTabs[rowIndex].first?.storedTab.id ?? ""
+        if let tabGroup = findTabGroup(containingTabId: currentTabId, space: space) {
+            // Add to the same row as the existing tab
+            if let targetRow = tabGroup.tabRows.first(where: { row in
+                row.tabs.contains { $0.id == currentTabId }
+            }) {
+                targetRow.tabs.append(storedTab)
+            }
+        }
+        
+        modelContext.insert(storedTab)
+        space.tabs.append(storedTab)
+        
+        try? modelContext.save()
+        
+        // Set focus to the new tab
+        focusedWebsite = [rowIndex, currentTabs[rowIndex].count - 1]
+    }
+    
+    /// Add a new row to current tabs (vertical split)
+    func addNewRowToCurrentTabs(url: String, modelContext: ModelContext) {
+        guard let space = selectedSpace else { return }
+        
+        let page = WebPage()
+        var request = URLRequest(url: URL(string: url)!)
+        request.attribution = .user
+        page.load(request)
+        
+        // Get tab type from current context - use the type of the currently selected tab
+        let currentTabType = getFocusedTab()?.tabType ?? .primary
+        
+        let storedTab = StoredTab(
+            id: createStoredTabID(url: url),
+            timestamp: Date.now,
+            url: url,
+            orderIndex: 0,
+            tabType: currentTabType,
+            parentSpace: space
+        )
+        
+        let browserTab = BrowserTab(
+            lastActiveTime: Date.now,
+            tabType: currentTabType,
+            page: page,
+            storedTab: storedTab
+        )
+        
+        // Add new row to current tabs
+        currentTabs.append([browserTab])
+        
+        // Find the TabGroup that we're currently viewing and add a new row to it
+        let currentTabId = getFocusedTab()?.storedTab.id ?? currentTabs.first?.first?.storedTab.id ?? ""
+        if let tabGroup = findTabGroup(containingTabId: currentTabId, space: space) {
+            // Add a new row to the existing TabGroup
+            tabGroup.addTabRow(tabs: [storedTab])
+        } else {
+            // Create new TabGroup if none found (fallback)
+            let tabGroup = TabGroup(
+                timestamp: Date.now,
+                tabType: currentTabType,
+                orderIndex: getTabGroups(for: currentTabType, in: space).count,
+                parentSpace: space
+            )
+            tabGroup.addTab(storedTab)
+            
+            modelContext.insert(tabGroup)
+            addTabGroupToSpace(tabGroup: tabGroup, space: space)
+        }
+        
+        modelContext.insert(storedTab)
+        space.tabs.append(storedTab)
+        
+        try? modelContext.save()
+        
+        // Set focus to the new tab
+        focusedWebsite = [currentTabs.count - 1, 0]
+    }
+    
+    /// Get the currently focused tab if valid
+    func getFocusedTab() -> BrowserTab? {
+        guard focusedWebsite.count == 2,
+              focusedWebsite[0] < currentTabs.count,
+              focusedWebsite[1] < currentTabs[focusedWebsite[0]].count else {
+            return nil
+        }
+        return currentTabs[focusedWebsite[0]][focusedWebsite[1]]
+    }
+    
+    /// Find the TabGroup that contains a specific tab ID
+    private func findTabGroup(containingTabId tabId: String, space: SpaceData) -> TabGroup? {
+        let allGroups = space.primaryTabGroups + space.pinnedTabGroups + space.favoriteTabGroups
+        
+        for group in allGroups {
+            for row in group.tabRows {
+                if row.tabs.contains(where: { $0.id == tabId }) {
+                    return group
+                }
+            }
+        }
+        return nil
+    }
+    
+    /// Add a TabGroup to the appropriate array in SpaceData
+    private func addTabGroupToSpace(tabGroup: TabGroup, space: SpaceData) {
+        switch tabGroup.tabType {
+        case .primary:
+            space.primaryTabGroups.append(tabGroup)
+        case .pinned:
+            space.pinnedTabGroups.append(tabGroup)
+        case .favorites:
+            space.favoriteTabGroups.append(tabGroup)
+        }
+    }
+    
+    // MARK: - Tab Context Methods
+    
+    /// Create a new tab for a specific type (used by sidebar components)
+    func newTabForType(unformattedString: String, space: SpaceData, tabType: TabType, modelContext: ModelContext) -> StoredTab {
+        let formattedURL = formatURL(from: unformattedString)
+        let page = WebPage()
+        var request = URLRequest(url: URL(string: formattedURL)!)
+        request.attribution = .user
+        page.load(request)
+        
+        let newOrder = getTabGroups(for: tabType, in: space).count
+        let storedTabObject = StoredTab(
+            id: createStoredTabID(url: formattedURL),
+            timestamp: Date.now,
+            url: formattedURL,
+            orderIndex: 0,
+            tabType: tabType,
+            parentSpace: space
+        )
+        
+        // Create a new TabGroup for this single tab
+        let tabGroup = TabGroup(
+            timestamp: Date.now,
+            tabType: tabType,
+            orderIndex: newOrder,
+            parentSpace: space
+        )
+        
+        tabGroup.addTab(storedTabObject)
+        
+        modelContext.insert(storedTabObject)
+        modelContext.insert(tabGroup)
+        addTabGroupToSpace(tabGroup: tabGroup, space: space)
+        space.tabs.append(storedTabObject)
+        
+        try? modelContext.save()
+        
+        let createdTab = BrowserTab(lastActiveTime: Date.now, tabType: tabType, page: page, storedTab: storedTabObject)
+        currentTabs = [[createdTab]]
+        appendAndRemove(addingTab: createdTab)
+        
+        return storedTabObject
+    }
+    
+    /// Close an entire TabGroup
+    func closeTabGroup(tabGroup: TabGroup, modelContext: ModelContext) -> StoredTab? {
+        guard let space = selectedSpace else { return nil }
+        
+        // Remove the TabGroup from the appropriate array
+        switch tabGroup.tabType {
+        case .primary:
+            if let index = space.primaryTabGroups.firstIndex(where: { $0.id == tabGroup.id }) {
+                space.primaryTabGroups.remove(at: index)
+            }
+        case .pinned:
+            if let index = space.pinnedTabGroups.firstIndex(where: { $0.id == tabGroup.id }) {
+                space.pinnedTabGroups.remove(at: index)
+            }
+        case .favorites:
+            if let index = space.favoriteTabGroups.firstIndex(where: { $0.id == tabGroup.id }) {
+                space.favoriteTabGroups.remove(at: index)
+            }
+        }
+        
+        // Remove all tabs from the legacy tabs array and delete them
+        for row in tabGroup.tabRows {
+            for tab in row.tabs {
+                if let legacyIndex = space.tabs.firstIndex(where: { $0.id == tab.id }) {
+                    space.tabs.remove(at: legacyIndex)
+                }
+                modelContext.delete(tab)
+            }
+        }
+        
+        // Delete the TabGroup itself
+        modelContext.delete(tabGroup)
+        
+        // Find a replacement TabGroup to switch to
+        let replacementGroup = findReplacementTabGroup(removedGroup: tabGroup, space: space)
+        
+        if let replacement = replacementGroup?.tabRows.first?.tabs.first {
+            Task { await selectOrLoadTab(tabObject: replacement) }
+            return replacement
+        } else {
+            currentTabs = [[]]
+            return nil
+        }
+    }
+    
+    /// Find a replacement TabGroup after one is closed
+    private func findReplacementTabGroup(removedGroup: TabGroup, space: SpaceData) -> TabGroup? {
+        let groups = getTabGroups(for: removedGroup.tabType, in: space)
+        
+        // Try to find the next group with higher order index
+        let nextGroup = groups.first { $0.orderIndex > removedGroup.orderIndex }
+        if let next = nextGroup {
+            return next
+        }
+        
+        // Fall back to the previous group
+        let prevGroup = groups.filter { $0.orderIndex < removedGroup.orderIndex }.max { $0.orderIndex < $1.orderIndex }
+        if let prev = prevGroup {
+            return prev
+        }
+        
+        // Try other tab types if no replacement found in same type
+        let allGroups = space.primaryTabGroups + space.pinnedTabGroups + space.favoriteTabGroups
+        return allGroups.first
     }
 }
 

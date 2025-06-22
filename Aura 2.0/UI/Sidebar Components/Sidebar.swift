@@ -114,7 +114,7 @@ struct Sidebar: View {
                                         .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff").opacity(0.5))
                                 }
                                 
-                                Text(hoverSearch || !settingsManager.useUnifiedToolbar ? unformatURL(url: storageManager.currentTabs.first?.first?.storedTab.url ?? "Search or Enter URL"): "")
+                                Text(hoverSearch || !settingsManager.useUnifiedToolbar ? unformatURL(url: getFocusedOrFirstTabURL()): "")
                                     .lineLimit(1)
                                     .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff").opacity(0.5))
                             }
@@ -383,6 +383,17 @@ struct Sidebar: View {
             }
         }
     }
+    
+    /// Get the URL of the focused tab, or fallback to first tab
+    private func getFocusedOrFirstTabURL() -> String {
+        // Try to get focused tab URL
+        if let focusedTab = storageManager.getFocusedTab() {
+            return focusedTab.storedTab.url
+        }
+        
+        // Fallback to first tab
+        return storageManager.currentTabs.first?.first?.storedTab.url ?? "Search or Enter URL"
+    }
 }
 
 private extension Comparable {
@@ -437,6 +448,59 @@ struct TabDropDelegate: DropDelegate {
     func performDrop(info: DropInfo) -> Bool {
         draggingTabID = nil
         do { try modelContext.save() }            // persist the new order
+        catch { assertionFailure("SwiftData save failed: \(error)") }
+        return true
+    }
+}
+
+struct TabGroupDropDelegate: DropDelegate {
+    let tabGroup: TabGroup
+    let space: SpaceData
+    @Binding var draggingTabID: String?
+    var modelContext: ModelContext
+
+    func dropEntered(info: DropInfo) {
+        guard
+            let draggingID = draggingTabID,
+            draggingID != (tabGroup.tabRows.first?.tabs.first?.id ?? tabGroup.id)
+        else { return }
+
+        // Work on a snapshot that reflects the on-screen order for TabGroups
+        var orderedGroups: [TabGroup]
+        switch tabGroup.tabType {
+        case .primary:
+            orderedGroups = space.primaryTabGroups.sorted { $0.orderIndex < $1.orderIndex }
+        case .pinned:
+            orderedGroups = space.pinnedTabGroups.sorted { $0.orderIndex < $1.orderIndex }
+        case .favorites:
+            orderedGroups = space.favoriteTabGroups.sorted { $0.orderIndex < $1.orderIndex }
+        }
+
+        guard
+            let from = orderedGroups.firstIndex(where: { group in
+                group.tabRows.contains { row in
+                    row.tabs.contains { $0.id == draggingID }
+                }
+            }),
+            let to = orderedGroups.firstIndex(where: { $0.id == tabGroup.id })
+        else { return }
+
+        withAnimation {
+            let moved = orderedGroups.remove(at: from)
+            orderedGroups.insert(moved, at: to)
+
+            // Update order indices
+            for (i, group) in orderedGroups.enumerated() { 
+                group.orderIndex = i 
+            }
+        }
+    }
+
+    func dropUpdated(info: DropInfo) -> DropProposal? { DropProposal(operation: .move) }
+
+    func performDrop(info: DropInfo) -> Bool {
+        draggingTabID = nil
+        do { try modelContext.save() }
         catch { assertionFailure("SwiftData save failed: \(error)") }
         return true
     }

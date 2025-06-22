@@ -6,9 +6,9 @@ struct PrimaryTabsView: View {
 
     var body: some View {
         VStack {
-            let orderedTabs = space.primaryTabs.sorted { $0.orderIndex > $1.orderIndex }
-            ForEach(orderedTabs, id: \.id) { tab in
-                TabRowView(tab: tab, space: space, tabType: .primary, draggingTabID: $draggingTabID)
+            let orderedGroups = space.primaryTabGroups.sorted { $0.orderIndex < $1.orderIndex }
+            ForEach(orderedGroups, id: \.id) { tabGroup in
+                TabGroupRowView(tabGroup: tabGroup, space: space, draggingTabID: $draggingTabID)
             }
         }
     }
