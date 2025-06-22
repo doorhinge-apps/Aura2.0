@@ -136,20 +136,34 @@ class StorageManager: ObservableObject {
         request.attribution = .user
         page.load(request)
         
-        let newOrder = space.primaryTabs.count
+        let newOrder = space.primaryTabGroups.count
         let storedTabObject = StoredTab(
             id: createStoredTabID(url: formattedURL),
             timestamp: Date.now,
             url: formattedURL,
-            orderIndex: newOrder,
+            orderIndex: 0, // First tab in its group
             tabType: .primary,
             parentSpace: space
         )
         print("Created tab \(storedTabObject.id) with orderIndex \(newOrder)")
 
-        // Add to the space's storedTabs and persist
+        // Create a new TabGroup for this single tab
+        let tabGroup = TabGroup(
+            timestamp: Date.now,
+            tabType: .primary,
+            orderIndex: newOrder,
+            parentSpace: space
+        )
+        
+        // Add the tab to the group using the nested structure [[StoredTab]]
+        tabGroup.addTab(storedTabObject)
+        
+        // Insert models and update relationships
         modelContext.insert(storedTabObject)
-        space.tabs.append(storedTabObject)
+        modelContext.insert(tabGroup)
+        space.primaryTabGroups.append(tabGroup)
+        space.tabs.append(storedTabObject) // Keep legacy relationship for migration
+        
         try? modelContext.save()
         
         let createdTab = BrowserTab(lastActiveTime: Date.now, tabType: .primary, page: page, storedTab: storedTabObject)
@@ -162,58 +176,74 @@ class StorageManager: ObservableObject {
     }
     
     func closeTab(tabObject: StoredTab, tabType: TabType) -> StoredTab? {
+        guard let space = selectedSpace else { return nil }
+        
         switch tabType {
         case .primary:
-            guard let space = selectedSpace,
-                  let removedIdx = space.primaryTabs.firstIndex(where: { $0.id == tabObject.id })
-            else { return nil }
-            space.tabs.remove(at: removedIdx)
-            for (i, tab) in space.primaryTabs.enumerated() { tab.orderIndex = i }
-            let nextIdx = removedIdx, prevIdx = removedIdx - 1
-            let replacement: StoredTab? = space.primaryTabs.indices.contains(nextIdx)
-                ? space.primaryTabs[nextIdx]
-                : (space.primaryTabs.indices.contains(prevIdx) ? space.primaryTabs[prevIdx] : nil)
-            if let tab = replacement {
-                Task { await selectOrLoadTab(tabObject: tab) }
-            } else {
-                currentTabs = [[]]
-            }
-            return replacement
-
+            return closeTabFromGroups(tabObject: tabObject, groups: &space.primaryTabGroups, space: space)
         case .pinned:
-            guard let space = selectedSpace,
-                  let removedIdx = space.pinnedTabs.firstIndex(where: { $0.id == tabObject.id })
-            else { return nil }
-            space.tabs.remove(at: removedIdx)
-            for (i, tab) in space.pinnedTabs.enumerated() { tab.orderIndex = i }
-            let nextPinned = removedIdx, prevPinned = removedIdx - 1
-            let replacementPinned: StoredTab? = space.pinnedTabs.indices.contains(nextPinned)
-                ? space.pinnedTabs[nextPinned]
-                : (space.pinnedTabs.indices.contains(prevPinned) ? space.pinnedTabs[prevPinned] : nil)
-            if let tab = replacementPinned {
-                Task { await selectOrLoadTab(tabObject: tab) }
-            } else {
-                currentTabs = [[]]
-            }
-            return replacementPinned
-
+            return closeTabFromGroups(tabObject: tabObject, groups: &space.pinnedTabGroups, space: space)
         case .favorites:
-            guard let space = selectedSpace,
-                  let removedIdx = space.favoriteTabs.firstIndex(where: { $0.id == tabObject.id })
-            else { return nil }
-            space.tabs.remove(at: removedIdx)
-            for (i, tab) in space.favoriteTabs.enumerated() { tab.orderIndex = i }
-            let nextFav = removedIdx, prevFav = removedIdx - 1
-            let replacementFav: StoredTab? = space.favoriteTabs.indices.contains(nextFav)
-                ? space.favoriteTabs[nextFav]
-                : (space.favoriteTabs.indices.contains(prevFav) ? space.favoriteTabs[prevFav] : nil)
-            if let tab = replacementFav {
-                Task { await selectOrLoadTab(tabObject: tab) }
-            } else {
-                currentTabs = [[]]
-            }
-            return replacementFav
+            return closeTabFromGroups(tabObject: tabObject, groups: &space.favoriteTabGroups, space: space)
         }
+    }
+    
+    private func closeTabFromGroups(tabObject: StoredTab, groups: inout [TabGroup], space: SpaceData) -> StoredTab? {
+        // Find the group containing this tab
+        for (groupIndex, group) in groups.enumerated() {
+            for (rowIndex, row) in group.tabRows.enumerated() {
+                if let tabIndex = row.tabs.firstIndex(where: { $0.id == tabObject.id }) {
+                    // Remove the tab from its row
+                    row.tabs.remove(at: tabIndex)
+                    
+                    // Clean up empty rows and groups
+                    if row.tabs.isEmpty {
+                        group.tabRows.remove(at: rowIndex)
+                    }
+                    
+                    if group.tabRows.isEmpty {
+                        groups.remove(at: groupIndex)
+                    }
+                    
+                    // Remove from legacy tabs array
+                    if let legacyIndex = space.tabs.firstIndex(where: { $0.id == tabObject.id }) {
+                        space.tabs.remove(at: legacyIndex)
+                    }
+                    
+                    // Find replacement tab
+                    let replacement = findReplacementTab(removedGroupIndex: groupIndex, groups: groups)
+                    
+                    if let replacementTab = replacement {
+                        Task { await selectOrLoadTab(tabObject: replacementTab) }
+                    } else {
+                        currentTabs = [[]]
+                    }
+                    
+                    return replacement
+                }
+            }
+        }
+        return nil
+    }
+    
+    private func findReplacementTab(removedGroupIndex: Int, groups: [TabGroup]) -> StoredTab? {
+        // Try to find a tab in the next group, then previous group
+        let nextIndex = removedGroupIndex
+        let prevIndex = removedGroupIndex - 1
+        
+        if groups.indices.contains(nextIndex), 
+           let firstRow = groups[nextIndex].tabRows.first,
+           let firstTab = firstRow.tabs.first {
+            return firstTab
+        }
+        
+        if groups.indices.contains(prevIndex),
+           let firstRow = groups[prevIndex].tabRows.first,
+           let firstTab = firstRow.tabs.first {
+            return firstTab
+        }
+        
+        return nil
     }
 
     
@@ -285,8 +315,12 @@ class StorageManager: ObservableObject {
     
     @MainActor
     func updateTabType(for storedTab: StoredTab, to newType: TabType, modelContext: ModelContext) {
+        guard let space = selectedSpace else { return }
+        
+        let oldType = storedTab.tabType
         storedTab.tabType = newType
         
+        // Update in-memory tabs
         for rowIdx in currentTabs.indices {
             for colIdx in currentTabs[rowIdx].indices where currentTabs[rowIdx][colIdx].storedTab.id == storedTab.id {
                 currentTabs[rowIdx][colIdx].tabType = newType
@@ -294,7 +328,69 @@ class StorageManager: ObservableObject {
             }
         }
         
+        // Move tab between groups if needed
+        moveTabBetweenGroups(storedTab: storedTab, from: oldType, to: newType, space: space, modelContext: modelContext)
+        
         try? modelContext.save()
+    }
+    
+    private func moveTabBetweenGroups(storedTab: StoredTab, from oldType: TabType, to newType: TabType, space: SpaceData, modelContext: ModelContext) {
+        // Remove from old group
+        let oldGroups = getTabGroups(for: oldType, in: space)
+        removeTabFromGroups(storedTab: storedTab, groups: oldGroups)
+        
+        // Add to new group
+        let newGroups = getTabGroups(for: newType, in: space)
+        addTabToGroups(storedTab: storedTab, groups: newGroups, tabType: newType, space: space, modelContext: modelContext)
+    }
+    
+    private func getTabGroups(for type: TabType, in space: SpaceData) -> [TabGroup] {
+        switch type {
+        case .primary:
+            return space.primaryTabGroups
+        case .pinned:
+            return space.pinnedTabGroups
+        case .favorites:
+            return space.favoriteTabGroups
+        }
+    }
+    
+    private func removeTabFromGroups(storedTab: StoredTab, groups: [TabGroup]) {
+        for group in groups {
+            for row in group.tabRows {
+                if let index = row.tabs.firstIndex(where: { $0.id == storedTab.id }) {
+                    row.tabs.remove(at: index)
+                    return
+                }
+            }
+        }
+    }
+    
+    private func addTabToGroups(storedTab: StoredTab, groups: [TabGroup], tabType: TabType, space: SpaceData, modelContext: ModelContext) {
+        if let firstGroup = groups.first {
+            // Add to existing group
+            firstGroup.addTab(storedTab)
+        } else {
+            // Create new group
+            let newGroup = TabGroup(
+                timestamp: Date.now,
+                tabType: tabType,
+                orderIndex: 0,
+                parentSpace: space
+            )
+            newGroup.addTab(storedTab)
+            modelContext.insert(newGroup)
+            
+            // Add to appropriate group array
+            switch tabType {
+            case .primary:
+                space.primaryTabGroups.append(newGroup)
+            case .pinned:
+                space.pinnedTabGroups.append(newGroup)
+            case .favorites:
+                space.favoriteTabGroups.append(newGroup)
+            }
+        }
     }
 }
 

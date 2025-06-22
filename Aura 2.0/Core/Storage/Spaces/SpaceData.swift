@@ -12,23 +12,50 @@ final class SpaceData {
     var textColor: String
     var adaptiveTheme: Bool = false
     
-    // Persist *all* tabs in one place
+    // Legacy tabs relationship - keeping for migration
     @Relationship(deleteRule: .cascade, inverse: \StoredTab.parentSpace)
     var tabs: [StoredTab] = []
     
-    // --- Derived sections (not stored) ---
+    // New nested structure using TabGroup
+    @Relationship(deleteRule: .cascade)
+    var primaryTabGroups: [TabGroup] = []
+    
+    @Relationship(deleteRule: .cascade)
+    var pinnedTabGroups: [TabGroup] = []
+    
+    @Relationship(deleteRule: .cascade)
+    var favoriteTabGroups: [TabGroup] = []
+    
+    // --- Computed properties for nested arrays ---
+    // Returns [[[StoredTab]]] - array of nested tab structures
+    var primaryTabsNested: [[[StoredTab]]] {
+        return primaryTabGroups.sorted { $0.orderIndex < $1.orderIndex }
+            .map { $0.nestedTabs }
+    }
+    
+    var pinnedTabsNested: [[[StoredTab]]] {
+        return pinnedTabGroups.sorted { $0.orderIndex < $1.orderIndex }
+            .map { $0.nestedTabs }
+    }
+    
+    var favoriteTabsNested: [[[StoredTab]]] {
+        return favoriteTabGroups.sorted { $0.orderIndex < $1.orderIndex }
+            .map { $0.nestedTabs }
+    }
+    
+    // --- Backward compatibility flat arrays ---
     var primaryTabs: [StoredTab] {
-        tabs.filter { $0.tabType == .primary }
+        return primaryTabGroups.flatMap { $0.tabRows.flatMap { $0.tabs } }
             .sorted { $0.orderIndex < $1.orderIndex }
     }
     
     var pinnedTabs: [StoredTab] {
-        tabs.filter { $0.tabType == .pinned }
+        return pinnedTabGroups.flatMap { $0.tabRows.flatMap { $0.tabs } }
             .sorted { $0.orderIndex < $1.orderIndex }
     }
     
     var favoriteTabs: [StoredTab] {
-        tabs.filter { $0.tabType == .favorites }
+        return favoriteTabGroups.flatMap { $0.tabRows.flatMap { $0.tabs } }
             .sorted { $0.orderIndex < $1.orderIndex }
     }
     

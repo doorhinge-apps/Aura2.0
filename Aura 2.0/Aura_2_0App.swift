@@ -14,7 +14,7 @@ import SwiftData
 @main
 struct Aura_2_0App: App {
     private let sharedModelContainer: ModelContainer = {
-        let schema = Schema([SpaceData.self])
+        let schema = Schema([SpaceData.self, TabGroup.self, TabRow.self, StoredTab.self])
         return try! ModelContainer(for: schema)
     }()
 

@@ -42,6 +42,7 @@
 		B9B060722E07709E00480CEF /* SpaceToolsBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060712E07709E00480CEF /* SpaceToolsBar.swift */; };
 		B9B060742E07775C00480CEF /* IconsPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060732E07775C00480CEF /* IconsPicker.swift */; };
 		B9B060762E07787400480CEF /* IconsArrayStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060752E07787400480CEF /* IconsArrayStorage.swift */; };
+		B9B060792E07AFBC00480CEF /* TabGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060782E07AFBC00480CEF /* TabGroup.swift */; };
 		B9BB57382DF8CE6F00B7E1E7 /* Aura_2_0App.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BB57332DF8CE6F00B7E1E7 /* Aura_2_0App.swift */; };
 		B9BB57392DF8CE6F00B7E1E7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BB57342DF8CE6F00B7E1E7 /* ContentView.swift */; };
 		B9BB573B2DF8CE6F00B7E1E7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9BB57312DF8CE6F00B7E1E7 /* Assets.xcassets */; };
@@ -107,6 +108,7 @@
 		B9B060712E07709E00480CEF /* SpaceToolsBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpaceToolsBar.swift; sourceTree = "<group>"; };
 		B9B060732E07775C00480CEF /* IconsPicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconsPicker.swift; sourceTree = "<group>"; };
 		B9B060752E07787400480CEF /* IconsArrayStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IconsArrayStorage.swift; sourceTree = "<group>"; };
+		B9B060782E07AFBC00480CEF /* TabGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroup.swift; sourceTree = "<group>"; };
 		B9BB57022DF8CE4500B7E1E7 /* Aura 2.0.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Aura 2.0.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9BB57132DF8CE4700B7E1E7 /* Aura 2.0Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Aura 2.0Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9BB571D2DF8CE4700B7E1E7 /* Aura 2.0UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Aura 2.0UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -381,6 +383,7 @@
 			children = (
 				B9B004F42DF96E4200B79152 /* Spaces */,
 				B9B004E52DF8D16E00B79152 /* StoredTab.swift */,
+				B9B060782E07AFBC00480CEF /* TabGroup.swift */,
 				B9B005062DFA0AF500B79152 /* SplitViewTab.swift */,
 				B9B0050C2DFA71BF00B79152 /* WebMetadata.swift */,
 				B9B004EB2DF8D35A00B79152 /* TabLoadingData.swift */,
@@ -554,6 +557,7 @@
 				B9B060722E07709E00480CEF /* SpaceToolsBar.swift in Sources */,
 				B9B0050B2DFA16CF00B79152 /* ContentContainer.swift in Sources */,
 				B9B004F62DF96E5100B79152 /* SpaceBackgroundType.swift in Sources */,
+				B9B060792E07AFBC00480CEF /* TabGroup.swift in Sources */,
 				B9BB57382DF8CE6F00B7E1E7 /* Aura_2_0App.swift in Sources */,
 				B9B0051F2DFAA2BC00B79152 /* CommandBar.swift in Sources */,
 				B9BB57392DF8CE6F00B7E1E7 /* ContentView.swift in Sources */,
