@@ -45,6 +45,7 @@
 		B9B060792E07AFBC00480CEF /* TabGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060782E07AFBC00480CEF /* TabGroup.swift */; };
 		B9B060822E07BF2E00480CEF /* TabGroupFavoriteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060802E07BF2E00480CEF /* TabGroupFavoriteView.swift */; };
 		B9B060832E07BF2E00480CEF /* TabGroupRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060812E07BF2E00480CEF /* TabGroupRowView.swift */; };
+		B9B060852E07C54600480CEF /* TemporaryTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060842E07C54600480CEF /* TemporaryTabView.swift */; };
 		B9BB57382DF8CE6F00B7E1E7 /* Aura_2_0App.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BB57332DF8CE6F00B7E1E7 /* Aura_2_0App.swift */; };
 		B9BB57392DF8CE6F00B7E1E7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BB57342DF8CE6F00B7E1E7 /* ContentView.swift */; };
 		B9BB573B2DF8CE6F00B7E1E7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9BB57312DF8CE6F00B7E1E7 /* Assets.xcassets */; };
@@ -113,6 +114,7 @@
 		B9B060782E07AFBC00480CEF /* TabGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroup.swift; sourceTree = "<group>"; };
 		B9B060802E07BF2E00480CEF /* TabGroupFavoriteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupFavoriteView.swift; sourceTree = "<group>"; };
 		B9B060812E07BF2E00480CEF /* TabGroupRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupRowView.swift; sourceTree = "<group>"; };
+		B9B060842E07C54600480CEF /* TemporaryTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryTabView.swift; sourceTree = "<group>"; };
 		B9BB57022DF8CE4500B7E1E7 /* Aura 2.0.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Aura 2.0.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9BB57132DF8CE4700B7E1E7 /* Aura 2.0Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Aura 2.0Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9BB571D2DF8CE4700B7E1E7 /* Aura 2.0UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Aura 2.0UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -374,6 +376,7 @@
 			children = (
 				B9BB57342DF8CE6F00B7E1E7 /* ContentView.swift */,
 				B9B0051E2DFAA2BC00B79152 /* CommandBar.swift */,
+				B9B060842E07C54600480CEF /* TemporaryTabView.swift */,
 				B95A80A12DFD4D39007FE1F4 /* Settings */,
 				B95A809C2DFD26AB007FE1F4 /* Sidebar Components */,
 				B95A809F2DFD4021007FE1F4 /* Side Panels */,
@@ -576,6 +579,7 @@
 				B9B0052E2DFC045F00B79152 /* Inspector.swift in Sources */,
 				B9B004F32DF96DC400B79152 /* SpaceData.swift in Sources */,
 				B9D455152E06A69900CB1E24 /* SearchSettings.swift in Sources */,
+				B9B060852E07C54600480CEF /* TemporaryTabView.swift in Sources */,
 				B9B004E82DF8D18200B79152 /* BrowserTab.swift in Sources */,
 				B95A80E12E035199007FE1F4 /* AppearanceSettings.swift in Sources */,
 				B95A80D52E02BAAF007FE1F4 /* GeneralSettings.swift in Sources */,

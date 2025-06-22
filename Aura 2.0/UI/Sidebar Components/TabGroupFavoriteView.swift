@@ -1,6 +1,7 @@
 import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
+import WebKit
 
 struct TabGroupFavoriteView: View {
     var tabGroup: TabGroup
@@ -30,8 +31,14 @@ struct TabGroupFavoriteView: View {
                         // Show multiple favicons for split view
                         HStack(spacing: 2) {
                             ForEach(Array(allTabsInGroup.prefix(4)), id: \.id) { tab in
-                                Favicon(url: tab.url)
-                                    .frame(width: 12, height: 12)
+                                if tab.isTemporary {
+                                    Image(systemName: "globe")
+                                        .frame(width: 12, height: 12)
+                                        .foregroundColor(.gray)
+                                } else {
+                                    Favicon(url: currentTabURLs[tab.id] ?? tab.url)
+                                        .frame(width: 12, height: 12)
+                                }
                             }
                             if allTabsInGroup.count > 4 {
                                 Text("+\(allTabsInGroup.count - 4)")
@@ -42,7 +49,12 @@ struct TabGroupFavoriteView: View {
                     } else {
                         // Show single favicon
                         if let firstTab = firstTab {
-                            Favicon(url: firstTab.url)
+                            if firstTab.isTemporary {
+                                Image(systemName: "globe")
+                                    .foregroundColor(.gray)
+                            } else {
+                                Favicon(url: currentTabURLs[firstTab.id] ?? firstTab.url)
+                            }
                         }
                     }
                 }
@@ -55,12 +67,18 @@ struct TabGroupFavoriteView: View {
                             .font(.caption)
                     } else {
                         if let firstTab = firstTab {
-                            Text(tabsManager.linksWithTitles[firstTab.url] ?? firstTab.url)
-                                .foregroundStyle(Color(hex: space.textColor))
-                                .lineLimit(1)
-                                .onAppear {
-                                    Task { await tabsManager.fetchTitlesIfNeeded(for: [firstTab.url]) }
-                                }
+                            if firstTab.isTemporary {
+                                Text("New Tab")
+                                    .foregroundStyle(Color(hex: space.textColor))
+                                    .lineLimit(1)
+                            } else {
+                                Text(tabsManager.linksWithTitles[currentTabURLs[firstTab.id] ?? firstTab.url] ?? (currentTabURLs[firstTab.id] ?? firstTab.url))
+                                    .foregroundStyle(Color(hex: space.textColor))
+                                    .lineLimit(1)
+                                    .onAppear {
+                                        Task { await tabsManager.fetchTitlesIfNeeded(for: [currentTabURLs[firstTab.id] ?? firstTab.url]) }
+                                    }
+                            }
                         }
                     }
                 }
@@ -95,11 +113,11 @@ struct TabGroupFavoriteView: View {
     }
     
     private var firstTab: StoredTab? {
-        return tabGroup.tabRows.first?.tabs.first
+        return tabGroup.tabRows.first?.tabs.first { !$0.isTemporary }
     }
     
     private var allTabsInGroup: [StoredTab] {
-        return tabGroup.tabRows.flatMap { $0.tabs.sorted { $0.orderIndex < $1.orderIndex } }
+        return tabGroup.tabRows.flatMap { $0.tabs.filter { !$0.isTemporary }.sorted { $0.orderIndex < $1.orderIndex } }
     }
     
     private var isCurrentlySelected: Bool {
@@ -112,6 +130,22 @@ struct TabGroupFavoriteView: View {
         return allTabsInGroup.contains { tab in
             uiViewModel.currentHoverTab?.id == tab.id
         }
+    }
+    
+    private var currentTabURLs: [String: String] {
+        // Use StorageManager's tracked URLs, fall back to stored URLs
+        var urlDict: [String: String] = [:]
+        for row in storageManager.currentTabs {
+            for browserTab in row {
+                if browserTab.storedTab.isTemporary {
+                    urlDict[browserTab.storedTab.id] = browserTab.storedTab.url
+                } else {
+                    // Use tracked URL or fall back to stored URL
+                    urlDict[browserTab.storedTab.id] = storageManager.currentTabURLs[browserTab.storedTab.id] ?? browserTab.storedTab.url
+                }
+            }
+        }
+        return urlDict
     }
     
     // MARK: - Actions

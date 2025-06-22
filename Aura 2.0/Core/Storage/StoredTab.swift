@@ -10,6 +10,7 @@ final class StoredTab {
     var orderIndex: Int
     var tabType: TabType
     var folderName: String?
+    var isTemporary: Bool = false
     
     @Relationship var parentSpace: SpaceData?   // inverse handled above
     
@@ -20,6 +21,7 @@ final class StoredTab {
         orderIndex: Int,
         tabType: TabType,
         folderName: String? = nil,
+        isTemporary: Bool = false,
         parentSpace: SpaceData? = nil
     ) {
         self.id = id
@@ -28,6 +30,7 @@ final class StoredTab {
         self.orderIndex = orderIndex
         self.tabType = tabType
         self.folderName = folderName
+        self.isTemporary = isTemporary
         self.parentSpace = parentSpace
     }
 }

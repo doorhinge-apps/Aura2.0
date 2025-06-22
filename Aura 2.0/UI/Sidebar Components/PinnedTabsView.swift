@@ -6,7 +6,9 @@ struct PinnedTabsView: View {
 
     var body: some View {
         VStack {
-            let orderedGroups = space.pinnedTabGroups.sorted { $0.orderIndex < $1.orderIndex }
+            let orderedGroups = space.pinnedTabGroups
+                .filter { $0.hasNonTemporaryTabs }
+                .sorted { $0.orderIndex < $1.orderIndex }
             ForEach(orderedGroups, id: \.id) { tabGroup in
                 TabGroupRowView(tabGroup: tabGroup, space: space, draggingTabID: $draggingTabID)
             }

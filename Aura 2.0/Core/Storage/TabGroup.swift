@@ -36,6 +36,21 @@ final class TabGroup {
         }
     }
     
+    // Convert to nested array structure excluding temporary tabs
+    var nestedTabsExcludingTemporary: [[StoredTab]] {
+        return tabRows.sorted { $0.rowIndex < $1.rowIndex }.compactMap { row in
+            let nonTempTabs = row.tabs.filter { !$0.isTemporary }.sorted { $0.orderIndex < $1.orderIndex }
+            return nonTempTabs.isEmpty ? nil : nonTempTabs
+        }
+    }
+    
+    // Check if this TabGroup has any non-temporary tabs
+    var hasNonTemporaryTabs: Bool {
+        return tabRows.contains { row in
+            row.tabs.contains { !$0.isTemporary }
+        }
+    }
+    
     // Helper method to add a new row of tabs
     func addTabRow(tabs: [StoredTab]) {
         let newRow = TabRow(

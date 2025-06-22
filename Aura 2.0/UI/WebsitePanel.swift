@@ -49,92 +49,154 @@ struct WebsitePanel: View {
                 VStack {
 //                    Spacer()
 //                        .frame(height: 50)
-                    ForEach(Array(storageManager.currentTabs.enumerated()), id:\.offset) { rowIdx, tabRow in
-                        ZStack {
-                            HStack {
-                                ForEach(Array(tabRow.enumerated()), id:\.element.id) { colIdx, website in
-                                    GeometryReader { geo in
-                                        ZStack {
-                                            WebView(website.page)
-                                                .scrollEdgeEffectDisabled(true)
-                                                .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
-                                                .webViewScrollPosition($scrollPosition)
-                                                .findNavigator(isPresented: $findNavigatorIsPresent)
-                                                .padding(.vertical, 10)
-                                                .frame(height: geo.size.height + 20)
-                                                .shadow(color: Color(.systemBlue).opacity(storageManager.focusedWebsite == [rowIdx, colIdx] ? 0.5: 0.0), radius: 5, x: 0, y: 0)
-                                                .onTapGesture {
-                                                    if storageManager.focusedWebsite != [rowIdx, colIdx] {
-                                                        storageManager.updateFocusedWebsite([rowIdx, colIdx])
+                    ZStack {
+                        ForEach(Array(storageManager.currentTabs.enumerated()), id:\.offset) { rowIdx, tabRow in
+                            ZStack {
+                                HStack {
+                                    ForEach(Array(tabRow.enumerated()), id:\.element.id) { colIdx, website in
+                                        GeometryReader { geo in
+                                            ZStack {
+                                                if website.storedTab.isTemporary {
+                                                    // Show temporary tab view
+                                                    TemporaryTabView(
+                                                        onURLSubmit: { url in
+                                                            storageManager.convertTemporaryTabToPermanent(
+                                                                browserTab: website,
+                                                                newURL: url,
+                                                                modelContext: modelContext
+                                                            )
+                                                        },
+                                                        onClose: {
+                                                            // Handle close for temporary tab
+                                                            storageManager.cleanupTemporaryTabs()
+                                                        }
+                                                    )
+                                                    .shadow(color: Color(.systemBlue).opacity(storageManager.focusedWebsite == [rowIdx, colIdx] ? 0.5: 0.0), radius: 5, x: 0, y: 0)
+                                                    .onTapGesture {
+                                                        if storageManager.focusedWebsite != [rowIdx, colIdx] {
+                                                            storageManager.updateFocusedWebsite([rowIdx, colIdx])
+                                                            storageManager.cleanupTemporaryTabs()
+                                                        }
                                                     }
-                                                }
-                                            
-                                            if presentWebsiteNavigatorIn == [rowIdx, colIdx] {
-                                                let tab = storageManager.currentTabs[rowIdx][colIdx]
-                                                
-                                                VStack {
-                                                    TextField("Search or Enter URL", text: $temporaryEditText)
-                                                        .onSubmit {
-                                                            handleURLSubmission(rowIdx: rowIdx, colIdx: colIdx)
+                                                } else {
+                                                    // Show regular web view
+                                                    WebView(website.page)
+                                                        .scrollEdgeEffectDisabled(true)
+                                                        .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
+                                                        .webViewScrollPosition($scrollPosition)
+                                                        .findNavigator(isPresented: $findNavigatorIsPresent)
+                                                        .padding(.vertical, 10)
+                                                        .frame(height: geo.size.height + 20)
+                                                        .shadow(color: Color(.systemBlue).opacity(storageManager.focusedWebsite == [rowIdx, colIdx] ? 0.5: 0.0), radius: 5, x: 0, y: 0)
+                                                        .onTapGesture {
+                                                            if storageManager.focusedWebsite != [rowIdx, colIdx] {
+                                                                storageManager.updateFocusedWebsite([rowIdx, colIdx])
+                                                                storageManager.cleanupTemporaryTabs()
+                                                            }
                                                         }
                                                 }
+                                                
+                                                if presentWebsiteNavigatorIn == [rowIdx, colIdx] {
+                                                    let tab = storageManager.currentTabs[rowIdx][colIdx]
+                                                    
+                                                    VStack {
+                                                        TextField("Search or Enter URL", text: $temporaryEditText)
+                                                            .onSubmit {
+                                                                handleURLSubmission(rowIdx: rowIdx, colIdx: colIdx)
+                                                            }
+                                                    }
+                                                }
                                             }
-                                        }
-                                        .frame(height: geo.size.height)
-                                        .cornerRadius(10)
-                                        .clipped()
-                                        .onChange(of: website.page.url) { _, newVal in
-                                            if let url = newVal {
-                                                storageManager.updateURL(for: website.id, newURL: url.absoluteString, modelContext: modelContext)
+                                            .frame(height: geo.size.height)
+                                            .cornerRadius(10)
+                                            .clipped()
+                                            .onChange(of: website.page.url) { _, newVal in
+                                                if let url = newVal, !website.storedTab.isTemporary {
+                                                    storageManager.updateURL(for: website.id, newURL: url.absoluteString, modelContext: modelContext)
+                                                }
                                             }
                                         }
                                     }
                                 }
+                                
+                                HStack {
+                                    Spacer()
+                                    Button {
+                                        // Horizontal split - add new tab to current row
+                                        storageManager.addTabToCurrentRow(rowIndex: rowIdx, modelContext: modelContext)
+                                    } label: {
+                                        ZStack {
+                                            Color.blue.opacity(0.001)
+                                                .frame(width: 30)
+                                            
+                                            ZStack {
+                                                Color.white.opacity(1)
+                                                
+                                                Image(systemName: "plus")
+                                                    .resizable()
+                                                    .scaledToFit()
+                                                    .padding(2)
+                                            }.frame(width: 30)
+                                                .cornerRadius(10)
+                                                .shadow(color: Color.black.opacity(0.4), radius: 5, x: 0, y: 0)
+                                                .offset(x: uiViewModel.hoveringID == "horizontalSplit" ? 0: 50)
+                                        }.onHover { hover in
+                                            withAnimation {
+                                                if uiViewModel.hoveringID == "horizontalSplit" {
+                                                    uiViewModel.hoveringID = ""
+                                                }
+                                                else {
+                                                    uiViewModel.hoveringID = "horizontalSplit"
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                }
                             }
+                        }
+                        
+                        /*VStack {
+                            Spacer()
                             
+                            // Vertical split button - add new row
                             HStack {
-                                Spacer()
                                 Button {
-                                    // Horizontal split - add new tab to current row
-                                    storageManager.addTabToCurrentRow(url: "https://google.com", rowIndex: rowIdx, modelContext: modelContext)
+                                    // Vertical split - add new row to current tabs
+                                    storageManager.addNewRowToCurrentTabs(modelContext: modelContext)
                                 } label: {
                                     ZStack {
-                                        Color.white.opacity(1)
+                                        Color.blue.opacity(0.001)
+                                            .frame(height: 30)
                                         
-                                        Image(systemName: "plus")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .padding(2)
-                                    }.frame(width: 30)
+                                        ZStack {
+                                            Color.white.opacity(1)
+                                            
+                                            Image(systemName: "plus")
+                                                .resizable()
+                                                .scaledToFit()
+                                                .padding(2)
+                                        }
+                                        .frame(height: 30)
                                         .cornerRadius(10)
                                         .shadow(color: Color.black.opacity(0.4), radius: 5, x: 0, y: 0)
+                                        .offset(y: uiViewModel.hoveringID == "verticalSplit" ? 0: 50)
+                                    }
+                                }.onHover { hover in
+                                    withAnimation {
+                                        if uiViewModel.hoveringID == "verticalSplit" {
+                                            uiViewModel.hoveringID = ""
+                                        }
+                                        else {
+                                            uiViewModel.hoveringID = "verticalSplit"
+                                        }
+                                    }
                                 }
-
                             }
-                        }
+//                            .padding(.horizontal, 10)
+//                            .padding(.bottom, 10)
+                        }*/
                     }
-                    
-                    // Vertical split button - add new row
-                    HStack {
-                        Button {
-                            // Vertical split - add new row to current tabs
-                            storageManager.addNewRowToCurrentTabs(url: "https://google.com", modelContext: modelContext)
-                        } label: {
-                            ZStack {
-                                Color.white.opacity(1)
-                                
-                                Image(systemName: "plus")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .padding(2)
-                            }
-                            .frame(height: 30)
-                            .cornerRadius(10)
-                            .shadow(color: Color.black.opacity(0.4), radius: 5, x: 0, y: 0)
-                        }
-                    }
-                    .padding(.horizontal, 10)
-                    .padding(.bottom, 10)
                 }
             }
         }.scrollEdgeEffectDisabled(true)

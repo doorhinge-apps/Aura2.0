@@ -64,6 +64,9 @@ class StorageManager: ObservableObject {
     // Focus state for website panel - [rowIndex, columnIndex]
     @Published var focusedWebsite: [Int] = []
     
+    // Track current URLs for real-time sidebar updates
+    @Published var currentTabURLs: [String: String] = [:]
+    
     
 //    @Published var currentTabs: [[BrowserTab]] = [
 //        BrowserTab(lastActiveTime: Date.now, tabType: .primary, page: <#T##WebPage#>, storedTab: StoredTab(timestamp: Date.now, url: "https://apple.com", tabType: .primary))
@@ -109,6 +112,9 @@ class StorageManager: ObservableObject {
         
         // Set focus to the selected tab
         setFocusToTab(tabObject: tabObject)
+        
+        // Initialize URL tracking for all current tabs
+        updateURLTracking()
     }
     
     /// Load a TabGroup and convert it to [[BrowserTab]] structure
@@ -237,6 +243,9 @@ class StorageManager: ObservableObject {
         
         appendAndRemove(addingTab: createdTab)
         
+        // Initialize URL tracking
+        currentTabURLs[storedTabObject.id] = formattedURL
+        
         return storedTabObject
     }
     
@@ -334,8 +343,87 @@ class StorageManager: ObservableObject {
             selectedSpace = newSpace
         } else {
             selectedSpace = spaces.first
+            // Clean up any temporary tabs from previous session
+            cleanupTemporaryTabsFromDatabase(modelContext: modelContext)
             // Migrate legacy tabs to TabGroups if needed
             migrateLegacyTabsToGroups(modelContext: modelContext)
+        }
+    }
+    
+    /// Clean up any temporary tabs that may have been accidentally persisted
+    private func cleanupTemporaryTabsFromDatabase(modelContext: ModelContext) {
+        guard let space = selectedSpace else { return }
+        
+        // Remove temporary tabs from legacy tabs array
+        let temporaryTabs = space.tabs.filter { $0.isTemporary }
+        for tempTab in temporaryTabs {
+            if let index = space.tabs.firstIndex(where: { $0.id == tempTab.id }) {
+                space.tabs.remove(at: index)
+            }
+            modelContext.delete(tempTab)
+        }
+        
+        // Clean up TabGroups containing temporary tabs
+        cleanupTemporaryTabGroups(space: space, modelContext: modelContext)
+        
+        if !temporaryTabs.isEmpty {
+            try? modelContext.save()
+            print("Cleaned up \(temporaryTabs.count) temporary tabs from database")
+        }
+    }
+    
+    /// Remove TabGroups that contain only temporary tabs
+    private func cleanupTemporaryTabGroups(space: SpaceData, modelContext: ModelContext) {
+        let allTabGroups = space.primaryTabGroups + space.pinnedTabGroups + space.favoriteTabGroups
+        var groupsToRemove: [TabGroup] = []
+        
+        for tabGroup in allTabGroups {
+            var hasNonTemporaryTabs = false
+            var temporaryTabsToRemove: [StoredTab] = []
+            
+            for row in tabGroup.tabRows {
+                let nonTempTabs = row.tabs.filter { !$0.isTemporary }
+                let tempTabs = row.tabs.filter { $0.isTemporary }
+                
+                if !nonTempTabs.isEmpty {
+                    hasNonTemporaryTabs = true
+                }
+                
+                // Collect temporary tabs for removal
+                temporaryTabsToRemove.append(contentsOf: tempTabs)
+            }
+            
+            // Remove temporary tabs from rows
+            for tempTab in temporaryTabsToRemove {
+                for row in tabGroup.tabRows {
+                    if let index = row.tabs.firstIndex(where: { $0.id == tempTab.id }) {
+                        row.tabs.remove(at: index)
+                    }
+                }
+                modelContext.delete(tempTab)
+            }
+            
+            // Remove empty rows
+            tabGroup.tabRows.removeAll { $0.tabs.isEmpty }
+            
+            // If the group has no non-temporary tabs, mark it for removal
+            if !hasNonTemporaryTabs || tabGroup.tabRows.isEmpty {
+                groupsToRemove.append(tabGroup)
+            }
+        }
+        
+        // Remove empty TabGroups
+        for group in groupsToRemove {
+            if let index = space.primaryTabGroups.firstIndex(where: { $0.id == group.id }) {
+                space.primaryTabGroups.remove(at: index)
+            }
+            if let index = space.pinnedTabGroups.firstIndex(where: { $0.id == group.id }) {
+                space.pinnedTabGroups.remove(at: index)
+            }
+            if let index = space.favoriteTabGroups.firstIndex(where: { $0.id == group.id }) {
+                space.favoriteTabGroups.remove(at: index)
+            }
+            modelContext.delete(group)
         }
     }
     
@@ -343,9 +431,9 @@ class StorageManager: ObservableObject {
     private func migrateLegacyTabsToGroups(modelContext: ModelContext) {
         guard let space = selectedSpace else { return }
         
-        // Check if we have legacy tabs that aren't in TabGroups
+        // Check if we have legacy tabs that aren't in TabGroups (exclude temporary tabs)
         let legacyTabs = space.tabs.filter { tab in
-            findTabGroup(containingTabId: tab.id, space: space) == nil
+            !tab.isTemporary && findTabGroup(containingTabId: tab.id, space: space) == nil
         }
         
         if !legacyTabs.isEmpty {
@@ -389,25 +477,41 @@ class StorageManager: ObservableObject {
     /// Update a tab's URL across all in-memory representations and persist the change.
     @MainActor
     func updateURL(for tabID: UUID, newURL: String, modelContext: ModelContext) {
+        var storedTabID: String? = nil
+        
         // Update currently displayed tabs
         for rowIdx in currentTabs.indices {
             for colIdx in currentTabs[rowIdx].indices where currentTabs[rowIdx][colIdx].id == tabID {
                 currentTabs[rowIdx][colIdx].storedTab.url = newURL
+                currentTabs[rowIdx][colIdx].storedTab.timestamp = Date.now
+                storedTabID = currentTabs[rowIdx][colIdx].storedTab.id
             }
         }
 
         // Update any preloaded tabs
         for idx in loadedTabs.indices where loadedTabs[idx].id == tabID {
             loadedTabs[idx].storedTab.url = newURL
+            loadedTabs[idx].storedTab.timestamp = Date.now
+            storedTabID = loadedTabs[idx].storedTab.id
         }
 
         // Update tabs stored in split view containers
-        let storedID = currentTabs.flatMap { $0 }.first(where: { $0.id == tabID })?.storedTab.id
-        for idx in splitViewTabs.indices where splitViewTabs[idx].mainTab.id == storedID {
+        if storedTabID == nil {
+            storedTabID = currentTabs.flatMap { $0 }.first(where: { $0.id == tabID })?.storedTab.id
+        }
+        for idx in splitViewTabs.indices where splitViewTabs[idx].mainTab.id == storedTabID {
             splitViewTabs[idx].mainTab.url = newURL
+        }
+        
+        // Update the URL tracking dictionary
+        if let storedID = storedTabID {
+            currentTabURLs[storedID] = newURL
         }
 
         try? modelContext.save()
+        
+        // Trigger UI update to refresh sidebar
+        objectWillChange.send()
     }
     
     @MainActor
@@ -498,17 +602,22 @@ class StorageManager: ObservableObject {
     }
     
     /// Add a new tab to the current row (horizontal split)
-    func addTabToCurrentRow(url: String, rowIndex: Int, modelContext: ModelContext) {
+    func addTabToCurrentRow(url: String = "temp://new-tab", rowIndex: Int, modelContext: ModelContext) {
         guard rowIndex < currentTabs.count,
               let space = selectedSpace else { return }
         
-        let page = WebPage()
-        var request = URLRequest(url: URL(string: url)!)
-        request.attribution = .user
-        page.load(request)
-        
         // Get the tab type from the current tab in this row
         let currentTabType = currentTabs[rowIndex].first?.tabType ?? .primary
+        
+        let isTemporary = url == "temp://new-tab"
+        let page = WebPage()
+        
+        // Only load web content for non-temporary tabs
+        if !isTemporary {
+            var request = URLRequest(url: URL(string: url)!)
+            request.attribution = .user
+            page.load(request)
+        }
         
         let storedTab = StoredTab(
             id: createStoredTabID(url: url),
@@ -516,6 +625,7 @@ class StorageManager: ObservableObject {
             url: url,
             orderIndex: currentTabs[rowIndex].count,
             tabType: currentTabType,
+            isTemporary: isTemporary,
             parentSpace: space
         )
         
@@ -529,37 +639,50 @@ class StorageManager: ObservableObject {
         // Add to current tabs
         currentTabs[rowIndex].append(browserTab)
         
-        // Find the TabGroup that contains the current tab and add to the correct row
-        let currentTabId = currentTabs[rowIndex].first?.storedTab.id ?? ""
-        if let tabGroup = findTabGroup(containingTabId: currentTabId, space: space) {
-            // Add to the same row as the existing tab
-            if let targetRow = tabGroup.tabRows.first(where: { row in
-                row.tabs.contains { $0.id == currentTabId }
-            }) {
-                targetRow.tabs.append(storedTab)
+        // Only add to persistent storage if not temporary
+        if !isTemporary {
+            // Find the TabGroup that contains the current tab and add to the correct row
+            let currentTabId = currentTabs[rowIndex].first?.storedTab.id ?? ""
+            if let tabGroup = findTabGroup(containingTabId: currentTabId, space: space) {
+                // Add to the same row as the existing tab
+                if let targetRow = tabGroup.tabRows.first(where: { row in
+                    row.tabs.contains { $0.id == currentTabId }
+                }) {
+                    targetRow.tabs.append(storedTab)
+                }
             }
+            
+            modelContext.insert(storedTab)
+            space.tabs.append(storedTab)
+            
+            try? modelContext.save()
         }
-        
-        modelContext.insert(storedTab)
-        space.tabs.append(storedTab)
-        
-        try? modelContext.save()
         
         // Set focus to the new tab
         focusedWebsite = [rowIndex, currentTabs[rowIndex].count - 1]
+        
+        // Update URL tracking for non-temporary tabs
+        if !isTemporary {
+            currentTabURLs[storedTab.id] = url
+        }
     }
     
     /// Add a new row to current tabs (vertical split)
-    func addNewRowToCurrentTabs(url: String, modelContext: ModelContext) {
+    func addNewRowToCurrentTabs(url: String = "temp://new-tab", modelContext: ModelContext) {
         guard let space = selectedSpace else { return }
-        
-        let page = WebPage()
-        var request = URLRequest(url: URL(string: url)!)
-        request.attribution = .user
-        page.load(request)
         
         // Get tab type from current context - use the type of the currently selected tab
         let currentTabType = getFocusedTab()?.tabType ?? .primary
+        
+        let isTemporary = url == "temp://new-tab"
+        let page = WebPage()
+        
+        // Only load web content for non-temporary tabs
+        if !isTemporary {
+            var request = URLRequest(url: URL(string: url)!)
+            request.attribution = .user
+            page.load(request)
+        }
         
         let storedTab = StoredTab(
             id: createStoredTabID(url: url),
@@ -567,6 +690,7 @@ class StorageManager: ObservableObject {
             url: url,
             orderIndex: 0,
             tabType: currentTabType,
+            isTemporary: isTemporary,
             parentSpace: space
         )
         
@@ -580,32 +704,166 @@ class StorageManager: ObservableObject {
         // Add new row to current tabs
         currentTabs.append([browserTab])
         
-        // Find the TabGroup that we're currently viewing and add a new row to it
-        let currentTabId = getFocusedTab()?.storedTab.id ?? currentTabs.first?.first?.storedTab.id ?? ""
-        if let tabGroup = findTabGroup(containingTabId: currentTabId, space: space) {
-            // Add a new row to the existing TabGroup
-            tabGroup.addTabRow(tabs: [storedTab])
+        // Only add to persistent storage if not temporary
+        if !isTemporary {
+            // Find the TabGroup that we're currently viewing and add a new row to it
+            let currentTabId = getFocusedTab()?.storedTab.id ?? currentTabs.first?.first?.storedTab.id ?? ""
+            if let tabGroup = findTabGroup(containingTabId: currentTabId, space: space) {
+                // Add a new row to the existing TabGroup
+                tabGroup.addTabRow(tabs: [storedTab])
+            } else {
+                // Create new TabGroup if none found (fallback)
+                let tabGroup = TabGroup(
+                    timestamp: Date.now,
+                    tabType: currentTabType,
+                    orderIndex: getTabGroups(for: currentTabType, in: space).count,
+                    parentSpace: space
+                )
+                tabGroup.addTab(storedTab)
+                
+                modelContext.insert(tabGroup)
+                addTabGroupToSpace(tabGroup: tabGroup, space: space)
+            }
+            
+            modelContext.insert(storedTab)
+            space.tabs.append(storedTab)
+            
+            try? modelContext.save()
+        }
+        
+        // Set focus to the new tab
+        focusedWebsite = [currentTabs.count - 1, 0]
+        
+        // Update URL tracking for non-temporary tabs
+        if !isTemporary {
+            currentTabURLs[storedTab.id] = url
+        }
+    }
+    
+    /// Convert a temporary tab to a permanent tab with a real URL
+    func convertTemporaryTabToPermanent(browserTab: BrowserTab, newURL: String, modelContext: ModelContext) {
+        guard browserTab.storedTab.isTemporary,
+              let space = selectedSpace else { return }
+        
+        // Update the stored tab
+        browserTab.storedTab.url = newURL
+        browserTab.storedTab.isTemporary = false
+        browserTab.storedTab.timestamp = Date.now
+        
+        // Load the web page
+        var request = URLRequest(url: URL(string: newURL)!)
+        request.attribution = .user
+        browserTab.page.load(request)
+        
+        // Find the position of this tab in currentTabs
+        guard let (rowIndex, colIndex) = findTabPosition(browserTab: browserTab) else { return }
+        
+        // Find or create a TabGroup for this tab
+        let currentTabInRow = currentTabs[rowIndex].first(where: { !$0.storedTab.isTemporary })
+        
+        if let existingTab = currentTabInRow,
+           let tabGroup = findTabGroup(containingTabId: existingTab.storedTab.id, space: space) {
+            // Add to existing TabGroup
+            if rowIndex < tabGroup.tabRows.count {
+                // Add to existing row
+                tabGroup.tabRows[rowIndex].tabs.append(browserTab.storedTab)
+            } else {
+                // Add new row to existing group
+                tabGroup.addTabRow(tabs: [browserTab.storedTab])
+            }
         } else {
-            // Create new TabGroup if none found (fallback)
+            // Create new TabGroup
             let tabGroup = TabGroup(
                 timestamp: Date.now,
-                tabType: currentTabType,
-                orderIndex: getTabGroups(for: currentTabType, in: space).count,
+                tabType: browserTab.tabType,
+                orderIndex: getTabGroups(for: browserTab.tabType, in: space).count,
                 parentSpace: space
             )
-            tabGroup.addTab(storedTab)
+            
+            // Only add the converted tab to the new group (don't include other temporary tabs)
+            tabGroup.addTab(browserTab.storedTab)
             
             modelContext.insert(tabGroup)
             addTabGroupToSpace(tabGroup: tabGroup, space: space)
         }
         
-        modelContext.insert(storedTab)
-        space.tabs.append(storedTab)
+        // Ensure the tab is inserted if not already
+        if !space.tabs.contains(where: { $0.id == browserTab.storedTab.id }) {
+            modelContext.insert(browserTab.storedTab)
+            space.tabs.append(browserTab.storedTab)
+        }
         
         try? modelContext.save()
         
-        // Set focus to the new tab
-        focusedWebsite = [currentTabs.count - 1, 0]
+        // Update URL tracking
+        currentTabURLs[browserTab.storedTab.id] = newURL
+        
+        // Trigger UI update
+        objectWillChange.send()
+    }
+    
+    /// Find the position of a browser tab in currentTabs
+    private func findTabPosition(browserTab: BrowserTab) -> (Int, Int)? {
+        for (rowIndex, row) in currentTabs.enumerated() {
+            for (colIndex, tab) in row.enumerated() {
+                if tab.id == browserTab.id {
+                    return (rowIndex, colIndex)
+                }
+            }
+        }
+        return nil
+    }
+    
+    /// Remove temporary tabs when focus changes away from them
+    func cleanupTemporaryTabs() {
+        var indicesToRemove: [(Int, Int)] = []
+        
+        for (rowIndex, row) in currentTabs.enumerated() {
+            for (colIndex, browserTab) in row.enumerated() {
+                if browserTab.storedTab.isTemporary {
+                    // Don't remove the currently focused tab
+                    if focusedWebsite.count == 2 && 
+                       focusedWebsite[0] == rowIndex && 
+                       focusedWebsite[1] == colIndex {
+                        continue
+                    }
+                    indicesToRemove.append((rowIndex, colIndex))
+                }
+            }
+        }
+        
+        // Remove tabs in reverse order to maintain indices
+        for (rowIndex, colIndex) in indicesToRemove.reversed() {
+            if rowIndex < currentTabs.count && colIndex < currentTabs[rowIndex].count {
+                currentTabs[rowIndex].remove(at: colIndex)
+                
+                // Remove empty rows
+                if currentTabs[rowIndex].isEmpty {
+                    currentTabs.remove(at: rowIndex)
+                    
+                    // Adjust focus if needed
+                    if focusedWebsite.count == 2 && focusedWebsite[0] > rowIndex {
+                        focusedWebsite[0] -= 1
+                    }
+                }
+            }
+        }
+    }
+    
+    /// Update URL tracking dictionary with current tab URLs
+    private func updateURLTracking() {
+        currentTabURLs.removeAll()
+        for row in currentTabs {
+            for browserTab in row {
+                if !browserTab.storedTab.isTemporary {
+                    if let pageURL = browserTab.page.url?.absoluteString {
+                        currentTabURLs[browserTab.storedTab.id] = pageURL
+                    } else {
+                        currentTabURLs[browserTab.storedTab.id] = browserTab.storedTab.url
+                    }
+                }
+            }
+        }
     }
     
     /// Get the currently focused tab if valid

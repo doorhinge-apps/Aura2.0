@@ -56,5 +56,10 @@ class TabsManager: ObservableObject {
             }
         }
     }
+    
+    @MainActor
+    func clearCachedTitle(for url: String) {
+        linksWithTitles.removeValue(forKey: url)
+    }
 }
 
