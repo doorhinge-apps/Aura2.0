@@ -11,6 +11,7 @@ final class SpaceData {
     var spaceBackgroundColors: [String] = []
     var textColor: String = "#ffffff"
     var adaptiveTheme: Bool = false
+    var spaceOrder: Int?
     
     // Legacy tabs relationship - keeping for migration
     @Relationship(deleteRule: .cascade, inverse: \StoredTab.parentSpace)
