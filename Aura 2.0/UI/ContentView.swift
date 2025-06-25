@@ -46,6 +46,7 @@ struct ContentView: View {
                             startPoint: .bottomLeading,
                             endPoint: .topTrailing
                         ).ignoresSafeArea()
+                            .animation(.default)
                     }
                     
                     HStack(spacing: 0) {

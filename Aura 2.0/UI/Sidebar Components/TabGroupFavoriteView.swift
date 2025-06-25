@@ -108,16 +108,18 @@ struct TabGroupFavoriteView: View {
     // MARK: - Computed Properties
     
     private var isSplitView: Bool {
-        let totalTabs = tabGroup.tabRows.reduce(0) { $0 + $1.tabs.count }
-        return totalTabs > 1 || tabGroup.tabRows.count > 1
+        let totalTabs = (tabGroup.tabRows ?? []).reduce(0) { $0 + ($1.tabs ?? []).count }
+        return totalTabs > 1 || (tabGroup.tabRows ?? []).count > 1
     }
-    
+
     private var firstTab: StoredTab? {
-        return tabGroup.tabRows.first?.tabs.first { !$0.isTemporary }
+        return (tabGroup.tabRows ?? []).first?.tabs?.first { !$0.isTemporary }
     }
-    
+
     private var allTabsInGroup: [StoredTab] {
-        return tabGroup.tabRows.flatMap { $0.tabs.filter { !$0.isTemporary }.sorted { $0.orderIndex < $1.orderIndex } }
+        return (tabGroup.tabRows ?? []).flatMap {
+            ($0.tabs ?? []).filter { !$0.isTemporary }.sorted { $0.orderIndex < $1.orderIndex }
+        }
     }
     
     private var isCurrentlySelected: Bool {

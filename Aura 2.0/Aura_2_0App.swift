@@ -15,7 +15,16 @@ import SwiftData
 struct Aura_2_0App: App {
     private let sharedModelContainer: ModelContainer = {
         let schema = Schema([SpaceData.self, TabGroup.self, TabRow.self, StoredTab.self])
-        return try! ModelContainer(for: schema)
+        
+        let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
+        
+//        return try! ModelContainer(for: schema)
+        do {
+            var container = try ModelContainer(for: schema, configurations: [modelConfiguration])
+            return container
+        } catch {
+            fatalError("Could not create ModelContainer: \(error)")
+        }
     }()
 
     var body: some Scene {
@@ -34,7 +43,8 @@ struct Aura_2_0App: App {
                 .focusedSceneObject(storageManager)
                 .focusedSceneObject(uiViewModel)
         }
-        .modelContainer(sharedModelContainer)
+        .modelContainer(for: [SpaceData.self, TabGroup.self, TabRow.self, StoredTab.self], inMemory: false, isAutosaveEnabled: true, isUndoEnabled: true)
+//        .modelContainer(sharedModelContainer)
 //        .commands { SceneCommands() }
         .commands {
             CommandsBridge()

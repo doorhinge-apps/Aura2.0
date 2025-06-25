@@ -7,32 +7,12 @@
 // Copyright ©2025 DoorHinge Apps.
 //
 
-
 import SwiftUI
 import Combine
 import WebKit
 import SwiftData
 
 class StorageManager: ObservableObject {
-//    @Published var currentTabs: [[BrowserTab]]
-//    init() {
-//        self.currentTabs = []
-//
-//        self.currentTabs.append([
-//            makeTab(url: "https://apple.com"),
-//            makeTab(url: "https://figma.com")
-//        ])
-//
-//        self.currentTabs.append([
-//            makeTab(url: "https://arc.net"),
-//            makeTab(url: "https://google.com"),
-//            makeTab(url: "https://thebrowser.company")
-//        ])
-//
-//        self.currentTabs.append([
-//            makeTab(url: "https://doorhingeapps.com")
-//        ])
-//    }
     
     private func makeTab(url: String) -> BrowserTab {
             let page = WebPage()
@@ -44,8 +24,8 @@ class StorageManager: ObservableObject {
                                timestamp: .now,
                                url: url,
                                orderIndex: 0,
-                               tabType: .primary)
-            let tab = BrowserTab(lastActiveTime: .now, tabType: .primary, page: page, storedTab: stored)
+                               tabType: TabType.primary)
+            let tab = BrowserTab(lastActiveTime: .now, tabType: TabType.primary, page: page, storedTab: stored)
             return tab
         }
     
@@ -66,11 +46,6 @@ class StorageManager: ObservableObject {
     
     // Track current URLs for real-time sidebar updates
     @Published var currentTabURLs: [String: String] = [:]
-    
-    
-//    @Published var currentTabs: [[BrowserTab]] = [
-//        BrowserTab(lastActiveTime: Date.now, tabType: .primary, page: <#T##WebPage#>, storedTab: StoredTab(timestamp: Date.now, url: "https://apple.com", tabType: .primary))
-//    ]
     
     @Published var splitViewTabs: [SplitViewTab] = []
     
@@ -121,10 +96,12 @@ class StorageManager: ObservableObject {
     private func loadTabGroupAsCurrentTabs(tabGroup: TabGroup) async -> [[BrowserTab]] {
         var result: [[BrowserTab]] = []
         
-        for row in tabGroup.tabRows.sorted(by: { $0.rowIndex < $1.rowIndex }) {
+        let tabRows = (tabGroup.tabRows ?? []).sorted(by: { $0.rowIndex < $1.rowIndex })
+        for row in tabRows {
             var browserRow: [BrowserTab] = []
             
-            for storedTab in row.tabs.sorted(by: { $0.orderIndex < $1.orderIndex }) {
+            let tabs = (row.tabs ?? []).sorted(by: { $0.orderIndex < $1.orderIndex })
+            for storedTab in tabs {
                 // Check if we already have this tab loaded
                 if let existingTab = loadedTabs.first(where: { $0.storedTab.id == storedTab.id }) {
                     browserRow.append(existingTab)
@@ -207,13 +184,13 @@ class StorageManager: ObservableObject {
         request.attribution = .user
         page.load(request)
         
-        let newOrder = space.primaryTabGroups.count
+        let newOrder = (space.primaryTabGroups ?? []).count
         let storedTabObject = StoredTab(
             id: createStoredTabID(url: formattedURL),
             timestamp: Date.now,
             url: formattedURL,
             orderIndex: 0, // First tab in its group
-            tabType: .primary,
+            tabType: TabType.primary,
             parentSpace: space
         )
         print("Created tab \(storedTabObject.id) with orderIndex \(newOrder)")
@@ -221,7 +198,7 @@ class StorageManager: ObservableObject {
         // Create a new TabGroup for this single tab
         let tabGroup = TabGroup(
             timestamp: Date.now,
-            tabType: .primary,
+            tabType: TabType.primary,
             orderIndex: newOrder,
             parentSpace: space
         )
@@ -232,12 +209,21 @@ class StorageManager: ObservableObject {
         // Insert models and update relationships
         modelContext.insert(storedTabObject)
         modelContext.insert(tabGroup)
-        space.primaryTabGroups.append(tabGroup)
-        space.tabs.append(storedTabObject) // Keep legacy relationship for migration
+        
+        // Safely append to optional arrays
+        if space.primaryTabGroups == nil {
+            space.primaryTabGroups = []
+        }
+        space.primaryTabGroups?.append(tabGroup)
+        
+        if space.tabs == nil {
+            space.tabs = []
+        }
+        space.tabs?.append(storedTabObject) // Keep legacy relationship for migration
         
         try? modelContext.save()
         
-        let createdTab = BrowserTab(lastActiveTime: Date.now, tabType: .primary, page: page, storedTab: storedTabObject)
+        let createdTab = BrowserTab(lastActiveTime: Date.now, tabType: TabType.primary, page: page, storedTab: storedTabObject)
 
         currentTabs = [[createdTab]]
         
@@ -254,34 +240,43 @@ class StorageManager: ObservableObject {
         
         switch tabType {
         case .primary:
-            return closeTabFromGroups(tabObject: tabObject, groups: &space.primaryTabGroups, space: space)
+            return closeTabFromGroups(tabObject: tabObject, groups: space.primaryTabGroups ?? [], space: space)
         case .pinned:
-            return closeTabFromGroups(tabObject: tabObject, groups: &space.pinnedTabGroups, space: space)
+            return closeTabFromGroups(tabObject: tabObject, groups: space.pinnedTabGroups ?? [], space: space)
         case .favorites:
-            return closeTabFromGroups(tabObject: tabObject, groups: &space.favoriteTabGroups, space: space)
+            return closeTabFromGroups(tabObject: tabObject, groups: space.favoriteTabGroups ?? [], space: space)
         }
     }
     
-    private func closeTabFromGroups(tabObject: StoredTab, groups: inout [TabGroup], space: SpaceData) -> StoredTab? {
+    private func closeTabFromGroups(tabObject: StoredTab, groups: [TabGroup], space: SpaceData) -> StoredTab? {
         // Find the group containing this tab
         for (groupIndex, group) in groups.enumerated() {
-            for (rowIndex, row) in group.tabRows.enumerated() {
-                if let tabIndex = row.tabs.firstIndex(where: { $0.id == tabObject.id }) {
+            let tabRows = group.tabRows ?? []
+            for (rowIndex, row) in tabRows.enumerated() {
+                if let tabIndex = (row.tabs ?? []).firstIndex(where: { $0.id == tabObject.id }) {
                     // Remove the tab from its row
-                    row.tabs.remove(at: tabIndex)
+                    row.tabs?.remove(at: tabIndex)
                     
                     // Clean up empty rows and groups
-                    if row.tabs.isEmpty {
-                        group.tabRows.remove(at: rowIndex)
+                    if row.tabs?.isEmpty ?? true {
+                        group.tabRows?.remove(at: rowIndex)
                     }
                     
-                    if group.tabRows.isEmpty {
-                        groups.remove(at: groupIndex)
+                    if group.tabRows?.isEmpty ?? true {
+                        // Remove from appropriate space array
+                        switch tabObject.tabType {
+                        case .primary:
+                            space.primaryTabGroups?.remove(at: groupIndex)
+                        case .pinned:
+                            space.pinnedTabGroups?.remove(at: groupIndex)
+                        case .favorites:
+                            space.favoriteTabGroups?.remove(at: groupIndex)
+                        }
                     }
                     
                     // Remove from legacy tabs array
-                    if let legacyIndex = space.tabs.firstIndex(where: { $0.id == tabObject.id }) {
-                        space.tabs.remove(at: legacyIndex)
+                    if let legacyIndex = (space.tabs ?? []).firstIndex(where: { $0.id == tabObject.id }) {
+                        space.tabs?.remove(at: legacyIndex)
                     }
                     
                     // Find replacement tab
@@ -305,15 +300,15 @@ class StorageManager: ObservableObject {
         let nextIndex = removedGroupIndex
         let prevIndex = removedGroupIndex - 1
         
-        if groups.indices.contains(nextIndex), 
-           let firstRow = groups[nextIndex].tabRows.first,
-           let firstTab = firstRow.tabs.first {
+        if groups.indices.contains(nextIndex),
+           let firstRow = groups[nextIndex].tabRows?.first,
+           let firstTab = firstRow.tabs?.first {
             return firstTab
         }
         
         if groups.indices.contains(prevIndex),
-           let firstRow = groups[prevIndex].tabRows.first,
-           let firstTab = firstRow.tabs.first {
+           let firstRow = groups[prevIndex].tabRows?.first,
+           let firstTab = firstRow.tabs?.first {
             return firstTab
         }
         
@@ -355,10 +350,10 @@ class StorageManager: ObservableObject {
         guard let space = selectedSpace else { return }
         
         // Remove temporary tabs from legacy tabs array
-        let temporaryTabs = space.tabs.filter { $0.isTemporary }
+        let temporaryTabs = (space.tabs ?? []).filter { $0.isTemporary }
         for tempTab in temporaryTabs {
-            if let index = space.tabs.firstIndex(where: { $0.id == tempTab.id }) {
-                space.tabs.remove(at: index)
+            if let index = (space.tabs ?? []).firstIndex(where: { $0.id == tempTab.id }) {
+                space.tabs?.remove(at: index)
             }
             modelContext.delete(tempTab)
         }
@@ -374,16 +369,19 @@ class StorageManager: ObservableObject {
     
     /// Remove TabGroups that contain only temporary tabs
     private func cleanupTemporaryTabGroups(space: SpaceData, modelContext: ModelContext) {
-        let allTabGroups = space.primaryTabGroups + space.pinnedTabGroups + space.favoriteTabGroups
+        let primaryGroups = space.primaryTabGroups ?? []
+        let pinnedGroups = space.pinnedTabGroups ?? []
+        let favoriteGroups = space.favoriteTabGroups ?? []
+        let allTabGroups = primaryGroups + pinnedGroups + favoriteGroups
         var groupsToRemove: [TabGroup] = []
         
         for tabGroup in allTabGroups {
             var hasNonTemporaryTabs = false
             var temporaryTabsToRemove: [StoredTab] = []
             
-            for row in tabGroup.tabRows {
-                let nonTempTabs = row.tabs.filter { !$0.isTemporary }
-                let tempTabs = row.tabs.filter { $0.isTemporary }
+            for row in (tabGroup.tabRows ?? []) {
+                let nonTempTabs = (row.tabs ?? []).filter { !$0.isTemporary }
+                let tempTabs = (row.tabs ?? []).filter { $0.isTemporary }
                 
                 if !nonTempTabs.isEmpty {
                     hasNonTemporaryTabs = true
@@ -395,33 +393,33 @@ class StorageManager: ObservableObject {
             
             // Remove temporary tabs from rows
             for tempTab in temporaryTabsToRemove {
-                for row in tabGroup.tabRows {
-                    if let index = row.tabs.firstIndex(where: { $0.id == tempTab.id }) {
-                        row.tabs.remove(at: index)
+                for row in (tabGroup.tabRows ?? []) {
+                    if let index = (row.tabs ?? []).firstIndex(where: { $0.id == tempTab.id }) {
+                        row.tabs?.remove(at: index)
                     }
                 }
                 modelContext.delete(tempTab)
             }
             
             // Remove empty rows
-            tabGroup.tabRows.removeAll { $0.tabs.isEmpty }
+            tabGroup.tabRows?.removeAll { ($0.tabs ?? []).isEmpty }
             
             // If the group has no non-temporary tabs, mark it for removal
-            if !hasNonTemporaryTabs || tabGroup.tabRows.isEmpty {
+            if !hasNonTemporaryTabs || (tabGroup.tabRows ?? []).isEmpty {
                 groupsToRemove.append(tabGroup)
             }
         }
         
         // Remove empty TabGroups
         for group in groupsToRemove {
-            if let index = space.primaryTabGroups.firstIndex(where: { $0.id == group.id }) {
-                space.primaryTabGroups.remove(at: index)
+            if let index = (space.primaryTabGroups ?? []).firstIndex(where: { $0.id == group.id }) {
+                space.primaryTabGroups?.remove(at: index)
             }
-            if let index = space.pinnedTabGroups.firstIndex(where: { $0.id == group.id }) {
-                space.pinnedTabGroups.remove(at: index)
+            if let index = (space.pinnedTabGroups ?? []).firstIndex(where: { $0.id == group.id }) {
+                space.pinnedTabGroups?.remove(at: index)
             }
-            if let index = space.favoriteTabGroups.firstIndex(where: { $0.id == group.id }) {
-                space.favoriteTabGroups.remove(at: index)
+            if let index = (space.favoriteTabGroups ?? []).firstIndex(where: { $0.id == group.id }) {
+                space.favoriteTabGroups?.remove(at: index)
             }
             modelContext.delete(group)
         }
@@ -432,7 +430,7 @@ class StorageManager: ObservableObject {
         guard let space = selectedSpace else { return }
         
         // Check if we have legacy tabs that aren't in TabGroups (exclude temporary tabs)
-        let legacyTabs = space.tabs.filter { tab in
+        let legacyTabs = (space.tabs ?? []).filter { tab in
             !tab.isTemporary && findTabGroup(containingTabId: tab.id, space: space) == nil
         }
         
@@ -548,19 +546,19 @@ class StorageManager: ObservableObject {
     private func getTabGroups(for type: TabType, in space: SpaceData) -> [TabGroup] {
         switch type {
         case .primary:
-            return space.primaryTabGroups
+            return space.primaryTabGroups ?? []
         case .pinned:
-            return space.pinnedTabGroups
+            return space.pinnedTabGroups ?? []
         case .favorites:
-            return space.favoriteTabGroups
+            return space.favoriteTabGroups ?? []
         }
     }
     
     private func removeTabFromGroups(storedTab: StoredTab, groups: [TabGroup]) {
         for group in groups {
-            for row in group.tabRows {
-                if let index = row.tabs.firstIndex(where: { $0.id == storedTab.id }) {
-                    row.tabs.remove(at: index)
+            for row in (group.tabRows ?? []) {
+                if let index = (row.tabs ?? []).firstIndex(where: { $0.id == storedTab.id }) {
+                    row.tabs?.remove(at: index)
                     return
                 }
             }
@@ -582,15 +580,7 @@ class StorageManager: ObservableObject {
             newGroup.addTab(storedTab)
             modelContext.insert(newGroup)
             
-            // Add to appropriate group array
-            switch tabType {
-            case .primary:
-                space.primaryTabGroups.append(newGroup)
-            case .pinned:
-                space.pinnedTabGroups.append(newGroup)
-            case .favorites:
-                space.favoriteTabGroups.append(newGroup)
-            }
+            addTabGroupToSpace(tabGroup: newGroup, space: space)
         }
     }
     
@@ -607,7 +597,7 @@ class StorageManager: ObservableObject {
               let space = selectedSpace else { return }
         
         // Get the tab type from the current tab in this row
-        let currentTabType = currentTabs[rowIndex].first?.tabType ?? .primary
+        let currentTabType = currentTabs[rowIndex].first?.tabType ?? TabType.primary
         
         let isTemporary = url == "temp://new-tab"
         let page = WebPage()
@@ -645,15 +635,21 @@ class StorageManager: ObservableObject {
             let currentTabId = currentTabs[rowIndex].first?.storedTab.id ?? ""
             if let tabGroup = findTabGroup(containingTabId: currentTabId, space: space) {
                 // Add to the same row as the existing tab
-                if let targetRow = tabGroup.tabRows.first(where: { row in
-                    row.tabs.contains { $0.id == currentTabId }
+                if let targetRow = (tabGroup.tabRows ?? []).first(where: { row in
+                    (row.tabs ?? []).contains { $0.id == currentTabId }
                 }) {
-                    targetRow.tabs.append(storedTab)
+                    if targetRow.tabs == nil {
+                        targetRow.tabs = []
+                    }
+                    targetRow.tabs?.append(storedTab)
                 }
             }
             
             modelContext.insert(storedTab)
-            space.tabs.append(storedTab)
+            if space.tabs == nil {
+                space.tabs = []
+            }
+            space.tabs?.append(storedTab)
             
             try? modelContext.save()
         }
@@ -672,7 +668,7 @@ class StorageManager: ObservableObject {
         guard let space = selectedSpace else { return }
         
         // Get tab type from current context - use the type of the currently selected tab
-        let currentTabType = getFocusedTab()?.tabType ?? .primary
+        let currentTabType = getFocusedTab()?.tabType ?? TabType.primary
         
         let isTemporary = url == "temp://new-tab"
         let page = WebPage()
@@ -726,7 +722,10 @@ class StorageManager: ObservableObject {
             }
             
             modelContext.insert(storedTab)
-            space.tabs.append(storedTab)
+            if space.tabs == nil {
+                space.tabs = []
+            }
+            space.tabs?.append(storedTab)
             
             try? modelContext.save()
         }
@@ -758,15 +757,19 @@ class StorageManager: ObservableObject {
         // Find the position of this tab in currentTabs
         guard let (rowIndex, colIndex) = findTabPosition(browserTab: browserTab) else { return }
         
-        // Find or create a TabGroup for this tab
+        // Find the TabGroup for this tab
         let currentTabInRow = currentTabs[rowIndex].first(where: { !$0.storedTab.isTemporary })
         
         if let existingTab = currentTabInRow,
            let tabGroup = findTabGroup(containingTabId: existingTab.storedTab.id, space: space) {
             // Add to existing TabGroup
-            if rowIndex < tabGroup.tabRows.count {
+            let tabRows = tabGroup.tabRows ?? []
+            if rowIndex < tabRows.count {
                 // Add to existing row
-                tabGroup.tabRows[rowIndex].tabs.append(browserTab.storedTab)
+                if tabRows[rowIndex].tabs == nil {
+                    tabRows[rowIndex].tabs = []
+                }
+                tabRows[rowIndex].tabs?.append(browserTab.storedTab)
             } else {
                 // Add new row to existing group
                 tabGroup.addTabRow(tabs: [browserTab.storedTab])
@@ -788,9 +791,12 @@ class StorageManager: ObservableObject {
         }
         
         // Ensure the tab is inserted if not already
-        if !space.tabs.contains(where: { $0.id == browserTab.storedTab.id }) {
+        if !((space.tabs ?? []).contains(where: { $0.id == browserTab.storedTab.id })) {
             modelContext.insert(browserTab.storedTab)
-            space.tabs.append(browserTab.storedTab)
+            if space.tabs == nil {
+                space.tabs = []
+            }
+            space.tabs?.append(browserTab.storedTab)
         }
         
         try? modelContext.save()
@@ -822,8 +828,8 @@ class StorageManager: ObservableObject {
             for (colIndex, browserTab) in row.enumerated() {
                 if browserTab.storedTab.isTemporary {
                     // Don't remove the currently focused tab
-                    if focusedWebsite.count == 2 && 
-                       focusedWebsite[0] == rowIndex && 
+                    if focusedWebsite.count == 2 &&
+                       focusedWebsite[0] == rowIndex &&
                        focusedWebsite[1] == colIndex {
                         continue
                     }
@@ -878,11 +884,14 @@ class StorageManager: ObservableObject {
     
     /// Find the TabGroup that contains a specific tab ID
     private func findTabGroup(containingTabId tabId: String, space: SpaceData) -> TabGroup? {
-        let allGroups = space.primaryTabGroups + space.pinnedTabGroups + space.favoriteTabGroups
+        let primaryGroups = space.primaryTabGroups ?? []
+        let pinnedGroups = space.pinnedTabGroups ?? []
+        let favoriteGroups = space.favoriteTabGroups ?? []
+        let allGroups = primaryGroups + pinnedGroups + favoriteGroups
         
         for group in allGroups {
-            for row in group.tabRows {
-                if row.tabs.contains(where: { $0.id == tabId }) {
+            for row in (group.tabRows ?? []) {
+                if (row.tabs ?? []).contains(where: { $0.id == tabId }) {
                     return group
                 }
             }
@@ -894,11 +903,20 @@ class StorageManager: ObservableObject {
     private func addTabGroupToSpace(tabGroup: TabGroup, space: SpaceData) {
         switch tabGroup.tabType {
         case .primary:
-            space.primaryTabGroups.append(tabGroup)
+            if space.primaryTabGroups == nil {
+                space.primaryTabGroups = []
+            }
+            space.primaryTabGroups?.append(tabGroup)
         case .pinned:
-            space.pinnedTabGroups.append(tabGroup)
+            if space.pinnedTabGroups == nil {
+                space.pinnedTabGroups = []
+            }
+            space.pinnedTabGroups?.append(tabGroup)
         case .favorites:
-            space.favoriteTabGroups.append(tabGroup)
+            if space.favoriteTabGroups == nil {
+                space.favoriteTabGroups = []
+            }
+            space.favoriteTabGroups?.append(tabGroup)
         }
     }
     
@@ -935,7 +953,11 @@ class StorageManager: ObservableObject {
         modelContext.insert(storedTabObject)
         modelContext.insert(tabGroup)
         addTabGroupToSpace(tabGroup: tabGroup, space: space)
-        space.tabs.append(storedTabObject)
+        
+        if space.tabs == nil {
+            space.tabs = []
+        }
+        space.tabs?.append(storedTabObject)
         
         try? modelContext.save()
         
@@ -953,24 +975,24 @@ class StorageManager: ObservableObject {
         // Remove the TabGroup from the appropriate array
         switch tabGroup.tabType {
         case .primary:
-            if let index = space.primaryTabGroups.firstIndex(where: { $0.id == tabGroup.id }) {
-                space.primaryTabGroups.remove(at: index)
+            if let index = (space.primaryTabGroups ?? []).firstIndex(where: { $0.id == tabGroup.id }) {
+                space.primaryTabGroups?.remove(at: index)
             }
         case .pinned:
-            if let index = space.pinnedTabGroups.firstIndex(where: { $0.id == tabGroup.id }) {
-                space.pinnedTabGroups.remove(at: index)
+            if let index = (space.pinnedTabGroups ?? []).firstIndex(where: { $0.id == tabGroup.id }) {
+                space.pinnedTabGroups?.remove(at: index)
             }
         case .favorites:
-            if let index = space.favoriteTabGroups.firstIndex(where: { $0.id == tabGroup.id }) {
-                space.favoriteTabGroups.remove(at: index)
+            if let index = (space.favoriteTabGroups ?? []).firstIndex(where: { $0.id == tabGroup.id }) {
+                space.favoriteTabGroups?.remove(at: index)
             }
         }
         
         // Remove all tabs from the legacy tabs array and delete them
-        for row in tabGroup.tabRows {
-            for tab in row.tabs {
-                if let legacyIndex = space.tabs.firstIndex(where: { $0.id == tab.id }) {
-                    space.tabs.remove(at: legacyIndex)
+        for row in (tabGroup.tabRows ?? []) {
+            for tab in (row.tabs ?? []) {
+                if let legacyIndex = (space.tabs ?? []).firstIndex(where: { $0.id == tab.id }) {
+                    space.tabs?.remove(at: legacyIndex)
                 }
                 modelContext.delete(tab)
             }
@@ -982,7 +1004,7 @@ class StorageManager: ObservableObject {
         // Find a replacement TabGroup to switch to
         let replacementGroup = findReplacementTabGroup(removedGroup: tabGroup, space: space)
         
-        if let replacement = replacementGroup?.tabRows.first?.tabs.first {
+        if let replacement = replacementGroup?.tabRows?.first?.tabs?.first {
             Task { await selectOrLoadTab(tabObject: replacement) }
             return replacement
         } else {
@@ -1008,8 +1030,10 @@ class StorageManager: ObservableObject {
         }
         
         // Try other tab types if no replacement found in same type
-        let allGroups = space.primaryTabGroups + space.pinnedTabGroups + space.favoriteTabGroups
+        let primaryGroups = space.primaryTabGroups ?? []
+        let pinnedGroups = space.pinnedTabGroups ?? []
+        let favoriteGroups = space.favoriteTabGroups ?? []
+        let allGroups = primaryGroups + pinnedGroups + favoriteGroups
         return allGroups.first
     }
 }
-

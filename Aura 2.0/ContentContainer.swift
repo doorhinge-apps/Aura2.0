@@ -7,7 +7,6 @@
 // Copyright ©2025 DoorHinge Apps.
 //
 
-
 import SwiftUI
 import SwiftData
 
@@ -37,8 +36,9 @@ struct ContentContainerView: View {
                             // Also clean up legacy tabs for migration
                             let oldTabs = space.primaryTabs.filter { $0.timestamp < cutoff }
                             for tab in oldTabs {
-                                if let index = space.tabs.firstIndex(where: { $0.id == tab.id }) {
-                                    space.tabs.remove(at: index)
+                                if let spaceTabs = space.tabs,
+                                   let index = spaceTabs.firstIndex(where: { $0.id == tab.id }) {
+                                    space.tabs?.remove(at: index)
                                     modelContext.delete(tab)
                                 }
                             }
@@ -69,39 +69,44 @@ struct ContentContainerView: View {
 
 // MARK: - Helper Functions
 private func cleanupOldTabsFromGroups(space: SpaceData, cutoff: Date, modelContext: ModelContext) {
-    let allGroups = space.primaryTabGroups + space.pinnedTabGroups + space.favoriteTabGroups
+    let primaryGroups = space.primaryTabGroups ?? []
+    let pinnedGroups = space.pinnedTabGroups ?? []
+    let favoriteGroups = space.favoriteTabGroups ?? []
+    let allGroups = primaryGroups + pinnedGroups + favoriteGroups
     
     for group in allGroups {
         var groupIsEmpty = true
         
-        for row in group.tabRows {
-            let oldTabs = row.tabs.filter { $0.timestamp < cutoff }
+        let tabRows = group.tabRows ?? []
+        for row in tabRows {
+            let rowTabs = row.tabs ?? []
+            let oldTabs = rowTabs.filter { $0.timestamp < cutoff }
             
             for tab in oldTabs {
-                if let index = row.tabs.firstIndex(where: { $0.id == tab.id }) {
-                    row.tabs.remove(at: index)
+                if let index = row.tabs?.firstIndex(where: { $0.id == tab.id }) {
+                    row.tabs?.remove(at: index)
                     modelContext.delete(tab)
                 }
             }
             
-            if !row.tabs.isEmpty {
+            if !(row.tabs?.isEmpty ?? true) {
                 groupIsEmpty = false
             }
         }
         
         // Remove empty rows
-        group.tabRows.removeAll { $0.tabs.isEmpty }
+        group.tabRows?.removeAll { $0.tabs?.isEmpty ?? true }
         
         // If the entire group is empty, mark for deletion
-        if groupIsEmpty || group.tabRows.isEmpty {
-            if let primaryIndex = space.primaryTabGroups.firstIndex(where: { $0.id == group.id }) {
-                space.primaryTabGroups.remove(at: primaryIndex)
+        if groupIsEmpty || (group.tabRows?.isEmpty ?? true) {
+            if let primaryIndex = space.primaryTabGroups?.firstIndex(where: { $0.id == group.id }) {
+                space.primaryTabGroups?.remove(at: primaryIndex)
             }
-            if let pinnedIndex = space.pinnedTabGroups.firstIndex(where: { $0.id == group.id }) {
-                space.pinnedTabGroups.remove(at: pinnedIndex)
+            if let pinnedIndex = space.pinnedTabGroups?.firstIndex(where: { $0.id == group.id }) {
+                space.pinnedTabGroups?.remove(at: pinnedIndex)
             }
-            if let favoriteIndex = space.favoriteTabGroups.firstIndex(where: { $0.id == group.id }) {
-                space.favoriteTabGroups.remove(at: favoriteIndex)
+            if let favoriteIndex = space.favoriteTabGroups?.firstIndex(where: { $0.id == group.id }) {
+                space.favoriteTabGroups?.remove(at: favoriteIndex)
             }
             modelContext.delete(group)
         }

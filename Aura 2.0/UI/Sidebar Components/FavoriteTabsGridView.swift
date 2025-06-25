@@ -7,7 +7,7 @@ struct FavoriteTabsGridView: View {
 
     var body: some View {
         LazyVGrid(columns: columns, spacing: 10) {
-            let orderedGroups = space.favoriteTabGroups
+            let orderedGroups = (space.favoriteTabGroups ?? [])
                 .filter { $0.hasNonTemporaryTabs }
                 .sorted { $0.orderIndex < $1.orderIndex }
             ForEach(orderedGroups, id: \.id) { tabGroup in

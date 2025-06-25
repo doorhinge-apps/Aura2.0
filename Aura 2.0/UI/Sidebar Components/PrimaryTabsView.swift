@@ -6,7 +6,7 @@ struct PrimaryTabsView: View {
 
     var body: some View {
         VStack {
-            let orderedGroups = space.primaryTabGroups
+            let orderedGroups = (space.primaryTabGroups ?? [])
                 .filter { $0.hasNonTemporaryTabs }
                 .sorted { $0.orderIndex < $1.orderIndex }
             ForEach(orderedGroups, id: \.id) { tabGroup in

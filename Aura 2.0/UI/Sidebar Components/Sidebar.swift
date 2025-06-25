@@ -453,6 +453,7 @@ struct TabDropDelegate: DropDelegate {
     }
 }
 
+
 struct TabGroupDropDelegate: DropDelegate {
     let tabGroup: TabGroup
     let space: SpaceData
@@ -462,24 +463,24 @@ struct TabGroupDropDelegate: DropDelegate {
     func dropEntered(info: DropInfo) {
         guard
             let draggingID = draggingTabID,
-            draggingID != (tabGroup.tabRows.first?.tabs.first?.id ?? tabGroup.id)
+            draggingID != ((tabGroup.tabRows ?? []).first?.tabs?.first?.id ?? tabGroup.id)
         else { return }
 
         // Work on a snapshot that reflects the on-screen order for TabGroups
         var orderedGroups: [TabGroup]
         switch tabGroup.tabType {
         case .primary:
-            orderedGroups = space.primaryTabGroups.sorted { $0.orderIndex < $1.orderIndex }
+            orderedGroups = (space.primaryTabGroups ?? []).sorted { $0.orderIndex < $1.orderIndex }
         case .pinned:
-            orderedGroups = space.pinnedTabGroups.sorted { $0.orderIndex < $1.orderIndex }
+            orderedGroups = (space.pinnedTabGroups ?? []).sorted { $0.orderIndex < $1.orderIndex }
         case .favorites:
-            orderedGroups = space.favoriteTabGroups.sorted { $0.orderIndex < $1.orderIndex }
+            orderedGroups = (space.favoriteTabGroups ?? []).sorted { $0.orderIndex < $1.orderIndex }
         }
 
         guard
             let from = orderedGroups.firstIndex(where: { group in
-                group.tabRows.contains { row in
-                    row.tabs.contains { $0.id == draggingID }
+                (group.tabRows ?? []).contains { row in
+                    (row.tabs ?? []).contains { $0.id == draggingID }
                 }
             }),
             let to = orderedGroups.firstIndex(where: { $0.id == tabGroup.id })
@@ -490,8 +491,8 @@ struct TabGroupDropDelegate: DropDelegate {
             orderedGroups.insert(moved, at: to)
 
             // Update order indices
-            for (i, group) in orderedGroups.enumerated() { 
-                group.orderIndex = i 
+            for (i, group) in orderedGroups.enumerated() {
+                group.orderIndex = i
             }
         }
     }
@@ -505,6 +506,3 @@ struct TabGroupDropDelegate: DropDelegate {
         return true
     }
 }
-
-
-

@@ -4,15 +4,18 @@ import SwiftData
 
 @Model
 final class StoredTab {
-    var id: String
-    var timestamp: Date
-    var url: String
-    var orderIndex: Int
-    var tabType: TabType
+    var id: String = UUID().uuidString
+    var timestamp: Date = Date()
+    var url: String = ""
+    var orderIndex: Int = 0
+    var tabType: TabType = TabType.primary // You'll need to add a default case to your TabType enum
     var folderName: String?
     var isTemporary: Bool = false
     
     @Relationship var parentSpace: SpaceData?   // inverse handled above
+    @Relationship var parentRow: TabRow?
+    
+    init() {}
     
     init(
         id: String,
