@@ -9,6 +9,8 @@
 
 
 import SwiftUI
+import SDWebImage
+import SDWebImageSwiftUI
 
 struct SearchSettings: View {
     @EnvironmentObject var storageManager: StorageManager
@@ -46,11 +48,31 @@ struct SearchSettings: View {
             ScrollView {
                 VStack {
                     ZStack {
-                        Color(hex: searchEngineIconColors[searchEngines.someKey(forValue: settingsManager.searchEngine).unsafelyUnwrapped] ?? "ffffff")
-                        
-                        Image("\(searchEngines.someKey(forValue: settingsManager.searchEngine).unsafelyUnwrapped) Icon")
-                            .resizable()
-                            .scaledToFit()
+                        WebImage(url: URL(string: "https://www.google.com/s2/favicons?domain=\(formatURL(from: settingsManager.searchEngine))&sz=\(128)".replacingOccurrences(of: "https://www.google.com/s2/favicons?domain=Optional(", with: "https://www.google.com/s2/favicons?domain=").replacingOccurrences(of: ")&sz=", with: "&sz=").replacingOccurrences(of: "\"", with: ""))) { image in
+                            if searchEngines.values.contains(settingsManager.searchEngine) {
+                                Color(hex: searchEngineIconColors[searchEngines.someKey(forValue: settingsManager.searchEngine).unsafelyUnwrapped] ?? "ffffff")
+                                
+                                Image("\(searchEngines.someKey(forValue: settingsManager.searchEngine).unsafelyUnwrapped) Icon")
+                                    .resizable()
+                                    .scaledToFit()
+                            }
+                            else {
+                                image
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 200, height: 200)
+                                    .cornerRadius(settingsManager.faviconShape == "square" ? 0: settingsManager.faviconShape == "squircle" ? 5: 100)
+                                    .padding(.leading, 5)
+                            }
+                        } placeholder: {
+                            LoadingAnimations(size: 150, borderWidth: 30.0)
+                                .padding(.leading, 5)
+                        }
+                        .onSuccess { image, data, cacheType in
+                            
+                        }
+                        .transition(.fade(duration: 0.5))
+                        .scaledToFit()
                         
                     }.frame(width: 200, height: 200)
                     .cornerRadius(CGFloat(settingsManager.faviconShape == "circle" ? 100: settingsManager.faviconShape == "square" ? 0: 20))

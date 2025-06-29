@@ -198,20 +198,22 @@ struct AppearanceSettings: View {
 #endif
                     }
                     
-                    Group {
-                        Toggle(isOn: $settingsManager.liquidGlassCommandBar) {
-                            Text("Liquid Glass Command Bar")
-                                .font(.system(.headline, design: .rounded, weight: .bold))
-                        }.tint(backgroundGradientColors.first?.opacity(0.5))
-                        HStack {
-                            Text("Use the liquid glass UI style for the command bar.")
-                                .font(.system(.body, design: .rounded, weight: .bold))
-                            
-                            Spacer()
+                    if #available(iOS 26, *) {
+                        Group {
+                            Toggle(isOn: $settingsManager.liquidGlassCommandBar) {
+                                Text("Liquid Glass Command Bar")
+                                    .font(.system(.headline, design: .rounded, weight: .bold))
+                            }.tint(backgroundGradientColors.first?.opacity(0.5))
+                            HStack {
+                                Text("Use the liquid glass UI style for the command bar.")
+                                    .font(.system(.body, design: .rounded, weight: .bold))
+                                
+                                Spacer()
+                            }
                         }
+                        
+                        Divider()
                     }
-                    
-                    Divider()
                     
                     Group {
                         Toggle(isOn: $settingsManager.showBorder) {

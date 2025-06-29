@@ -58,7 +58,8 @@ struct ContentView: View {
                         
                         ZStack {
                             WebsitePanel()
-                                .scrollEdgeEffectStyle(.none, for: .all)
+//                                .scrollEdgeEffectStyle(.none, for: .all)
+                                .modifier(ScrollEdgeIfAvailable())
                                 .padding(.top, settingsManager.showBorder ? 15 : 0)
                                 .padding(.bottom, settingsManager.showBorder ? 15 : 0)
                                 .padding(.leading, (settingsManager.tabsPosition == "right" || !uiViewModel.showSidebar) ? (settingsManager.showBorder ? 15 : 0) : 0)

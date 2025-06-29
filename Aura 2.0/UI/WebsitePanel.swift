@@ -81,7 +81,8 @@ struct WebsitePanel: View {
                                                 } else {
                                                     // Show regular web view
                                                     WebView(website.page)
-                                                        .scrollEdgeEffectDisabled(true)
+//                                                        .scrollEdgeEffectDisabled(true)
+                                                        .modifier(ScrollEdgeDisabledIfAvailable())
                                                         .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
                                                         .webViewScrollPosition($scrollPosition)
                                                         .findNavigator(isPresented: $findNavigatorIsPresent)
@@ -199,7 +200,8 @@ struct WebsitePanel: View {
                     }
                 }
             }
-        }.scrollEdgeEffectDisabled(true)
+        }//.scrollEdgeEffectDisabled(true)
+        .modifier(ScrollEdgeDisabledIfAvailable())
     }
     
     private func handleURLSubmission(rowIdx: Int, colIdx: Int) {

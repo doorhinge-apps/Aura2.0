@@ -253,7 +253,8 @@ struct Sidebar: View {
 
                                 PrimaryTabsView(space: space, draggingTabID: $draggingTabID)
                             }
-                        }.scrollEdgeEffectDisabled(true)
+                        }//.scrollEdgeEffectDisabled(true)
+                        .modifier(ScrollEdgeDisabledIfAvailable())
                             .tag(space)
                     }
                 }

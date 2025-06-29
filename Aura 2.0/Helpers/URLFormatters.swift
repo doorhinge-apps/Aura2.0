@@ -10,7 +10,7 @@
 
 import SwiftUI
 
-func formatURL(from input: String) -> String {
+/*func formatURL(from input: String) -> String {
     // Check if it's already a URL with a scheme
     if let url = URL(string: input), url.scheme != nil {
         return url.absoluteString.hasPrefix("http") ? input : "https://\(input)"
@@ -26,7 +26,38 @@ func formatURL(from input: String) -> String {
     // Assume it's a search term and format it for Google search
     let searchTerms = input.split(separator: " ").joined(separator: "+")
     return "\(UserDefaults.standard.string(forKey: "searchEngine") ?? "https://www.google.com/search?q=")\(searchTerms)"
+}*/
+
+func formatURL(from input: String) -> String {
+    var formattedInput = input
+
+    // Check if it already has a scheme
+    if let url = URL(string: input), url.scheme != nil {
+        if var components = URLComponents(string: input) {
+            components.scheme = components.scheme?.lowercased()
+            components.host = components.host?.lowercased()
+            return components.string ?? input
+        }
+        return input
+    }
+
+    // Add https scheme if missing
+    if let url = URL(string: "https://\(input)"), url.host != nil {
+        if url.absoluteString.contains(".") && !url.absoluteString.contains(" ") {
+            if var components = URLComponents(string: "https://\(input)") {
+                components.scheme = components.scheme?.lowercased()
+                components.host = components.host?.lowercased()
+                return components.string ?? url.absoluteString
+            }
+            return url.absoluteString
+        }
+    }
+
+    // Treat it as a search term
+    let searchTerms = input.split(separator: " ").joined(separator: "+")
+    return "\(UserDefaults.standard.string(forKey: "searchEngine") ?? "https://www.google.com/search?q=")\(searchTerms)"
 }
+
 
 
 func unformatURL(url: String) -> String {

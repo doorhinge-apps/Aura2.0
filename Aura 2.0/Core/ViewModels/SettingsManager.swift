@@ -39,6 +39,7 @@ class SettingsManager: ObservableObject {
     @AppStorage("hideResizingHandles") var hideResizingHandles = false
     
     @AppStorage("commandBarOnLaunch") var commandBarOnLaunch = false
+    
     @AppStorage("liquidGlassCommandBar") var liquidGlassCommandBar = true
     
     @AppStorage("adBlock") var adBlock = false

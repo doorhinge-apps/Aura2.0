@@ -23,8 +23,10 @@ struct ContentContainerView: View {
         Group {
             if let selected = spaces.first {
                 ContentView(selectedSpace: selected)
-                    .scrollEdgeEffectDisabled(true)
-                    .scrollEdgeEffectStyle(.hard, for: .top)
+                    //.scrollEdgeEffectDisabled(true)
+                    .modifier(ScrollEdgeDisabledIfAvailable())
+                    .modifier(ScrollEdgeIfAvailable())
+                    //.scrollEdgeEffectStyle(.hard, for: .top)
                     .statusBarHidden(true)
                     .onAppear {
                         let cutoff = Date().addingTimeInterval(-Double(settingsManager.closePrimaryTabsAfter) * 60)

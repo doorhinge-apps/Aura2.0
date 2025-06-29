@@ -28,7 +28,7 @@ struct CommandBar: View {
     
     var body: some View {
         VStack {
-            if settingsManager.liquidGlassCommandBar {
+            if #available(iOS 26.0, *), settingsManager.liquidGlassCommandBar {
                 GlassEffectContainer {
                     content
                         .shadow(color: Color.black.opacity(0.5), radius: 10, x: 0, y: 0)
@@ -85,7 +85,8 @@ struct CommandBar: View {
             HStack(spacing: 20) {
                 TextField("Search or enter URL", text: currentSuggestionIndex == -1 ? $uiViewModel.commandBarText: $previewSuggestionInCommandBar)
                     .padding(20)
-                    .glassEffect(isEnabled: settingsManager.liquidGlassCommandBar)
+//                    .glassEffect(isEnabled: settingsManager.liquidGlassCommandBar)
+                    .modifier(GlassEffectIfAvailable())
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled(true)
                     .lineLimit(1)
@@ -135,10 +136,11 @@ struct CommandBar: View {
                 }
                 .zIndex(1)
                 .frame(width: 80)
-                .glassEffect(.regular.tint(
-                    Color(hex: storageManager.selectedSpace?.spaceBackgroundColors.first ?? "8041E6")
-                        .opacity(uiViewModel.commandBarText.isEmpty ? 0.0 : 0.5)
-                ).interactive(), isEnabled: settingsManager.liquidGlassCommandBar)
+//                .glassEffect(.regular.tint(
+//                    Color(hex: storageManager.selectedSpace?.spaceBackgroundColors.first ?? "8041E6")
+//                        .opacity(uiViewModel.commandBarText.isEmpty ? 0.0 : 0.5)
+//                ).interactive(), isEnabled: settingsManager.liquidGlassCommandBar)
+                .modifier(TintedGlassEffect1IfAvailable())
                 
             }
             
@@ -162,13 +164,14 @@ struct CommandBar: View {
                 }
                 .padding(20)
                 .frame(width: geo.size.width/2)
-                .glassEffect(
-                    .regular.tint(
-                        Color(hex: storageManager.selectedSpace?.spaceBackgroundColors.first ?? "8041E6")
-                            .opacity(currentSuggestionIndex == uiViewModel.searchSuggestions.firstIndex(of: suggestion) ? 0.5: 0.0)
-                    ),
-                    isEnabled: settingsManager.liquidGlassCommandBar
-                )
+//                .glassEffect(
+//                    .regular.tint(
+//                        Color(hex: storageManager.selectedSpace?.spaceBackgroundColors.first ?? "8041E6")
+//                            .opacity(currentSuggestionIndex == uiViewModel.searchSuggestions.firstIndex(of: suggestion) ? 0.5: 0.0)
+//                    ),
+//                    isEnabled: settingsManager.liquidGlassCommandBar
+//                )
+                .modifier(TintedGlassEffect2IfAvailable(suggestion: suggestion, currentSuggestionIndex: currentSuggestionIndex))
                 .background(content: {
                     if !settingsManager.liquidGlassCommandBar {
                         Color(hex: storageManager.selectedSpace?.spaceBackgroundColors.first ?? "8041E6")
