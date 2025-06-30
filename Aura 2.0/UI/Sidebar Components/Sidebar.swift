@@ -12,6 +12,9 @@ import SwiftUI
 import SwiftData
 import WebKit
 import UniformTypeIdentifiers
+#if targetEnvironment(macCatalyst)
+import AppKit
+#endif
 
 struct Sidebar: View {
     @EnvironmentObject var storageManager: StorageManager
@@ -46,6 +49,16 @@ struct Sidebar: View {
                             .frame(width: 5, height: 30)
                     }
                 }
+#if targetEnvironment(macCatalyst)
+                .onHover(perform: { hover in
+                    if hover {
+                        NSCursor.resizeLeftRight.push()
+                    }
+                    else {
+                        NSCursor.pop()
+                    }
+                })
+#endif
                 .gesture(
                     DragGesture(minimumDistance: 0)
                         .onChanged { value in
@@ -369,7 +382,18 @@ struct Sidebar: View {
                             .fill(Color.white.opacity(0.25))
                             .frame(width: 5, height: 30)
                     }
-                }.gesture(
+                }
+#if targetEnvironment(macCatalyst)
+                .onHover(perform: { hover in
+                    if hover {
+                        NSCursor.resizeLeftRight.push()
+                    }
+                    else {
+                        NSCursor.pop()
+                    }
+                })
+#endif
+                .gesture(
                     DragGesture(minimumDistance: 0)
                         .onChanged { value in
                             dragOffset = (uiViewModel.sidebarWidth + value.translation.width)

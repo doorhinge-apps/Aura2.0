@@ -86,7 +86,7 @@ struct CommandBar: View {
                 TextField("Search or enter URL", text: currentSuggestionIndex == -1 ? $uiViewModel.commandBarText: $previewSuggestionInCommandBar)
                     .padding(20)
 //                    .glassEffect(isEnabled: settingsManager.liquidGlassCommandBar)
-                    .modifier(GlassEffectIfAvailable())
+                    .modifier(GlassEffectIfAvailable(enabled: settingsManager.liquidGlassCommandBar))
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled(true)
                     .lineLimit(1)
@@ -157,7 +157,7 @@ struct CommandBar: View {
                     uiViewModel.showCommandBar = false
                 } label: {
                     HStack {
-                        Text(suggestion)
+                        Text(.init(suggestion))
                         
                         Spacer()
                     }.foregroundStyle(Color(.label))
@@ -171,7 +171,12 @@ struct CommandBar: View {
 //                    ),
 //                    isEnabled: settingsManager.liquidGlassCommandBar
 //                )
-                .modifier(TintedGlassEffect2IfAvailable(suggestion: suggestion, currentSuggestionIndex: currentSuggestionIndex))
+                .modifier(
+                    TintedGlassEffect2IfAvailable(
+                        suggestion: suggestion,
+                        currentSuggestionIndex: currentSuggestionIndex
+                    )
+                )
                 .background(content: {
                     if !settingsManager.liquidGlassCommandBar {
                         Color(hex: storageManager.selectedSpace?.spaceBackgroundColors.first ?? "8041E6")
