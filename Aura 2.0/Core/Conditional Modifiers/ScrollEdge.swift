@@ -39,15 +39,15 @@ struct ScrollEdgeDisabledIfAvailable: ViewModifier {
     }
 }
 
-struct WebViewModifiersIfAvailable: ViewModifier {
-    @Binding var scrollPosition: ScrollPosition
-    func body(content: Content) -> some View {
-        if #available(iOS 26, *) {
-            content
-                .webViewScrollPosition($scrollPosition)
-        }
-        else {
-            content
-        }
-    }
-}
+//struct WebViewModifiersIfAvailable: ViewModifier {
+//    @Binding var scrollPosition: ScrollPosition
+//    func body(content: Content) -> some View {
+//        if #available(iOS 26, *) {
+//            content
+//                .webViewScrollPosition($scrollPosition)
+//        }
+//        else {
+//            content
+//        }
+//    }
+//}

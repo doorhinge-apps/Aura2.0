@@ -225,8 +225,15 @@ struct ContentView: View {
 
         if count.isMultiple(of: 2) {
             // mix the two middle colors correctly using `by`
-            let mixed = Color(hex: hexes[half - 1])
-                .mix(with: Color(hex: hexes[half]), by: 0.5)
+            var mixed = Color(hex: "ffffff")
+            
+            if #available(iOS 18.0, *) {
+                mixed = Color(hex: hexes[half - 1])
+                    .mix(with: Color(hex: hexes[half]), by: 0.5)
+            }
+            else {
+                mixed = Color(hex: hexes[half - 1])
+            }
             
             return hexes.prefix(half - 1).map { Color(hex: $0) } + [mixed]
         } else {

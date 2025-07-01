@@ -166,7 +166,7 @@ struct Sidebar: View {
                                 
                                 
                                 Button {
-                                    let activityController = UIActivityViewController(activityItems: [storageManager.currentTabs.first?.first?.page.url ?? URL(string: "")!, storageManager.currentTabs.first?.first?.page ?? WebPageFallback(useDeclarativeWebView: settingsManager.useDeclarativeWebView)], applicationActivities: nil)
+                                    let activityController = UIActivityViewController(activityItems: [storageManager.currentTabs.first?.first?.page.url ?? URL(string: "")!, storageManager.currentTabs.first?.first?.page ?? WebPageFallback()], applicationActivities: nil)
                                     
                                     if let popoverController = activityController.popoverPresentationController {
                                         popoverController.sourceView = UIApplication.shared.windows.first?.rootViewController?.view

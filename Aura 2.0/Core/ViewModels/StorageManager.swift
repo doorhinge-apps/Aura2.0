@@ -15,7 +15,7 @@ import SwiftData
 class StorageManager: ObservableObject {
     
     private func makeTab(url: String) -> BrowserTab {
-            let page = createWebPage()
+            let page = WebPageFallback()
             var request = URLRequest(url: URL(string: url)!)
             request.attribution = .user
             page.load(request)
@@ -30,10 +30,6 @@ class StorageManager: ObservableObject {
         }
     
     @StateObject var settingManager = SettingsManager()
-    
-    private func createWebPage() -> WebPageFallback {
-        return WebPageFallback(useDeclarativeWebView: settingManager.useDeclarativeWebView)
-    }
     
     @Published var selectedSpace: SpaceData?
     // Tabs currently loaded in the background
@@ -54,7 +50,7 @@ class StorageManager: ObservableObject {
     @Published var splitViewTabs: [SplitViewTab] = []
     
     func loadTabFromStorage(tabObject: StoredTab) {
-        let newWebPage = createWebPage()
+        let newWebPage = WebPageFallback()
         var request = URLRequest(url: URL(string: tabObject.url)!)
         request.attribution = .user
         newWebPage.load(request)
@@ -125,7 +121,7 @@ class StorageManager: ObservableObject {
     
     /// Create a BrowserTab from a StoredTab
     private func createBrowserTab(from storedTab: StoredTab) async -> BrowserTab {
-        let newWebPage = createWebPage()
+        let newWebPage = WebPageFallback()
         var request = URLRequest(url: URL(string: storedTab.url)!)
         request.attribution = .user
         newWebPage.load(request)
@@ -183,7 +179,7 @@ class StorageManager: ObservableObject {
     
     func newTab(unformattedString: String, space: SpaceData, modelContext: ModelContext) -> StoredTab {
         let formattedURL = formatURL(from: unformattedString)
-        let page = createWebPage()
+        let page = WebPageFallback()
         var request = URLRequest(url: URL(string: formattedURL)!)
         request.attribution = .user
         page.load(request)
@@ -604,7 +600,7 @@ class StorageManager: ObservableObject {
         let currentTabType = currentTabs[rowIndex].first?.tabType ?? TabType.primary
         
         let isTemporary = url == "temp://new-tab"
-        let page = createWebPage()
+        let page = WebPageFallback()
         
         // Only load web content for non-temporary tabs
         if !isTemporary {
@@ -675,7 +671,7 @@ class StorageManager: ObservableObject {
         let currentTabType = getFocusedTab()?.tabType ?? TabType.primary
         
         let isTemporary = url == "temp://new-tab"
-        let page = createWebPage()
+        let page = WebPageFallback()
         
         // Only load web content for non-temporary tabs
         if !isTemporary {
@@ -929,7 +925,7 @@ class StorageManager: ObservableObject {
     /// Create a new tab for a specific type (used by sidebar components)
     func newTabForType(unformattedString: String, space: SpaceData, tabType: TabType, modelContext: ModelContext) -> StoredTab {
         let formattedURL = formatURL(from: unformattedString)
-        let page = createWebPage()
+        let page = WebPageFallback()
         var request = URLRequest(url: URL(string: formattedURL)!)
         request.attribution = .user
         page.load(request)

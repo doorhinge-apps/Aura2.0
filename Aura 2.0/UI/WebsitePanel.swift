@@ -20,7 +20,7 @@ struct WebsitePanel: View {
     
     @Environment(\.modelContext) private var modelContext
     
-    @State var scrollPosition = ScrollPosition()
+//    @State var scrollPosition = ScrollPosition()
     
     @State var findNavigatorIsPresent: Bool = false
     
@@ -83,7 +83,7 @@ struct WebsitePanel: View {
                                                     WebViewFallback(website.page)
 //                                                        .scrollEdgeEffectDisabled(true)
                                                         .modifier(ScrollEdgeDisabledIfAvailable())
-                                                        .modifier(WebViewModifiersIfAvailable(scrollPosition: $scrollPosition))
+//                                                        .modifier(WebViewModifiersIfAvailable(scrollPosition: $scrollPosition))
                                                         .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
                                                         .findNavigator(isPresented: $findNavigatorIsPresent)
                                                         .padding(.vertical, 10)

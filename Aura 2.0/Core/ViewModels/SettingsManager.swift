@@ -50,7 +50,5 @@ class SettingsManager: ObservableObject {
     
     @AppStorage("pinnedTabCornerRadius") var favoriteTabCornerRadius = 20.0
     @AppStorage("pinnedTabBorderWidth") var favoriteTabBorderWidth = 2.0
-    
-    @AppStorage("useDeclarativeWebView") var useDeclarativeWebView = true
 }
 

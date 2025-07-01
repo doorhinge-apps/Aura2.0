@@ -16,8 +16,6 @@ import Combine
 @available(iOS 16.0, *)
 class WebPageFallback: ObservableObject {
     private var webKitWebView: WKWebView?
-    private var nativeWebPage: Any? // For future iOS versions
-    var useDeclarativeWebView: Bool
     
     @Published var url: URL?
     @Published var title: String?
@@ -25,25 +23,7 @@ class WebPageFallback: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var themeColor: Color?
     
-    init(useDeclarativeWebView: Bool = true) {
-        self.useDeclarativeWebView = useDeclarativeWebView
-        
-        if #available(iOS 26.0, visionOS 26.0, *), useDeclarativeWebView {
-            // Check if the declarative WebView API is actually available
-            if NSClassFromString("WebPage") != nil {
-                setupDeclarativeWebView()
-            } else {
-                setupWKWebView()
-            }
-        } else {
-            setupWKWebView()
-        }
-    }
-    
-    @available(iOS 26.0, *)
-    private func setupDeclarativeWebView() {
-        // Future: Setup declarative WebView when API becomes available
-        // For now, fall back to WKWebView
+    init() {
         setupWKWebView()
     }
     
@@ -57,7 +37,6 @@ class WebPageFallback: ObservableObject {
         self.webKitWebView = webView
     }
     
-    // Future: Setup native observers when API becomes available
     
     func load(_ request: URLRequest) {
         webKitWebView?.load(request)
@@ -200,8 +179,6 @@ class WebPageFallback: ObservableObject {
     internal var wkWebView: WKWebView? {
         return webKitWebView
     }
-    
-    // Future: Internal access to native API when it becomes available
 }
 
 // MARK: - WKWebView Navigation Delegate
@@ -246,21 +223,6 @@ struct WebViewFallback: UIViewRepresentable {
     }
     
     func makeUIView(context: Context) -> UIView {
-        if #available(iOS 26.0, *), webPage.useDeclarativeWebView {
-            // Check if declarative WebView is available and user prefers it
-            if NSClassFromString("WebPage") != nil {
-                // Future: Return declarative WebView when API becomes available
-                // For now, fall back to WKWebView
-                return makeWKWebView()
-            } else {
-                return makeWKWebView()
-            }
-        } else {
-            return makeWKWebView()
-        }
-    }
-    
-    private func makeWKWebView() -> UIView {
         if let wkWebView = webPage.wkWebView {
             wkWebView.backgroundColor = UIColor.clear
             wkWebView.scrollView.backgroundColor = UIColor.clear
@@ -287,17 +249,14 @@ extension WebViewFallback {
     }
     
     func scrollBounceBehavior(_ behavior: Any, axes: Axis.Set) -> some View {
-        // WKWebView doesn't have the same scroll bounce behavior control
         return self
     }
     
-    func webViewScrollPosition(_ position: Binding<ScrollPosition>) -> some View {
-        // WKWebView doesn't support ScrollPosition binding directly
-        return self
-    }
+//    func webViewScrollPosition(_ position: Binding<ScrollPosition>) -> some View {
+//        return self
+//    }
     
     func findNavigator(isPresented: Binding<Bool>) -> some View {
-        // For WKWebView, we'd need to implement find functionality separately
         return self
     }
 }
