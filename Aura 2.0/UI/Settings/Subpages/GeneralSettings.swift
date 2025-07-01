@@ -206,6 +206,23 @@ struct GeneralSettings: View {
                     
                     Divider()
                     
+                    // WebView Selection (iOS 26+ only)
+                    if #available(iOS 26.0, *) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Toggle(isOn: $settingsManager.useDeclarativeWebView) {
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text("Use Modern WebView")
+                                        .font(.system(.headline, design: .rounded, weight: .bold))
+                                    Text("Toggle between the new declarative WebView and traditional WKWebView")
+                                        .font(.system(.caption, design: .rounded))
+                                        .foregroundColor(.secondary)
+                                }
+                            }.tint(backgroundGradientColors.first?.opacity(0.5))
+                        }
+                        
+                        Divider()
+                    }
+                    
                     Group {
                         Text("Loaded Websites in Background")
                             .font(.system(.headline, design: .rounded, weight: .bold))

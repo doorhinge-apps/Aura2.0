@@ -28,6 +28,7 @@ struct CommandBar: View {
     
     var body: some View {
         VStack {
+            #if !os(visionOS)
             if #available(iOS 26.0, *), settingsManager.liquidGlassCommandBar {
                 GlassEffectContainer {
                     content
@@ -43,6 +44,15 @@ struct CommandBar: View {
                             .shadow(color: Color.black.opacity(0.5), radius: 20, x: 0, y: 0)
                     )
             }
+            #else
+            content
+                .padding(5)
+                .background(
+                    RoundedRectangle(cornerRadius: 20)
+                        .fill(.regularMaterial)
+                        .shadow(color: Color.black.opacity(0.5), radius: 20, x: 0, y: 0)
+                )
+            #endif
         }
         .frame(width: geo.size.width / 2)
         .onAppear() {

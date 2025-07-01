@@ -15,7 +15,9 @@ struct ScrollEdgeIfAvailable: ViewModifier {
     func body(content: Content) -> some View {
         if #available(iOS 26, *) {
             content
+#if !os(visionOS)
                 .scrollEdgeEffectStyle(.none, for: .all)
+            #endif
         }
         else {
             content
@@ -27,7 +29,9 @@ struct ScrollEdgeDisabledIfAvailable: ViewModifier {
     func body(content: Content) -> some View {
         if #available(iOS 26, *) {
             content
+            #if !os(visionOS)
                 .scrollEdgeEffectDisabled(true)
+            #endif
         }
         else {
             content

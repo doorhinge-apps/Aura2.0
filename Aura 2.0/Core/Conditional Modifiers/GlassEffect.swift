@@ -17,7 +17,10 @@ struct GlassEffectIfAvailable: ViewModifier {
     func body(content: Content) -> some View {
         Group {
             if #available(iOS 26, *), enabled != false {
-                content.glassEffect()
+                content
+#if !os(visionOS)
+                    .glassEffect()
+                #endif
             } else {
                 content
             }
@@ -34,10 +37,12 @@ struct TintedGlassEffect1IfAvailable: ViewModifier {
     func body(content: Content) -> some View {
         if #available(iOS 26, *) {
             content
+#if !os(visionOS)
                 .glassEffect(.regular.tint(
                     Color(hex: storageManager.selectedSpace?.spaceBackgroundColors.first ?? "8041E6")
                         .opacity(uiViewModel.commandBarText.isEmpty ? 0.0 : 0.5)
                 ).interactive(), isEnabled: settingsManager.liquidGlassCommandBar)
+            #endif
         }
         else {
             content
@@ -59,6 +64,7 @@ struct TintedGlassEffect2IfAvailable: ViewModifier {
             let shouldTint = currentSuggestionIndex == uiViewModel.searchSuggestions.firstIndex(of: suggestion)
             let tintOpacity = shouldTint ? 0.5 : 0.0
             return content
+#if !os(visionOS)
                 .glassEffect(
                     .regular.tint(
                         Color(hex: storageManager.selectedSpace?.spaceBackgroundColors.first ?? "8041E6")
@@ -66,6 +72,7 @@ struct TintedGlassEffect2IfAvailable: ViewModifier {
                     ),
                     isEnabled: settingsManager.liquidGlassCommandBar
                 )
+            #endif
         } else {
             return content
         }

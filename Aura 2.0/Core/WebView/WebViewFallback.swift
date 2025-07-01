@@ -17,6 +17,7 @@ import Combine
 class WebPageFallback: ObservableObject {
     private var webKitWebView: WKWebView?
     private var nativeWebPage: Any? // For future iOS versions
+    var useDeclarativeWebView: Bool
     
     @Published var url: URL?
     @Published var title: String?
@@ -24,8 +25,25 @@ class WebPageFallback: ObservableObject {
     @Published var isLoading: Bool = false
     @Published var themeColor: Color?
     
-    init() {
-        // Always use WKWebView for now
+    init(useDeclarativeWebView: Bool = true) {
+        self.useDeclarativeWebView = useDeclarativeWebView
+        
+        if #available(iOS 26.0, visionOS 26.0, *), useDeclarativeWebView {
+            // Check if the declarative WebView API is actually available
+            if NSClassFromString("WebPage") != nil {
+                setupDeclarativeWebView()
+            } else {
+                setupWKWebView()
+            }
+        } else {
+            setupWKWebView()
+        }
+    }
+    
+    @available(iOS 26.0, *)
+    private func setupDeclarativeWebView() {
+        // Future: Setup declarative WebView when API becomes available
+        // For now, fall back to WKWebView
         setupWKWebView()
     }
     
@@ -228,13 +246,26 @@ struct WebViewFallback: UIViewRepresentable {
     }
     
     func makeUIView(context: Context) -> UIView {
-        // For now, always use WKWebView since WebView doesn't exist yet
+        if #available(iOS 26.0, *), webPage.useDeclarativeWebView {
+            // Check if declarative WebView is available and user prefers it
+            if NSClassFromString("WebPage") != nil {
+                // Future: Return declarative WebView when API becomes available
+                // For now, fall back to WKWebView
+                return makeWKWebView()
+            } else {
+                return makeWKWebView()
+            }
+        } else {
+            return makeWKWebView()
+        }
+    }
+    
+    private func makeWKWebView() -> UIView {
         if let wkWebView = webPage.wkWebView {
             wkWebView.backgroundColor = UIColor.clear
             wkWebView.scrollView.backgroundColor = UIColor.clear
             return wkWebView
         }
-        
         return UIView()
     }
     
