@@ -37,16 +37,18 @@ struct ContentView: View {
         GeometryReader { geo in
             ZStack {
                 ZStack {
-                    if storageManager.selectedSpace?.adaptiveTheme ?? false && storageManager.currentTabs.first?.first?.page.themeColor != nil {
-                        storageManager.currentTabs.first?.first?.page.themeColor
-                    }
-                    else {
+                    if storageManager.selectedSpace?.adaptiveTheme ?? false,
+                       let color = storageManager.currentTabs.first?.first?.page.themeColor,
+                       color.isDark() {
+                        color.ignoresSafeArea()
+                    } else {
                         LinearGradient(
                             colors: backgroundGradientColors,
                             startPoint: .bottomLeading,
                             endPoint: .topTrailing
-                        ).ignoresSafeArea()
-                            .animation(.default)
+                        )
+                        .ignoresSafeArea()
+                        .animation(.default)
                     }
                     
                     HStack(spacing: 0) {

@@ -80,11 +80,11 @@ struct WebsitePanel: View {
                                                     }
                                                 } else {
                                                     // Show regular web view
-                                                    WebView(website.page)
+                                                    WebViewFallback(website.page)
 //                                                        .scrollEdgeEffectDisabled(true)
                                                         .modifier(ScrollEdgeDisabledIfAvailable())
+                                                        .modifier(WebViewModifiersIfAvailable(scrollPosition: $scrollPosition))
                                                         .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
-                                                        .webViewScrollPosition($scrollPosition)
                                                         .findNavigator(isPresented: $findNavigatorIsPresent)
                                                         .padding(.vertical, 10)
                                                         .frame(height: geo.size.height + 20)

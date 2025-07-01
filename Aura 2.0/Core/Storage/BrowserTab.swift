@@ -15,7 +15,7 @@ struct BrowserTab: Hashable, Identifiable {
     let id: UUID = UUID()
     var lastActiveTime: Date
     var tabType: TabType
-    var page: WebPage
+    var page: WebPageFallback
     var storedTab: StoredTab
 
     static func == (lhs: BrowserTab, rhs: BrowserTab) -> Bool {

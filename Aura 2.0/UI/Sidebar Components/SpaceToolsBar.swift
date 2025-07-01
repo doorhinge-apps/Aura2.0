@@ -21,6 +21,8 @@ struct SpaceToolsBar: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var spaces: [SpaceData]
     
+    @State var space: SpaceData
+    
     @FocusState var renameIsFocused: Bool
     
     @State var temporaryRenameSpace = ""
@@ -40,7 +42,7 @@ struct SpaceToolsBar: View {
                 ZStack {
                     TextField("", text: $temporaryRenameSpace)
                         .textFieldStyle(.plain)
-                        .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
+                        .foregroundStyle(Color(hex: space.textColor ?? "ffffff"))
                         .opacity(renameIsFocused ? 0.75: 0)
                         .tint(Color.white)
                         .font(.system(.caption, design: .rounded, weight: .medium))
@@ -71,11 +73,11 @@ struct SpaceToolsBar: View {
                     ZStack {
                         Color.white.opacity(uiViewModel.hoveringID == "sidebarIconChanging" ? 0.25: 0.0)
                         
-                        Image(systemName: storageManager.selectedSpace?.spaceIcon ?? "circle.fill")
+                        Image(systemName: space.spaceIcon ?? "circle.fill")
                             .resizable()
                             .scaledToFit()
                             .frame(width: 20, height: 20)
-                            .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
+                            .foregroundStyle(Color(hex: space.textColor ?? "ffffff"))
                             .opacity(uiViewModel.hoveringID == "sidebarIconChanging" ? 1.0: 0.5)
                         
                     }.frame(width: 40, height: 40).cornerRadius(7)
@@ -91,12 +93,12 @@ struct SpaceToolsBar: View {
                         }
                 }.buttonStyle(.plain)
                 
-                Text((!renameIsFocused ? storageManager.selectedSpace?.spaceName: temporaryRenameSpace) ?? "Untitled")
-                    .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
+                Text((!renameIsFocused ? space.spaceName: temporaryRenameSpace) ?? "Untitled")
+                    .foregroundStyle(Color(hex: space.textColor ?? "ffffff"))
                     .opacity(!renameIsFocused ? 1.0: 0)
                     .font(.system(.caption, design: .rounded, weight: .medium))
                     .onTapGesture {
-                        temporaryRenameSpace = storageManager.selectedSpace?.spaceName ?? ""
+                        temporaryRenameSpace = space.spaceName ?? ""
                         temporaryRenameSpace = String(temporaryRenameSpace)
                         renameIsFocused = true
                     }
@@ -115,7 +117,7 @@ struct SpaceToolsBar: View {
                     })
                 }
                 
-                Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff")
+                Color(hex: space.textColor ?? "ffffff")
                     .opacity(0.5)
                     .frame(height: 1)
                     .cornerRadius(10)
@@ -130,7 +132,7 @@ struct SpaceToolsBar: View {
                         })
                         
                         Button(action: {
-                            temporaryRenameSpace = storageManager.selectedSpace?.spaceName ?? ""
+                            temporaryRenameSpace = space.spaceName ?? ""
                             temporaryRenameSpace = String(temporaryRenameSpace)
                             renameIsFocused = true
                         }, label: {
@@ -140,7 +142,7 @@ struct SpaceToolsBar: View {
                         Button(action: {
                             presentIcons.toggle()
                         }, label: {
-                            Label("Change Space Icon", systemImage: storageManager.selectedSpace?.spaceIcon ?? "circle.fill")
+                            Label("Change Space Icon", systemImage: space.spaceIcon ?? "circle.fill")
                         })
                     }
                 } label: {
@@ -151,7 +153,7 @@ struct SpaceToolsBar: View {
                             .resizable()
                             .scaledToFit()
                             .frame(width: 20, height: 20)
-                            .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
+                            .foregroundStyle(Color(hex: space.textColor ?? "ffffff"))
                             .opacity(uiViewModel.hoveringID == "spaceActionsMenu" ? 1.0: 0.5)
                         
                     }.frame(width: 40, height: 40).cornerRadius(7)
@@ -185,6 +187,20 @@ struct SpaceToolsBar: View {
                             get: { selectedSpace.spaceBackgroundColors },
                             set: { selectedSpace.spaceBackgroundColors = $0 }
                         )
+                        
+                        let adaptiveThemeBinding = Binding<Bool>(
+                            get: {
+                                storageManager.selectedSpace?.adaptiveTheme ?? false
+                            },
+                            set: { newValue in
+                                if var space = storageManager.selectedSpace {
+                                    space.adaptiveTheme = newValue
+                                    storageManager.selectedSpace = space
+                                }
+                            }
+                        )
+                        
+                        //Toggle("Adaptive Theme", isOn: adaptiveThemeBinding)
 
                         ForEach(colorsBinding.wrappedValue.indices, id: \.self) { idx in
                             HStack {
@@ -262,8 +278,4 @@ struct SpaceToolsBar: View {
         let hexes = storageManager.selectedSpace?.spaceBackgroundColors ?? ["8041E6", "A0F2FC"]
         return hexes.map { Color(hex: $0) }
     }
-}
-
-#Preview {
-    SpaceToolsBar()
 }

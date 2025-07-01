@@ -57,6 +57,7 @@
 		B9D455132E0667C900CB1E24 /* FavoriteTabRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D455122E0667C900CB1E24 /* FavoriteTabRowView.swift */; };
 		B9D455152E06A69900CB1E24 /* SearchSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D455142E06A69900CB1E24 /* SearchSettings.swift */; };
 		B9D455172E06A80800CB1E24 /* someKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9D455162E06A80800CB1E24 /* someKey.swift */; };
+		B9EE88F72E1315B300AB6ACE /* WebViewFallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9EE88F52E1315B300AB6ACE /* WebViewFallback.swift */; };
 		B9F078812E0B96A400723BA5 /* ScrollEdge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F078802E0B96A400723BA5 /* ScrollEdge.swift */; };
 		B9F078832E0B973E00723BA5 /* GlassEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F078822E0B973E00723BA5 /* GlassEffect.swift */; };
 /* End PBXBuildFile section */
@@ -133,6 +134,7 @@
 		B9D455122E0667C900CB1E24 /* FavoriteTabRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteTabRowView.swift; sourceTree = "<group>"; };
 		B9D455142E06A69900CB1E24 /* SearchSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSettings.swift; sourceTree = "<group>"; };
 		B9D455162E06A80800CB1E24 /* someKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = someKey.swift; path = "Aura 2.0/UI/Settings/Subpages/someKey.swift"; sourceTree = SOURCE_ROOT; };
+		B9EE88F52E1315B300AB6ACE /* WebViewFallback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewFallback.swift; sourceTree = "<group>"; };
 		B9F078802E0B96A400723BA5 /* ScrollEdge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollEdge.swift; sourceTree = "<group>"; };
 		B9F078822E0B973E00723BA5 /* GlassEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassEffect.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -254,6 +256,7 @@
 				B9BB57402DF8D10300B7E1E7 /* Storage */,
 				B9B004FE2DF9836000B79152 /* ViewModels */,
 				B9B004F12DF96C6D00B79152 /* Browsing Management */,
+				B9EE88F62E1315B300AB6ACE /* WebView */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -405,6 +408,14 @@
 				B9B004E92DF8D1F400B79152 /* TabType.swift */,
 			);
 			path = Storage;
+			sourceTree = "<group>";
+		};
+		B9EE88F62E1315B300AB6ACE /* WebView */ = {
+			isa = PBXGroup;
+			children = (
+				B9EE88F52E1315B300AB6ACE /* WebViewFallback.swift */,
+			);
+			path = WebView;
 			sourceTree = "<group>";
 		};
 		B9F0787F2E0B965D00723BA5 /* Conditional Modifiers */ = {
@@ -574,6 +585,7 @@
 				B95A80D72E02BD10007FE1F4 /* MotionManager.swift in Sources */,
 				B95A809E2DFD26BA007FE1F4 /* Toolbar.swift in Sources */,
 				B9B0051D2DFA834500B79152 /* TabsManager.swift in Sources */,
+				B9EE88F72E1315B300AB6ACE /* WebViewFallback.swift in Sources */,
 				B9B0050D2DFA71BF00B79152 /* WebMetadata.swift in Sources */,
 				B9B004FA2DF97CB400B79152 /* WebsitePanel.swift in Sources */,
 				B95A80D92E02C0DC007FE1F4 /* HoverDisabledVision.swift in Sources */,
@@ -665,7 +677,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -705,7 +717,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.4;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

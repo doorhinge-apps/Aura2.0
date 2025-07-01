@@ -9,6 +9,7 @@
 
 
 import SwiftUI
+import WebKit
 
 struct ScrollEdgeIfAvailable: ViewModifier {
     func body(content: Content) -> some View {
@@ -27,6 +28,19 @@ struct ScrollEdgeDisabledIfAvailable: ViewModifier {
         if #available(iOS 26, *) {
             content
                 .scrollEdgeEffectDisabled(true)
+        }
+        else {
+            content
+        }
+    }
+}
+
+struct WebViewModifiersIfAvailable: ViewModifier {
+    @Binding var scrollPosition: ScrollPosition
+    func body(content: Content) -> some View {
+        if #available(iOS 26, *) {
+            content
+                .webViewScrollPosition($scrollPosition)
         }
         else {
             content

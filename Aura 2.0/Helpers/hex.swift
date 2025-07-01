@@ -41,4 +41,16 @@ extension Color {
         uiColor.getRed(&r, green: &g, blue: &b, alpha: &a)
         return String(format: "%02X%02X%02X", Int(r * 255), Int(g * 255), Int(b * 255))
     }
+    
+    func isDark(threshold: Double = 0.75) -> Bool {
+        let uiColor = UIColor(self)
+        var r: CGFloat = 0
+        var g: CGFloat = 0
+        var b: CGFloat = 0
+        var a: CGFloat = 0
+        
+        uiColor.getRed(&r, green: &g, blue: &b, alpha: &a)
+        let brightness = (0.299 * r + 0.587 * g + 0.114 * b)
+        return brightness < threshold
+    }
 }
