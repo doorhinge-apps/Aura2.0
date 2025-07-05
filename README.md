@@ -5,7 +5,7 @@ Aura is a browser. Our goal is to bring the customizable and powerful experience
 Download on TestFlight: [testflight.apple.com/join/d6qMDVDH](https://testflight.apple.com/join/d6qMDVDH)
 
 # About Aura Browser
-Aura is currently in active development. This repository is the rewritten version of the browser designed for iOS 26. For iOS 17 and 18 support, check out the [version 1.0 repo](https://github.com/doorhinge-apps/Aura-Browser). 
+Aura is currently in active development. This repository is the rewritten version of the browser designed for iOS 26 and iOS 18. For iOS 17 support, check out the [version 1.0 repo](https://github.com/doorhinge-apps/Aura-Browser). 
 
 Despite being focused on iPadOS, Aura also supports iOS, macOS, and VisionOS. Full cross platform support is implemented in version 1.0 and will be coming to version 2.0 soon.
 
