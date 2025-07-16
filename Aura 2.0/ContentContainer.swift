@@ -22,35 +22,45 @@ struct ContentContainerView: View {
     var body: some View {
         Group {
             if let selected = spaces.first {
-                ContentView(selectedSpace: selected)
-                    //.scrollEdgeEffectDisabled(true)
-                    .modifier(ScrollEdgeDisabledIfAvailable())
-                    .modifier(ScrollEdgeIfAvailable())
-                    //.scrollEdgeEffectStyle(.hard, for: .top)
-                    .statusBarHidden(true)
-                    .onAppear {
-                        let cutoff = Date().addingTimeInterval(-Double(settingsManager.closePrimaryTabsAfter) * 60)
+                ZStack {
+                    if UIDevice.current.userInterfaceIdiom == .phone {
+                        MobileContent(selectedSpace: selected)
+                            .modifier(ScrollEdgeDisabledIfAvailable())
+                            .modifier(ScrollEdgeIfAvailable())
+                            .statusBarHidden(true)
+                            .ignoresSafeArea()
+                    }
+                    else {
+                        ContentView(selectedSpace: selected)
+                        //.scrollEdgeEffectDisabled(true)
+                            .modifier(ScrollEdgeDisabledIfAvailable())
+                            .modifier(ScrollEdgeIfAvailable())
+                        //.scrollEdgeEffectStyle(.hard, for: .top)
+                            .statusBarHidden(true)
+                    }
+                }.onAppear {
+                    let cutoff = Date().addingTimeInterval(-Double(settingsManager.closePrimaryTabsAfter) * 60)
 
-                        for space in spaces {
-                            // Clean up old tabs from the new group structure
-                            cleanupOldTabsFromGroups(space: space, cutoff: cutoff, modelContext: modelContext)
-                            
-                            // Also clean up legacy tabs for migration
-                            let oldTabs = space.primaryTabs.filter { $0.timestamp < cutoff }
-                            for tab in oldTabs {
-                                if let spaceTabs = space.tabs,
-                                   let index = spaceTabs.firstIndex(where: { $0.id == tab.id }) {
-                                    space.tabs?.remove(at: index)
-                                    modelContext.delete(tab)
-                                }
+                    for space in spaces {
+                        // Clean up old tabs from the new group structure
+                        cleanupOldTabsFromGroups(space: space, cutoff: cutoff, modelContext: modelContext)
+                        
+                        // Also clean up legacy tabs for migration
+                        let oldTabs = space.primaryTabs.filter { $0.timestamp < cutoff }
+                        for tab in oldTabs {
+                            if let spaceTabs = space.tabs,
+                               let index = spaceTabs.firstIndex(where: { $0.id == tab.id }) {
+                                space.tabs?.remove(at: index)
+                                modelContext.delete(tab)
                             }
                         }
-                        
-                        try? modelContext.save()
                     }
-                    .onOpenURL { url in
-                        uiViewModel.currentSelectedTab = storageManager.newTab(unformattedString: url.absoluteString, space: selected, modelContext: modelContext).id
-                    }
+                    
+                    try? modelContext.save()
+                }
+                .onOpenURL { url in
+                    uiViewModel.currentSelectedTab = storageManager.newTab(unformattedString: url.absoluteString, space: selected, modelContext: modelContext).id
+                }
             } else {
                 ProgressView()
                     .task {

@@ -36,10 +36,14 @@ class UIViewModel: ObservableObject {
     
     @Published var showSettings = false
     
+    @Published var showStartpage = false
+    
     @Published var selectedTabs: [StoredTab]?
     
     // Search suggestions from Google
     @Published var searchSuggestions: [String] = []
+    
+    @Published var currentTabTypeMobile: TabType = .primary
     
     func updateSearchSuggestions() {
         Task {
