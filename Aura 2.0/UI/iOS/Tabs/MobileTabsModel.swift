@@ -1,64 +1,85 @@
 //
-// Aura
-// MobileTabsViewModel.swift
+// Aura 2.0
+// MobileTabsModel.swift
 //
 // Created by Reyna Myers on 26/10/24
 //
 // Copyright ©2024 DoorHinge Apps.
 //
 
-
 import SwiftUI
+import Combine
 
+/// Mobile-specific UI state for iOS tabs interface
+/// Tab data and management is handled by StorageManager and UIViewModel
 class MobileTabsModel: ObservableObject {
     
-    @Published var browseForMeTabs = [] as [String]
+    // MARK: - Mobile-specific UI State
     
-    @Published var tabs: [(id: UUID, url: String)]
-    @Published var pinnedTabs: [(id: UUID, url: String)]
-    @Published var favoriteTabs: [(id: UUID, url: String)]
+    /// Browse for Me functionality - tracks which tabs have this enabled
+    @Published var browseForMeTabs: [String] = []
+    
+    // MARK: - Gesture & Animation State
+    
+    /// Drag offsets for tab cards during gestures
     @Published var offsets: [UUID: CGSize] = [:]
+    
+    /// Rotation tilts for tab cards during drag
     @Published var tilts: [UUID: Double] = [:]
+    
+    /// Z-index values for tab layering during interactions
     @Published var zIndexes: [UUID: Double] = [:]
     
-    @Published var selectedTab: (id: UUID, url: String)?
-    @Published var draggedTab: (id: UUID, url: String)?
+    /// Currently dragged tab for reordering
+    @Published var draggedTab: BrowserTab?
     
-    @StateObject var settings = SettingsVariables()
-    @StateObject var webViewManager = WebViewManager()
+    // MARK: - Fullscreen Web View State
     
-    @Published var selectedTabsSection: TabLocations = .tabs
-    
-    @FocusState var newTabFocus: Bool
-    @Published var newTabSearch = ""
-    @Published var fromTabSearch = ""
-    
+    /// Whether a tab is displayed in fullscreen mode
     @Published var fullScreenWebView = false
     
-    @Published var suggestions = [] as [String]
-    @Published var xmlString = ""
-    
-    @Published var offsetTest = 0 as CGFloat
-    
+    /// Drag offset for fullscreen web view
     @Published var tabOffset = CGSize.zero
+    
+    /// Scale factor for fullscreen web view
     @Published var tabScale: CGFloat = 1.0
     
+    /// Whether a gesture is currently active
+    @Published var gestureStarted = false
+    
+    /// Exponential damping factor for gestures
     @Published var exponentialThing = 1.0
     
+    // MARK: - Mobile UI Controls
+    
+    /// Whether new tab creation was triggered from within a tab
     @Published var newTabFromTab = false
     
-    @Published var gestureStarted = false
-    @Published var closeTabScrollDisabled = false
+    /// Counter for disabling scroll during tab close gestures
     @Published var closeTabScrollDisabledCounter = 0
     
-    @Published var webURL = ""
-    @Published var displayWebURL = ""
+    // MARK: - Grid Display
     
+    /// Number of columns in the tab grid
     @AppStorage("gridColumnCount") var gridColumnCount = 2.0
     
-    init() {
-        self._tabs = Published(initialValue: [])
-        self._pinnedTabs = Published(initialValue: [])
-        self._favoriteTabs = Published(initialValue: [])
+    // MARK: - Helper Methods
+    
+    /// Reset all gesture-related state
+    func resetGestureState() {
+        offsets.removeAll()
+        tilts.removeAll()
+        zIndexes.removeAll()
+        draggedTab = nil
+        gestureStarted = false
+        exponentialThing = 1.0
+    }
+    
+    /// Reset fullscreen state
+    func resetFullscreenState() {
+        fullScreenWebView = false
+        tabOffset = .zero
+        tabScale = 1.0
+        newTabFromTab = false
     }
 }

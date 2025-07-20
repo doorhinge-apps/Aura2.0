@@ -13,16 +13,34 @@ import SwiftData
 
 struct TabOverview: View {
     @Namespace var namespace
-    @Query(sort: \SpaceStorage.spaceIndex) var spaces: [SpaceStorage]
+    @Query(sort: \SpaceData.spaceOrder) var spaces: [SpaceData]
     @Environment(\.modelContext) private var modelContext
     
     @Binding var selectedSpaceIndex: Int
     
-    @EnvironmentObject var variables: ObservableVariables
     @EnvironmentObject var mobileTabs: MobileTabsModel
+    @EnvironmentObject var storageManager: StorageManager
+    @EnvironmentObject var uiViewModel: UIViewModel
+    @EnvironmentObject var settingsManager: SettingsManager
     
     @FocusState var newTabFocus: Bool
     @FocusState var inTabFocus: Bool
+    
+    @State private var inTabSearchText: String = ""
+    
+    // Single web page for fullscreen viewing
+    @State private var fullscreenWebPage = WebPageFallback()
+    
+    // MARK: - Computed Properties
+    
+    private var currentTabURL: String {
+        guard let selectedTabId = uiViewModel.currentSelectedTab,
+              let currentSpace = storageManager.selectedSpace,
+              let selectedStoredTab = findTabById(selectedTabId, in: currentSpace) else {
+            return ""
+        }
+        return selectedStoredTab.url
+    }
     
     init(selectedSpaceIndex: Binding<Int>) {
         self._selectedSpaceIndex = selectedSpaceIndex
@@ -31,12 +49,12 @@ struct TabOverview: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                if selectedSpaceIndex < spaces.count && (!spaces[selectedSpaceIndex].startHex.isEmpty && !spaces[selectedSpaceIndex].endHex.isEmpty) {
-                    LinearGradient(colors: [Color(hex: spaces[selectedSpaceIndex].startHex), Color(hex: spaces[selectedSpaceIndex].endHex)], startPoint: .bottomLeading, endPoint: .topTrailing).ignoresSafeArea()
+                if selectedSpaceIndex < spaces.count && !spaces[selectedSpaceIndex].spaceBackgroundColors.isEmpty {
+                    LinearGradient(colors: spaces[selectedSpaceIndex].spaceBackgroundColors.map { Color(hex: $0) }, startPoint: .bottomLeading, endPoint: .topTrailing).ignoresSafeArea()
                         .animation(.linear)
                 }
                 else {
-                    LinearGradient(colors: [variables.startColor, variables.endColor], startPoint: .bottomLeading, endPoint: .topTrailing).ignoresSafeArea()
+                    LinearGradient(colors: [Color.blue, Color.purple], startPoint: .bottomLeading, endPoint: .topTrailing).ignoresSafeArea()
                         .animation(.linear)
                 }
                 
@@ -54,7 +72,9 @@ struct TabOverview: View {
                 })
                 .onOpenURL { url in
                     if url.absoluteString.starts(with: "aura://") {
-                        //variables.navigationState.createNewWebView(withRequest: URLRequest(url: URL(string: "https\(url.absoluteString.dropFirst(4))")!))
+                        // Handle aura:// scheme URLs
+                        let httpsURL = "https\(url.absoluteString.dropFirst(4))"
+                        createTab(url: httpsURL, isBrowseForMeTab: false)
                     }
                     else {
                         createTab(url: url.absoluteString, isBrowseForMeTab: false)
@@ -65,30 +85,52 @@ struct TabOverview: View {
                 .scrollDisabled(mobileTabs.closeTabScrollDisabledCounter > 50)
                 
                 
-                TabTypeSwitcher()
+                TabTypeSwitcherOld()
                 
                 
                 if mobileTabs.fullScreenWebView {
-                    WebsiteView(namespace: namespace, url: $mobileTabs.webURL, webViewManager: mobileTabs.webViewManager, parentGeo: geo, webURL: $mobileTabs.webURL, fullScreenWebView: $mobileTabs.fullScreenWebView, tab: mobileTabs.selectedTab!, browseForMeTabs: $mobileTabs.browseForMeTabs)
+                    if let selectedTabId = uiViewModel.currentSelectedTab,
+                       let currentSpace = storageManager.selectedSpace,
+                       let selectedStoredTab = findTabById(selectedTabId, in: currentSpace) {
+                        let browserTab = BrowserTab(
+                            lastActiveTime: selectedStoredTab.timestamp,
+                            tabType: selectedStoredTab.tabType,
+                            page: fullscreenWebPage,
+                            storedTab: selectedStoredTab
+                        )
+                        WebsiteView(namespace: namespace, url: Binding(
+                            get: { selectedStoredTab.url },
+                            set: { _ in }
+                        ), webViewManager: nil, parentGeo: geo, webURL: Binding(
+                            get: { selectedStoredTab.url },
+                            set: { _ in }
+                        ), fullScreenWebView: $mobileTabs.fullScreenWebView, tab: browserTab, browseForMeTabs: $mobileTabs.browseForMeTabs)
                         .offset(x: mobileTabs.tabOffset.width, y: mobileTabs.tabOffset.height)
                         .scaleEffect(mobileTabs.tabScale)
+                        .onAppear {
+                            // Load the URL when fullscreen appears
+                            if let url = URL(string: selectedStoredTab.url) {
+                                fullscreenWebPage.load(URLRequest(url: url))
+                            }
+                        }
+                    }
                 }
                 
                 VStack {
                     if !mobileTabs.fullScreenWebView {
                         HStack {
                             Button(action: {
-                                variables.showSettings = true
+                                uiViewModel.showSettings = true
                             }, label: {
                                 Image(systemName: "gearshape")
                                 
                             }).buttonStyle(ToolbarButtonStyle())
-                                .sheet(isPresented: $variables.showSettings, content: {
-                                    if selectedSpaceIndex < spaces.count && (!spaces[selectedSpaceIndex].startHex.isEmpty && !spaces[selectedSpaceIndex].endHex.isEmpty) {
-                                        NewSettings(presentSheet: $variables.showSettings, startHex: spaces[selectedSpaceIndex].startHex, endHex: spaces[selectedSpaceIndex].endHex)
+                                .sheet(isPresented: $uiViewModel.showSettings, content: {
+                                    if selectedSpaceIndex < spaces.count && !spaces[selectedSpaceIndex].spaceBackgroundColors.isEmpty {
+                                        Settings()
                                     }
                                     else {
-                                        NewSettings(presentSheet: $variables.showSettings, startHex: variables.startHex, endHex: variables.endHex)
+                                        Settings()
                                     }
                                 })
                             
@@ -102,13 +144,13 @@ struct TabOverview: View {
                     ScrollView(showsIndicators: false) {
                         VStack {
                             if newTabFocus {
-                                ForEach(Array(mobileTabs.suggestions.prefix(5)), id:\.self) { suggestion in
+                                ForEach(Array(uiViewModel.searchSuggestions.prefix(5)), id:\.self) { suggestion in
                                     HStack {
                                         Button(action: {
                                             withAnimation {
                                                 newTabFocus = false
                                                 createTab(url: formatURL(from: suggestion), isBrowseForMeTab: false)
-                                                mobileTabs.newTabSearch = ""
+                                                uiViewModel.commandBarText = ""
                                             }
                                         }, label: {
                                             ZStack {
@@ -133,7 +175,7 @@ struct TabOverview: View {
                                                         withAnimation {
                                                             newTabFocus = false
                                                             createTab(url: formatURL(from: suggestion), isBrowseForMeTab: true)
-                                                            mobileTabs.newTabSearch = ""
+                                                            uiViewModel.commandBarText = ""
                                                         }
                                                     }, label: {
                                                         
@@ -147,21 +189,15 @@ struct TabOverview: View {
                                 }.animation(.easeInOut)
                             }
                         }.rotationEffect(Angle(degrees: 180))
-                            .onChange(of: mobileTabs.newTabSearch, perform: { value in
-                                Task {
-                                    await fetchXML(searchRequest: mobileTabs.newTabSearch)
-                                }
-                                
-                                Task {
-                                    await mobileTabs.suggestions = formatXML(from: mobileTabs.xmlString)
-                                }
+                            .onChange(of: uiViewModel.commandBarText, perform: { value in
+                                uiViewModel.updateSearchSuggestions()
                             })
                             .onChange(of: newTabFocus, perform: { newValue in
                                 if mobileTabs.newTabFromTab && !newTabFocus {
                                     mobileTabs.newTabFromTab = false
                                 }
                                 if !newTabFocus {
-                                    mobileTabs.suggestions.removeAll()
+                                    uiViewModel.searchSuggestions.removeAll()
                                 }
                             })
                     }.rotationEffect(Angle(degrees: 180))
@@ -170,7 +206,7 @@ struct TabOverview: View {
                             
                             if newTabFocus {
                                 newTabFocus = false
-                                mobileTabs.newTabSearch = ""
+                                uiViewModel.commandBarText = ""
                             }
                         })
                     
@@ -178,11 +214,7 @@ struct TabOverview: View {
                         Rectangle()
                             .fill(.thinMaterial)
                             .frame(height: newTabFocus || inTabFocus ? 75: 150)
-                            .onChange(of: mobileTabs.webURL, {
-                                if mobileTabs.fullScreenWebView, let selectedTab = mobileTabs.selectedTab {
-                                    updateTabURL(for: selectedTab.id, with: mobileTabs.webURL)
-                                }
-                            })
+                            // Tab URL updates are handled automatically by StorageManager
                         
                         VStack {
                             if !mobileTabs.fullScreenWebView || mobileTabs.newTabFromTab {
@@ -193,7 +225,7 @@ struct TabOverview: View {
                                             RoundedRectangle(cornerRadius: 15)
                                                 .fill(.white)
                                             
-                                            if mobileTabs.newTabSearch.isEmpty {
+                                            if uiViewModel.commandBarText.isEmpty {
                                                 Label("Search or enter url", systemImage: "magnifyingglass")
                                                     .foregroundColor(Color(hex: "4D4D4D"))
                                                     .font(.system(.headline, design: .default, weight: .bold))
@@ -209,7 +241,7 @@ struct TabOverview: View {
                                             newTabFocus = true
                                         }
                                         
-                                        TextField("", text: $mobileTabs.newTabSearch)
+                                        TextField("", text: $uiViewModel.commandBarText)
                                             .focused($newTabFocus)
                                             .padding(.horizontal, 10)
                                             .textFieldStyle(.plain)
@@ -230,8 +262,8 @@ struct TabOverview: View {
                                                 withAnimation {
                                                     mobileTabs.newTabFromTab = false
                                                     newTabFocus = false
-                                                    createTab(url: formatURL(from: mobileTabs.newTabSearch), isBrowseForMeTab: false)
-                                                    mobileTabs.newTabSearch = ""
+                                                    createTab(url: formatURL(from: uiViewModel.commandBarText), isBrowseForMeTab: false)
+                                                    uiViewModel.commandBarText = ""
                                                 }
                                             })
                                         
@@ -241,7 +273,7 @@ struct TabOverview: View {
                                         .frame(width: 10)
                                     
                                     Button(action: {
-                                        if mobileTabs.newTabSearch == "" && newTabFocus {
+                                        if uiViewModel.commandBarText == "" && newTabFocus {
                                             newTabFocus = false
                                             mobileTabs.newTabFromTab = false
                                         }
@@ -253,12 +285,12 @@ struct TabOverview: View {
                                             withAnimation {
                                                 mobileTabs.newTabFromTab = false
                                                 newTabFocus = false
-                                                createTab(url: formatURL(from: mobileTabs.newTabSearch), isBrowseForMeTab: false)
-                                                mobileTabs.newTabSearch = ""
+                                                createTab(url: formatURL(from: uiViewModel.commandBarText), isBrowseForMeTab: false)
+                                                uiViewModel.commandBarText = ""
                                             }
                                         }
                                     }, label: {
-                                        if mobileTabs.newTabSearch == "" && newTabFocus {
+                                        if uiViewModel.commandBarText == "" && newTabFocus {
                                             Image(systemName: "xmark")
                                         }
                                         else {
@@ -266,21 +298,22 @@ struct TabOverview: View {
                                         }
                                     }).buttonStyle(PlusButtonStyle())
                                         .onAppear() {
-                                            if mobileTabs.settings.commandBarOnLaunch {
-                                                withAnimation {
-                                                    newTabFocus = true
-                                                }
-                                            }
+                                            // TODO: Add commandBarOnLaunch setting to SettingsManager
+                                            // if settingsManager.commandBarOnLaunch {
+                                            //     withAnimation {
+                                            //         newTabFocus = true
+                                            //     }
+                                            // }
                                         }
                                         .scaleEffect(!newTabFocus ? 0: 1)
                                         .frame(width: !newTabFocus ? 0: .infinity)
                                     
                                 }//.padding(.leading, newTabFocus ? 10: 0)
                                 .padding(.horizontal, 15)
-                                    .onChange(of: mobileTabs.newTabSearch, {
+                                    .onChange(of: uiViewModel.commandBarText, {
                                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
-                                            if mobileTabs.newTabSearch == "" {
-                                                mobileTabs.suggestions.removeAll()
+                                            if uiViewModel.commandBarText == "" {
+                                                uiViewModel.searchSuggestions.removeAll()
                                             }
                                         })
                                     })
@@ -298,7 +331,7 @@ struct TabOverview: View {
                                                     Capsule()
                                                         .fill(.white)
                                                     
-                                                    if mobileTabs.fromTabSearch.isEmpty {
+                                                    if inTabSearchText.isEmpty {
                                                         Label("Search or enter url", systemImage: inTabFocus ? "": "magnifyingglass")
                                                             .foregroundColor(Color(hex: "4D4D4D"))
                                                             .font(.system(.headline, design: .rounded, weight: .bold))
@@ -314,7 +347,7 @@ struct TabOverview: View {
                                                     inTabFocus = true
                                                 }
                                                 
-                                                TextField("", text: $mobileTabs.fromTabSearch)
+                                                TextField("", text: $inTabSearchText)
                                                     .focused($inTabFocus)
                                                     .multilineTextAlignment(inTabFocus ? .leading: .center)
                                                     .padding(.horizontal, 10)
@@ -336,9 +369,15 @@ struct TabOverview: View {
                                                     .onSubmit({
                                                         withAnimation {
                                                             DispatchQueue.main.async {
-                                                                mobileTabs.webViewManager.load(urlString: formatURL(from: mobileTabs.fromTabSearch))
+                                                                if let selectedTabId = uiViewModel.currentSelectedTab,
+                                                                   let currentSpace = storageManager.selectedSpace,
+                                                                   let selectedStoredTab = findTabById(selectedTabId, in: currentSpace),
+                                                                   let url = URL(string: formatURL(from: inTabSearchText)) {
+                                                                    selectedStoredTab.url = formatURL(from: inTabSearchText)
+                                                                    try? modelContext.save()
+                                                                }
                                                                 print("Loading url:")
-                                                                print(formatURL(from: mobileTabs.fromTabSearch))
+                                                                print(formatURL(from: inTabSearchText))
                                                                 
                                                                 mobileTabs.newTabFromTab = false
                                                                 inTabFocus = false
@@ -346,10 +385,10 @@ struct TabOverview: View {
                                                         }
                                                     })
                                                     .onAppear() {
-                                                        mobileTabs.fromTabSearch = unformatURL(url: mobileTabs.webURL)
+                                                        inTabSearchText = unformatURL(url: currentTabURL)
                                                     }
-                                                    .onChange(of: mobileTabs.webURL) { oldValue, newValue in
-                                                        mobileTabs.fromTabSearch = unformatURL(url: mobileTabs.webURL)
+                                                    .onChange(of: currentTabURL) { oldValue, newValue in
+                                                        inTabSearchText = unformatURL(url: currentTabURL)
                                                     }
                                                 
                                             }.frame(height: 50)
@@ -359,7 +398,7 @@ struct TabOverview: View {
                                                 .frame(width: 10)
                                             
                                             Button(action: {
-                                                if mobileTabs.fromTabSearch == "" && inTabFocus {
+                                                if inTabSearchText == "" && inTabFocus {
                                                     inTabFocus = false
                                                     mobileTabs.newTabFromTab = false
                                                 }
@@ -369,14 +408,20 @@ struct TabOverview: View {
                                                     }
                                                 } else {
                                                     withAnimation {
-                                                        mobileTabs.webViewManager.load(urlString: formatURL(from: mobileTabs.fromTabSearch))
+                                                        if let selectedTabId = uiViewModel.currentSelectedTab,
+                                                           let currentSpace = storageManager.selectedSpace,
+                                                           let selectedStoredTab = findTabById(selectedTabId, in: currentSpace),
+                                                           let url = URL(string: formatURL(from: inTabSearchText)) {
+                                                            selectedStoredTab.url = formatURL(from: inTabSearchText)
+                                                            try? modelContext.save()
+                                                        }
                                                         mobileTabs.newTabFromTab = false
                                                         inTabFocus = false
                                                         //mobileTabs.newTabSearch = ""
                                                     }
                                                 }
                                             }, label: {
-                                                if mobileTabs.fromTabSearch == "" && inTabFocus {
+                                                if inTabSearchText == "" && inTabFocus {
                                                     Image(systemName: "xmark")
                                                 }
                                                 else {
@@ -388,10 +433,10 @@ struct TabOverview: View {
                                             
                                         }//.padding(.leading, newTabFocus ? 10: 0)
                                         .padding(.horizontal, 15)
-                                            .onChange(of: mobileTabs.fromTabSearch, {
+                                            .onChange(of: inTabSearchText, {
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1, execute: {
-                                                    if mobileTabs.fromTabSearch == "" {
-                                                        mobileTabs.suggestions.removeAll()
+                                                    if inTabSearchText == "" {
+                                                        uiViewModel.searchSuggestions.removeAll()
                                                     }
                                                 })
                                             })
@@ -432,7 +477,6 @@ struct TabOverview: View {
                                                         //self.presentationMode.wrappedValue.dismiss()
                                                         withAnimation {
                                                             mobileTabs.fullScreenWebView = false
-                                                            mobileTabs.webURL = ""
                                                         }
                                                     }
                                                     withAnimation(.spring()) {
@@ -446,23 +490,23 @@ struct TabOverview: View {
                                     if !newTabFocus && !inTabFocus {
                                         HStack {
                                             Button(action: {
-                                                mobileTabs.webViewManager.goBack()
+                                                // Navigation handled by web view in fullscreen mode
                                             }, label: {
                                                 Image(systemName: "chevron.left")
                                             })
-                                            .disabled(!mobileTabs.webViewManager.canGoBack())
-                                            .foregroundStyle(!mobileTabs.webViewManager.canGoBack() ? Color.gray: Color(.systemBlue))
+                                            .disabled(true) // TODO: Implement navigation state tracking
+                                            .foregroundStyle(Color.gray)
                                             .shadow(color: .white.opacity(0.5), radius: 2, x: 0, y: 0)
                                             
                                             Spacer()
                                             
                                             Button(action: {
-                                                mobileTabs.webViewManager.goForward()
+                                                // Navigation handled by web view in fullscreen mode
                                             }, label: {
                                                 Image(systemName: "chevron.right")
                                             })
-                                            .disabled(!mobileTabs.webViewManager.canGoForward())
-                                            .foregroundStyle(!mobileTabs.webViewManager.canGoForward() ? Color.gray: Color(.systemBlue))
+                                            .disabled(true) // TODO: Implement navigation state tracking
+                                            .foregroundStyle(Color.gray)
                                             .shadow(color: .white.opacity(0.5), radius: 5, x: 0, y: 0)
                                             
                                             Spacer()
@@ -480,8 +524,8 @@ struct TabOverview: View {
                                                     } else {
                                                         withAnimation {
                                                             newTabFocus = false
-                                                            createTab(url: formatURL(from: mobileTabs.newTabSearch), isBrowseForMeTab: false)
-                                                            mobileTabs.newTabSearch = ""
+                                                            createTab(url: formatURL(from: uiViewModel.commandBarText), isBrowseForMeTab: false)
+                                                            uiViewModel.commandBarText = ""
                                                         }
                                                     }
                                                 })
@@ -612,16 +656,18 @@ struct TabOverview: View {
         
         Task {
             if spaces.count <= 0 {
-                await modelContext.insert(SpaceStorage(spaceIndex: spaces.count, spaceName: "Untitled", spaceIcon: "circle.fill", favoritesUrls: [], pinnedUrls: [], tabUrls: []))
+                let newSpace = SpaceData()
+                newSpace.spaceName = "Untitled"
+                newSpace.spaceIcon = "circle.fill"
+                newSpace.spaceOrder = 0
+                modelContext.insert(newSpace)
+                try? modelContext.save()
             }
         }
         
+        // Update the storage manager's selected space
         if spaces.count > selectedSpaceIndex {
-            var temporaryTabs = spaces[selectedSpaceIndex].tabUrls.map { (id: UUID(), url: $0) }
-            //tabs = temporaryTabs.reversed()
-            mobileTabs.tabs = temporaryTabs
-            mobileTabs.pinnedTabs = spaces[selectedSpaceIndex].pinnedUrls.map { (id: UUID(), url: $0) }
-            mobileTabs.favoriteTabs = spaces[selectedSpaceIndex].favoritesUrls.map { (id: UUID(), url: $0) }
+            storageManager.selectedSpace = spaces[selectedSpaceIndex]
         }
     }
     
@@ -631,37 +677,30 @@ struct TabOverview: View {
         }
         
         if spaces.count > selectedSpaceIndex {
-            // Extracting URLs from tabs, pinnedTabs, and favoriteTabs arrays
-            let extractedTabUrls = mobileTabs.tabs.map { $0.url }
-            let extractedPinnedUrls = mobileTabs.pinnedTabs.map { $0.url }
-            let extractedFavoriteUrls = mobileTabs.favoriteTabs.map { $0.url }
-            
-            // Updating the corresponding space with the extracted URLs
-            spaces[selectedSpaceIndex].tabUrls = extractedTabUrls
-            spaces[selectedSpaceIndex].pinnedUrls = extractedPinnedUrls
-            spaces[selectedSpaceIndex].favoritesUrls = extractedFavoriteUrls
+            // Save changes to SwiftData model
+            try? modelContext.save()
         }
     }
     
     private func removeItem(_ id: UUID) {
         mobileTabs.browseForMeTabs.removeAll { $0 == id.description }
         
-        switch mobileTabs.selectedTabsSection {
-        case .tabs:
-            if let index = mobileTabs.tabs.firstIndex(where: { $0.id == id }) {
-                mobileTabs.tabs.remove(at: index)
-                spaces[selectedSpaceIndex].tabUrls.remove(at: index)
-            }
+        // Find and remove the tab from the current space
+        guard let currentSpace = storageManager.selectedSpace else { return }
+        
+        let allTabs: [StoredTab]
+        switch uiViewModel.currentTabTypeMobile {
+        case .primary:
+            allTabs = currentSpace.primaryTabs
         case .pinned:
-            if let index = mobileTabs.pinnedTabs.firstIndex(where: { $0.id == id }) {
-                mobileTabs.pinnedTabs.remove(at: index)
-                spaces[selectedSpaceIndex].pinnedUrls.remove(at: index)
-            }
+            allTabs = currentSpace.pinnedTabs
         case .favorites:
-            if let index = mobileTabs.favoriteTabs.firstIndex(where: { $0.id == id }) {
-                mobileTabs.favoriteTabs.remove(at: index)
-                spaces[selectedSpaceIndex].favoritesUrls.remove(at: index)
-            }
+            allTabs = currentSpace.favoriteTabs
+        }
+        
+        if let tabToRemove = allTabs.first(where: { UUID(uuidString: $0.id) == id }) {
+            modelContext.delete(tabToRemove)
+            try? modelContext.save()
         }
         
         withAnimation {
@@ -672,100 +711,44 @@ struct TabOverview: View {
     }
     
     private func updateTabURL(for id: UUID, with newURL: String) {
-        switch mobileTabs.selectedTabsSection {
-        case .tabs:
-            if let index = mobileTabs.tabs.firstIndex(where: { $0.id == id }) {
-                mobileTabs.tabs[index].url = newURL
-                spaces[selectedSpaceIndex].tabUrls[index] = newURL
-            }
-        case .pinned:
-            if let index = mobileTabs.pinnedTabs.firstIndex(where: { $0.id == id }) {
-                mobileTabs.pinnedTabs[index].url = newURL
-                spaces[selectedSpaceIndex].pinnedUrls[index] = newURL
-            }
-        case .favorites:
-            if let index = mobileTabs.favoriteTabs.firstIndex(where: { $0.id == id }) {
-                mobileTabs.favoriteTabs[index].url = newURL
-                spaces[selectedSpaceIndex].favoritesUrls[index] = newURL
-            }
-        }
+        // URL updates are handled by StorageManager automatically
     }
     
     
     private func createTab(url: String, isBrowseForMeTab: Bool) {
-        let newTab = (id: UUID(), url: url)
+        guard let currentSpace = storageManager.selectedSpace else { return }
         
-        switch mobileTabs.selectedTabsSection {
-        case .tabs:
-            mobileTabs.tabs.append(newTab)
-            spaces[selectedSpaceIndex].tabUrls.append(url)
-        case .pinned:
-            mobileTabs.pinnedTabs.append(newTab)
-            spaces[selectedSpaceIndex].pinnedUrls.append(url)
-        case .favorites:
-            mobileTabs.favoriteTabs.append(newTab)
-            spaces[selectedSpaceIndex].favoritesUrls.append(url)
-        }
+        // Create a new StoredTab
+        let storedTab = StoredTab(
+            id: UUID().uuidString,
+            url: url,
+            orderIndex: 0,
+            tabType: uiViewModel.currentTabTypeMobile,
+            parentSpace: currentSpace
+        )
+        
+        // Add to model context and save
+        modelContext.insert(storedTab)
         
         if isBrowseForMeTab {
-            mobileTabs.browseForMeTabs.append(newTab.id.description)
+            mobileTabs.browseForMeTabs.append(storedTab.id)
         }
+        
+        try? modelContext.save()
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
             withAnimation {
-                mobileTabs.selectedTab = newTab
-                mobileTabs.webURL = newTab.url
+                uiViewModel.currentSelectedTab = storedTab.id
                 mobileTabs.fullScreenWebView = true
             }
         })
     }
     
-    func fetchXML(searchRequest: String) {
-        guard let url = URL(string: "https://toolbarqueries.google.com/complete/search?q=\(searchRequest.replacingOccurrences(of: " ", with: "+"))&output=toolbar&hl=en") else {
-            print("Invalid URL")
-            return
-        }
-        
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            guard let data = data, error == nil else {
-                print("Error: \(error?.localizedDescription ?? "Unknown error")")
-                return
-            }
-            
-            if let xmlContent = String(data: data, encoding: .utf8) {
-                DispatchQueue.main.async {
-                    self.mobileTabs.xmlString = xmlContent
-                }
-            } else {
-                print("Unable to convert data to string")
-            }
-        }.resume()
-    }
-    // More APIs for Search suggestions. Implement in the future
-    // https://duckduckgo.com/ac/?q=YOUR_QUERY_HERE&type=list
-    // https://api.bing.com/osjson.aspx?query=YOUR_QUERY_HERE
+    // MARK: - Helper Functions
     
-    func formatXML(from input: String) -> [String] {
-        var results = [String]()
-        
-        // Find all occurrences of 'data="' in the XML string
-        var currentIndex = mobileTabs.xmlString.startIndex
-        while let startIndex = mobileTabs.xmlString[currentIndex...].range(of: "data=\"")?.upperBound {
-            let remainingSubstring = mobileTabs.xmlString[startIndex...]
-            
-            // Find the end of the attribute value enclosed in quotation marks
-            if let endIndex = remainingSubstring.range(of: "\"")?.lowerBound {
-                let attributeValue = mobileTabs.xmlString[startIndex..<endIndex]
-                results.append(String(attributeValue))
-                
-                // Move to the next character after the found attribute value
-                currentIndex = endIndex
-            } else {
-                break
-            }
-        }
-        
-        return results
+    private func findTabById(_ id: String, in space: SpaceData) -> StoredTab? {
+        let allTabs = space.primaryTabs + space.pinnedTabs + space.favoriteTabs
+        return allTabs.first { $0.id == id }
     }
 }
 

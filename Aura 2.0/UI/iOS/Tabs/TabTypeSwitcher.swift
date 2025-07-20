@@ -12,6 +12,7 @@ import SwiftUI
 
 struct TabTypeSwitcherOld: View {
     @EnvironmentObject var mobileTabs: MobileTabsModel
+    @EnvironmentObject var uiViewModel: UIViewModel
     
     var body: some View {
         HStack {
@@ -20,14 +21,14 @@ struct TabTypeSwitcherOld: View {
             VStack {
                 Button(action: {
                     withAnimation {
-                        mobileTabs.selectedTabsSection = .favorites
+                        uiViewModel.currentTabTypeMobile = .favorites
                     }
                 }, label: {
                     Image(systemName: "star")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: mobileTabs.selectedTabsSection == .favorites ? 30: 20, height: mobileTabs.selectedTabsSection == .favorites ? 30: 20)
-                        .opacity(mobileTabs.selectedTabsSection == .favorites ? 1.0: 0.4)
+                        .frame(width: uiViewModel.currentTabTypeMobile == .favorites ? 30: 20, height: uiViewModel.currentTabTypeMobile == .favorites ? 30: 20)
+                        .opacity(uiViewModel.currentTabTypeMobile == .favorites ? 1.0: 0.4)
                         .foregroundStyle(Color(hex: "4D4D4D"))
                 })
                 .highPriorityGesture(
@@ -35,12 +36,12 @@ struct TabTypeSwitcherOld: View {
                         .onChanged { value in
                             let dragHeight = value.translation.height
                             if dragHeight > 120 {
-                                mobileTabs.selectedTabsSection = .tabs
+                                uiViewModel.currentTabTypeMobile = .primary
                             } else if dragHeight > 60 {
-                                mobileTabs.selectedTabsSection = .pinned
+                                uiViewModel.currentTabTypeMobile = .pinned
                             }
                             else {
-                                mobileTabs.selectedTabsSection = .favorites
+                                uiViewModel.currentTabTypeMobile = .favorites
                             }
                         }
                 )
@@ -49,14 +50,14 @@ struct TabTypeSwitcherOld: View {
                 
                 Button(action: {
                     withAnimation {
-                        mobileTabs.selectedTabsSection = .pinned
+                        uiViewModel.currentTabTypeMobile = .pinned
                     }
                 }, label: {
                     Image(systemName: "pin")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: mobileTabs.selectedTabsSection == .pinned ? 30: 20, height: mobileTabs.selectedTabsSection == .pinned ? 30: 20)
-                        .opacity(mobileTabs.selectedTabsSection == .pinned ? 1.0: 0.4)
+                        .frame(width: uiViewModel.currentTabTypeMobile == .pinned ? 30: 20, height: uiViewModel.currentTabTypeMobile == .pinned ? 30: 20)
+                        .opacity(uiViewModel.currentTabTypeMobile == .pinned ? 1.0: 0.4)
                         .foregroundStyle(Color(hex: "4D4D4D"))
                 })
                 .highPriorityGesture(
@@ -64,12 +65,12 @@ struct TabTypeSwitcherOld: View {
                         .onChanged { value in
                             let dragHeight = value.translation.height
                             if dragHeight > 60 {
-                                mobileTabs.selectedTabsSection = .tabs
+                                uiViewModel.currentTabTypeMobile = .primary
                             } else if dragHeight < -60 {
-                                mobileTabs.selectedTabsSection = .favorites
+                                uiViewModel.currentTabTypeMobile = .favorites
                             }
                             else {
-                                mobileTabs.selectedTabsSection = .pinned
+                                uiViewModel.currentTabTypeMobile = .pinned
                             }
                         }
                 )
@@ -78,14 +79,14 @@ struct TabTypeSwitcherOld: View {
                 
                 Button(action: {
                     withAnimation {
-                        mobileTabs.selectedTabsSection = .tabs
+                        uiViewModel.currentTabTypeMobile = .primary
                     }
                 }, label: {
                     Image(systemName: "calendar.day.timeline.left")
                         .resizable()
                         .scaledToFit()
-                        .frame(width: mobileTabs.selectedTabsSection == .tabs ? 30: 20, height: mobileTabs.selectedTabsSection == .tabs ? 30: 20)
-                        .opacity(mobileTabs.selectedTabsSection == .tabs ? 1.0: 0.4)
+                        .frame(width: uiViewModel.currentTabTypeMobile == .primary ? 30: 20, height: uiViewModel.currentTabTypeMobile == .primary ? 30: 20)
+                        .opacity(uiViewModel.currentTabTypeMobile == .primary ? 1.0: 0.4)
                         .foregroundStyle(Color(hex: "4D4D4D"))
                 })
                 .highPriorityGesture(
@@ -93,12 +94,12 @@ struct TabTypeSwitcherOld: View {
                         .onChanged { value in
                             let dragHeight = value.translation.height
                             if dragHeight < -120 {
-                                mobileTabs.selectedTabsSection = .favorites
+                                uiViewModel.currentTabTypeMobile = .favorites
                             } else if dragHeight < -60 {
-                                mobileTabs.selectedTabsSection = .pinned
+                                uiViewModel.currentTabTypeMobile = .pinned
                             }
                             else {
-                                mobileTabs.selectedTabsSection = .tabs
+                                uiViewModel.currentTabTypeMobile = .primary
                             }
                         }
                 )

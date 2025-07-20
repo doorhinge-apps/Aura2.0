@@ -10,24 +10,28 @@
 
 import SwiftUI
 import SwiftData
+import UniformTypeIdentifiers
 
 struct TabList: View {
     //@Namespace var namespace
     @Environment(\.namespace) var namespace
-    @Query(sort: \SpaceStorage.spaceIndex) var spaces: [SpaceStorage]
+    @Query(sort: \SpaceData.spaceOrder) var spaces: [SpaceData]
     @Environment(\.modelContext) private var modelContext
     
     @EnvironmentObject var mobileTabs: MobileTabsModel
+    @EnvironmentObject var storageManager: StorageManager
+    @EnvironmentObject var uiViewModel: UIViewModel
+    @EnvironmentObject var settingsManager: SettingsManager
     
     @Binding var selectedSpaceIndex: Int
     
     @FocusState.Binding var newTabFocus: Bool
     
-    @StateObject private var snapshotRefresher = SnapshotRefresher()
+    // @StateObject private var snapshotRefresher = SnapshotRefresher() // Not needed for basic implementation
     
     @State var geo: GeometryProxy
     
-    @State var topZIndexTab: (id: UUID, url: String) = (.init(), "")
+    @State var topZIndexTab: BrowserTab?
     
     @State var delayLoading: Bool = false
     
@@ -39,15 +43,10 @@ struct TabList: View {
             if delayLoading {
                 LazyVGrid(
                     columns: Array(repeating: GridItem(spacing: 5), count: Int(mobileTabs.gridColumnCount)), content: {
-                        ForEach(
-                            mobileTabs.selectedTabsSection == .tabs ?
-                            mobileTabs.tabs: mobileTabs.selectedTabsSection == .pinned ?
-                            mobileTabs.pinnedTabs:
-                                mobileTabs.favoriteTabs,
-                            id: \.id) { tab in
+                        ForEach(currentTabsForSelectedSection(), id: \.id) { tab in
                                 
                                 let offset = mobileTabs.offsets[tab.id, default: .zero]
-                                WebPreview(namespace: namespace, url: tab.url, geo: geo, tab: tab, browseForMeTabs: $mobileTabs.browseForMeTabs)
+                                WebPreview(namespace: namespace, url: tab.storedTab.url, geo: geo, tab: tab, browseForMeTabs: $mobileTabs.browseForMeTabs)
                                     .rotationEffect(Angle(degrees: mobileTabs.tilts[tab.id, default: 0.0]))
                                     .offset(x: offset.width)
                                     .overlay(content: {
@@ -61,8 +60,7 @@ struct TabList: View {
                                                 }
                                                 else {
                                                     withAnimation {
-                                                        mobileTabs.webURL = tab.url
-                                                        mobileTabs.selectedTab = tab
+                                                        uiViewModel.currentSelectedTab = tab.storedTab.id
                                                         mobileTabs.fullScreenWebView = true
                                                     }
                                                 }
@@ -88,18 +86,18 @@ struct TabList: View {
                                                     handleDragEnd(gesture, for: tab.id)
                                                 }
                                                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) {
-                                                    topZIndexTab = (.init(), "")
+                                                    topZIndexTab = nil
                                                 }
                                             }
                                     )
                                     .contextMenu(menuItems: {
                                         Button(action: {
-                                            UIPasteboard.general.string = tab.url
+                                            UIPasteboard.general.string = tab.storedTab.url
                                         }, label: {
                                             Label("Copy URL", systemImage: "link")
                                         })
                                         
-                                        if !mobileTabs.settings.hideBrowseForMe {
+                                        if true { // TODO: Add hideBrowseForMe setting to SettingsManager
                                             Button(action: {
                                                 if mobileTabs.browseForMeTabs.contains(tab.id.description) {
                                                     mobileTabs.browseForMeTabs.removeAll { $0 == tab.id.description }
@@ -114,18 +112,10 @@ struct TabList: View {
                                     })
                                     .onDrag {
                                         self.mobileTabs.draggedTab = tab
-                                        return NSItemProvider(object: tab.url as NSString)
+                                        return NSItemProvider(object: tab.storedTab.url as NSString)
                                     }
-                                    .onDrop(of: [.text], delegate: AlternateDropViewDelegate(destinationItem: tab, allTabs: mobileTabs.selectedTabsSection == .tabs ? $mobileTabs.tabs: mobileTabs.selectedTabsSection == .pinned ? $mobileTabs.pinnedTabs: $mobileTabs.favoriteTabs, draggedItem: $mobileTabs.draggedTab))
-                                    .onChange(of: mobileTabs.tabs.map { $0.url }, {
-                                        saveTabs()
-                                    })
-                                    .onChange(of: mobileTabs.pinnedTabs.map { $0.url }, {
-                                        saveTabs()
-                                    })
-                                    .onChange(of: mobileTabs.favoriteTabs.map { $0.url }, {
-                                        saveTabs()
-                                    })
+                                    .onDrop(of: [.text], delegate: AlternateDropViewDelegate(destinationItem: tab, allTabs: currentTabsBinding(), draggedItem: $mobileTabs.draggedTab))
+                                    // Tab changes are automatically saved by StorageManager
                                 
                             }
                     })
@@ -184,37 +174,20 @@ struct TabList: View {
         }
         
         if spaces.count > selectedSpaceIndex {
-            // Extracting URLs from tabs, pinnedTabs, and favoriteTabs arrays
-            let extractedTabUrls = mobileTabs.tabs.map { $0.url }
-            let extractedPinnedUrls = mobileTabs.pinnedTabs.map { $0.url }
-            let extractedFavoriteUrls = mobileTabs.favoriteTabs.map { $0.url }
-            
-            // Updating the corresponding space with the extracted URLs
-            spaces[selectedSpaceIndex].tabUrls = extractedTabUrls
-            spaces[selectedSpaceIndex].pinnedUrls = extractedPinnedUrls
-            spaces[selectedSpaceIndex].favoritesUrls = extractedFavoriteUrls
+            // Save changes to SwiftData model
+            try? modelContext.save()
         }
     }
     
     private func removeItem(_ id: UUID) {
         mobileTabs.browseForMeTabs.removeAll { $0 == id.description }
         
-        switch mobileTabs.selectedTabsSection {
-        case .tabs:
-            if let index = mobileTabs.tabs.firstIndex(where: { $0.id == id }) {
-                mobileTabs.tabs.remove(at: index)
-                spaces[selectedSpaceIndex].tabUrls.remove(at: index)
-            }
-        case .pinned:
-            if let index = mobileTabs.pinnedTabs.firstIndex(where: { $0.id == id }) {
-                mobileTabs.pinnedTabs.remove(at: index)
-                spaces[selectedSpaceIndex].pinnedUrls.remove(at: index)
-            }
-        case .favorites:
-            if let index = mobileTabs.favoriteTabs.firstIndex(where: { $0.id == id }) {
-                mobileTabs.favoriteTabs.remove(at: index)
-                spaces[selectedSpaceIndex].favoritesUrls.remove(at: index)
-            }
+        // Find and remove the tab from the current tabs
+        let allTabs = currentTabsForSelectedSection()
+        if let tabToRemove = allTabs.first(where: { $0.id == id }) {
+            // Remove from SwiftData
+            modelContext.delete(tabToRemove.storedTab)
+            try? modelContext.save()
         }
         
         withAnimation {
@@ -222,6 +195,50 @@ struct TabList: View {
             mobileTabs.tilts.removeValue(forKey: id)
             mobileTabs.zIndexes.removeValue(forKey: id)
         }
+    }
+    
+    // MARK: - Helper Methods
+    
+    private func currentTabsForSelectedSection() -> [BrowserTab] {
+        guard selectedSpaceIndex < spaces.count else { return [] }
+        let currentSpace = spaces[selectedSpaceIndex]
+        
+        switch uiViewModel.currentTabTypeMobile {
+        case .primary:
+            return currentSpace.primaryTabs.map { storedTab in
+                createBrowserTab(from: storedTab)
+            }
+        case .pinned:
+            return currentSpace.pinnedTabs.map { storedTab in
+                createBrowserTab(from: storedTab)
+            }
+        case .favorites:
+            return currentSpace.favoriteTabs.map { storedTab in
+                createBrowserTab(from: storedTab)
+            }
+        }
+    }
+    
+    private func createBrowserTab(from storedTab: StoredTab) -> BrowserTab {
+        // Create a placeholder WebPageFallback - actual loading happens in fullscreen
+        let webPage = WebPageFallback()
+        
+        return BrowserTab(
+            lastActiveTime: storedTab.timestamp,
+            tabType: storedTab.tabType,
+            page: webPage,
+            storedTab: storedTab
+        )
+    }
+    
+    private func currentTabsBinding() -> Binding<[BrowserTab]> {
+        return Binding(
+            get: { self.currentTabsForSelectedSection() },
+            set: { _ in
+                // Tab reordering will be handled by the drop delegate
+                // and saved through StorageManager
+            }
+        )
     }
 }
 

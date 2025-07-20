@@ -12,6 +12,7 @@ import SwiftUI
 
 struct TabTypeSwitcher: View {
     @EnvironmentObject var mobileTabs: MobileTabsModel
+    @EnvironmentObject var uiViewModel: UIViewModel
     @State private var dragPercent: Double = 0
     
     @State var offsetIcons = false
@@ -38,11 +39,11 @@ struct TabTypeSwitcher: View {
                             15
                         )
                     )
-                    .opacity(mobileTabs.selectedTabsSection == .favorites ? 1.0: 0.4)
+                    .opacity(uiViewModel.currentTabTypeMobile == .favorites ? 1.0: 0.4)
                     .foregroundStyle(Color(hex: "4D4D4D"))
                     .onTapGesture {
                         withAnimation {
-                            mobileTabs.selectedTabsSection = .favorites
+                            uiViewModel.currentTabTypeMobile = .favorites
                             dragPercent = 100
                         }
                     }
@@ -68,11 +69,11 @@ struct TabTypeSwitcher: View {
                             0
                         )
                     )
-                    .opacity(mobileTabs.selectedTabsSection == .pinned ? 1.0: 0.4)
+                    .opacity(uiViewModel.currentTabTypeMobile == .pinned ? 1.0: 0.4)
                     .foregroundStyle(Color(hex: "4D4D4D"))
                     .onTapGesture {
                         withAnimation {
-                            mobileTabs.selectedTabsSection = .pinned
+                            uiViewModel.currentTabTypeMobile = .pinned
                             dragPercent = 50
                         }
                     }
@@ -86,11 +87,11 @@ struct TabTypeSwitcher: View {
                         width: 20 + (1 - ((min(max(dragPercent, 20), 40) - 20) / 20)) * 15,
                         height: 20 + (1 - ((min(max(dragPercent, 20), 40) - 20) / 20)) * 15
                     )
-                    .opacity(mobileTabs.selectedTabsSection == .tabs ? 1.0: 0.4)
+                    .opacity(uiViewModel.currentTabTypeMobile == .primary ? 1.0: 0.4)
                     .foregroundStyle(Color(hex: "4D4D4D"))
                     .onTapGesture {
                         withAnimation {
-                            mobileTabs.selectedTabsSection = .tabs
+                            uiViewModel.currentTabTypeMobile = .primary
                             dragPercent = 0
                         }
                     }
@@ -114,13 +115,13 @@ struct TabTypeSwitcher: View {
                         
                         withAnimation {
                             if dragPercent < 35 {
-                                mobileTabs.selectedTabsSection = .tabs
+                                uiViewModel.currentTabTypeMobile = .primary
                             }
                             else if dragPercent > 65 {
-                                mobileTabs.selectedTabsSection = .favorites
+                                uiViewModel.currentTabTypeMobile = .favorites
                             }
                             else {
-                                mobileTabs.selectedTabsSection = .pinned
+                                uiViewModel.currentTabTypeMobile = .pinned
                             }
                         }
                     }
@@ -142,7 +143,7 @@ struct TabTypeSwitcher: View {
                         }
                     })
             )
-            .sensoryFeedback(.selection, trigger: mobileTabs.selectedTabsSection)
+            .sensoryFeedback(.selection, trigger: uiViewModel.currentTabTypeMobile)
             .padding(.trailing, 5)
         }
         .padding(2)
