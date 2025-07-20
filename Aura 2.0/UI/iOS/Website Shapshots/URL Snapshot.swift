@@ -29,6 +29,7 @@ private func saveDisk(_ img: UIImage, for url: URL) {
 struct UrlSnapshotView: View {
     let urlString: String
     @State private var img: UIImage?
+    @State private var isLoaded = false
 
     var body: some View {
         ZStack {
@@ -43,10 +44,26 @@ struct UrlSnapshotView: View {
         }
         .clipped()
         .background(
-            HiddenLoader(urlString: urlString) { self.img = $0 }
-                .frame(width: 400, height: 600)
-                .opacity(0.001)
+            Group {
+                if !isLoaded {
+                    HiddenLoader(urlString: urlString) { image in
+                        self.img = image
+                        self.isLoaded = true
+                    }
+                    .frame(width: 400, height: 600)
+                    .opacity(0.001)
+                } else {
+                    EmptyView()
+                }
+            }
         )
+        .onAppear {
+            // Load from disk immediately if available
+            if let url = URL(string: urlString), let diskImage = loadDisk(for: url) {
+                self.img = diskImage
+                self.isLoaded = true
+            }
+        }
         .onReceive(NotificationCenter.default.publisher(for: .snapshotDidUpdate)) { note in
             guard let s = note.object as? String,
                   s == urlString,
@@ -85,6 +102,11 @@ private struct HiddenLoader: UIViewRepresentable {
         if let img = await snapshot(from: wv) {
             saveDisk(img, for: url)
             onSnapshot(img)
+            
+            // Post notification that snapshot was updated
+            await MainActor.run {
+                NotificationCenter.default.post(name: .snapshotDidUpdate, object: urlString)
+            }
         }
     }
 
@@ -127,3 +149,4 @@ private struct HiddenLoader: UIViewRepresentable {
         func webView(_ w: WKWebView, didFailProvisionalNavigation n: WKNavigation!, withError e: Error) { finish(e) }
     }
 }
+

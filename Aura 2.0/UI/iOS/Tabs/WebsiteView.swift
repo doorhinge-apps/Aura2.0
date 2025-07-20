@@ -24,17 +24,14 @@ struct WebsiteView: View {
         ZStack {
             Color.black.ignoresSafeArea()
             
-            VStack {
+            VStack(spacing: 0) {
                 // Web content - reuse the existing page from the tab
                 WebViewFallback(tab.page)
-                    .ignoresSafeArea()
+                    .ignoresSafeArea(.all, edges: .horizontal)
+                    .matchedGeometryEffect(id: tab.id, in: namespace)
             }
         }
-        .onTapGesture {
-            // Close fullscreen on tap
-            withAnimation {
-                fullScreenWebView = false
-            }
-        }
+        .navigationBarHidden(true)
+        .ignoresSafeArea(.container)
     }
 }

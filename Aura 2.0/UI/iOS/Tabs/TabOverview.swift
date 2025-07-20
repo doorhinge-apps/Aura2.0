@@ -113,6 +113,15 @@ struct TabOverview: View {
                                 fullscreenWebPage.load(URLRequest(url: url))
                             }
                         }
+                        .onChange(of: uiViewModel.currentSelectedTab) { oldValue, newValue in
+                            // Reload when selected tab changes
+                            if let newTabId = newValue,
+                               let currentSpace = storageManager.selectedSpace,
+                               let newStoredTab = findTabById(newTabId, in: currentSpace),
+                               let url = URL(string: newStoredTab.url) {
+                                fullscreenWebPage.load(URLRequest(url: url))
+                            }
+                        }
                     }
                 }
                 

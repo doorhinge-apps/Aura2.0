@@ -68,7 +68,7 @@ struct TabList: View {
                                     })
                                     .zIndex(topZIndexTab == tab ? 100: 1)
                                     .gesture(
-                                        DragGesture(minimumDistance: 50)
+                                        DragGesture(minimumDistance: 20)
                                             .onChanged { gesture in
                                                 if newTabFocus {
                                                     newTabFocus = false
