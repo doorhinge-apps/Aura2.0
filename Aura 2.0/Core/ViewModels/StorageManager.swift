@@ -65,21 +65,34 @@ class StorageManager: ObservableObject {
         )
     }
     
+    @MainActor
     func selectOrLoadTab(tabObject: StoredTab) async {
-        guard let space = selectedSpace else { return }
+        print("DEBUG: selectOrLoadTab called with tab: \(tabObject.url)")
+        guard let space = selectedSpace else { 
+            print("DEBUG: selectedSpace is nil, returning")
+            return 
+        }
+        
+        print("DEBUG: selectedSpace exists: \(space.spaceName)")
         
         if let index = splitViewTabs.firstIndex(where: { $0.mainTab == tabObject }) {
+            print("DEBUG: Found existing splitViewTab at index: \(index)")
             splitViewTabs[index].subTabLayout = currentTabs
         } else {
+            print("DEBUG: No existing splitViewTab found, creating new tab")
             // Find the TabGroup that contains this tab
             if let tabGroup = findTabGroup(containingTabId: tabObject.id, space: space) {
+                print("DEBUG: Found TabGroup, loading as currentTabs")
                 // Restore the entire nested structure from the TabGroup
                 currentTabs = await loadTabGroupAsCurrentTabs(tabGroup: tabGroup)
             } else {
+                print("DEBUG: No TabGroup found, loading single tab")
                 // Fallback: create a single tab if no TabGroup found
                 await loadSingleTab(tabObject: tabObject)
             }
         }
+        
+        print("DEBUG: After loading, currentTabs count: \(currentTabs.count)")
         
         if loadedTabs.count >= Int(settingManager.preloadingWebsites) {
             loadedTabs.removeFirst()
@@ -121,10 +134,12 @@ class StorageManager: ObservableObject {
     
     /// Create a BrowserTab from a StoredTab
     private func createBrowserTab(from storedTab: StoredTab) async -> BrowserTab {
+        print("DEBUG: createBrowserTab called for: \(storedTab.url)")
         let newWebPage = WebPageFallback()
         var request = URLRequest(url: URL(string: storedTab.url)!)
         request.attribution = .user
         newWebPage.load(request)
+        print("DEBUG: WebPageFallback created and request loaded")
         
         do {
             try await newWebPage.callJavaScript(
@@ -142,6 +157,7 @@ class StorageManager: ObservableObject {
             print("JavaScript injection failed: \(error)")
         }
         
+        print("DEBUG: createBrowserTab returning BrowserTab")
         return BrowserTab(
             lastActiveTime: Date.now,
             tabType: storedTab.tabType,
@@ -152,13 +168,18 @@ class StorageManager: ObservableObject {
     
     /// Fallback method to load a single tab
     private func loadSingleTab(tabObject: StoredTab) async {
+        print("DEBUG: loadSingleTab called for tab: \(tabObject.url)")
         if let existingTab = loadedTabs.first(where: { $0.storedTab.id == tabObject.id }) {
+            print("DEBUG: Found existing tab in loadedTabs")
             currentTabs = [[existingTab]]
         } else {
+            print("DEBUG: Creating new browser tab")
             let browserTab = await createBrowserTab(from: tabObject)
+            print("DEBUG: Created browserTab, setting currentTabs")
             currentTabs = [[browserTab]]
             loadedTabs.append(browserTab)
         }
+        print("DEBUG: loadSingleTab completed, currentTabs count: \(currentTabs.count)")
     }
     
     /// Set focus to the specified tab within currentTabs

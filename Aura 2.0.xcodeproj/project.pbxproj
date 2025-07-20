@@ -11,6 +11,7 @@
 		B90E957B2E2767D5004FED66 /* URL Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = B90E95782E2767D5004FED66 /* URL Snapshot.swift */; };
 		B90E957C2E2767D5004FED66 /* SnapshotRefresher.swift in Sources */ = {isa = PBXBuildFile; fileRef = B90E95792E2767D5004FED66 /* SnapshotRefresher.swift */; };
 		B90E957E2E2790FA004FED66 /* Startpage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B90E957D2E2790FA004FED66 /* Startpage.swift */; };
+		B90E95802E27A765004FED66 /* MobileWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B90E957F2E27A765004FED66 /* MobileWebView.swift */; };
 		B95A809E2DFD26BA007FE1F4 /* Toolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95A809D2DFD26BA007FE1F4 /* Toolbar.swift */; };
 		B95A80A32DFD4D41007FE1F4 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95A80A22DFD4D41007FE1F4 /* Settings.swift */; };
 		B95A80D52E02BAAF007FE1F4 /* GeneralSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95A80D42E02BAAF007FE1F4 /* GeneralSettings.swift */; };
@@ -64,6 +65,11 @@
 		B9EE88F72E1315B300AB6ACE /* WebViewFallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9EE88F52E1315B300AB6ACE /* WebViewFallback.swift */; };
 		B9F078812E0B96A400723BA5 /* ScrollEdge.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F078802E0B96A400723BA5 /* ScrollEdge.swift */; };
 		B9F078832E0B973E00723BA5 /* GlassEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9F078822E0B973E00723BA5 /* GlassEffect.swift */; };
+		B9FC6D032E2D7F4C003A0D13 /* TabTypeSwitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9FC6CFF2E2D7F4C003A0D13 /* TabTypeSwitcher.swift */; };
+		B9FC6D042E2D7F4C003A0D13 /* TabOverview.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9FC6CFE2E2D7F4C003A0D13 /* TabOverview.swift */; };
+		B9FC6D052E2D7F4C003A0D13 /* TabList.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9FC6D022E2D7F4C003A0D13 /* TabList.swift */; };
+		B9FC6D062E2D7F4C003A0D13 /* MobileTabsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9FC6D012E2D7F4C003A0D13 /* MobileTabsModel.swift */; };
+		B9FC6D072E2D7F4C003A0D13 /* TabTypeSwitcher2.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9FC6D002E2D7F4C003A0D13 /* TabTypeSwitcher2.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -88,6 +94,7 @@
 		B90E95782E2767D5004FED66 /* URL Snapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL Snapshot.swift"; sourceTree = "<group>"; };
 		B90E95792E2767D5004FED66 /* SnapshotRefresher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotRefresher.swift; sourceTree = "<group>"; };
 		B90E957D2E2790FA004FED66 /* Startpage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Startpage.swift; sourceTree = "<group>"; };
+		B90E957F2E27A765004FED66 /* MobileWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileWebView.swift; sourceTree = "<group>"; };
 		B95A809D2DFD26BA007FE1F4 /* Toolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Toolbar.swift; sourceTree = "<group>"; };
 		B95A80A22DFD4D41007FE1F4 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		B95A80D42E02BAAF007FE1F4 /* GeneralSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettings.swift; sourceTree = "<group>"; };
@@ -145,6 +152,11 @@
 		B9EE88F52E1315B300AB6ACE /* WebViewFallback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewFallback.swift; sourceTree = "<group>"; };
 		B9F078802E0B96A400723BA5 /* ScrollEdge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollEdge.swift; sourceTree = "<group>"; };
 		B9F078822E0B973E00723BA5 /* GlassEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlassEffect.swift; sourceTree = "<group>"; };
+		B9FC6CFE2E2D7F4C003A0D13 /* TabOverview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabOverview.swift; sourceTree = "<group>"; };
+		B9FC6CFF2E2D7F4C003A0D13 /* TabTypeSwitcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabTypeSwitcher.swift; sourceTree = "<group>"; };
+		B9FC6D002E2D7F4C003A0D13 /* TabTypeSwitcher2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabTypeSwitcher2.swift; sourceTree = "<group>"; };
+		B9FC6D012E2D7F4C003A0D13 /* MobileTabsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileTabsModel.swift; sourceTree = "<group>"; };
+		B9FC6D022E2D7F4C003A0D13 /* TabList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabList.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -198,7 +210,9 @@
 		B92128AD2E274B7500CC9463 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
+				B9FC6CFD2E2D7F43003A0D13 /* Tabs */,
 				B90E95762E274D1B004FED66 /* MobileContent.swift */,
+				B90E957F2E27A765004FED66 /* MobileWebView.swift */,
 				B90E957D2E2790FA004FED66 /* Startpage.swift */,
 				B90E957A2E2767D5004FED66 /* Website Shapshots */,
 			);
@@ -455,6 +469,18 @@
 			path = "Conditional Modifiers";
 			sourceTree = "<group>";
 		};
+		B9FC6CFD2E2D7F43003A0D13 /* Tabs */ = {
+			isa = PBXGroup;
+			children = (
+				B9FC6CFE2E2D7F4C003A0D13 /* TabOverview.swift */,
+				B9FC6CFF2E2D7F4C003A0D13 /* TabTypeSwitcher.swift */,
+				B9FC6D002E2D7F4C003A0D13 /* TabTypeSwitcher2.swift */,
+				B9FC6D012E2D7F4C003A0D13 /* MobileTabsModel.swift */,
+				B9FC6D022E2D7F4C003A0D13 /* TabList.swift */,
+			);
+			path = Tabs;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -609,9 +635,15 @@
 				B9D455042E06525100CB1E24 /* PrimaryTabsView.swift in Sources */,
 				B9D455052E06525100CB1E24 /* TabRowView.swift in Sources */,
 				B9B005152DFA7D3300B79152 /* Favicon.swift in Sources */,
+				B9FC6D032E2D7F4C003A0D13 /* TabTypeSwitcher.swift in Sources */,
+				B9FC6D042E2D7F4C003A0D13 /* TabOverview.swift in Sources */,
+				B9FC6D052E2D7F4C003A0D13 /* TabList.swift in Sources */,
+				B9FC6D062E2D7F4C003A0D13 /* MobileTabsModel.swift in Sources */,
+				B9FC6D072E2D7F4C003A0D13 /* TabTypeSwitcher2.swift in Sources */,
 				B9D455172E06A80800CB1E24 /* someKey.swift in Sources */,
 				B95A80D72E02BD10007FE1F4 /* MotionManager.swift in Sources */,
 				B95A809E2DFD26BA007FE1F4 /* Toolbar.swift in Sources */,
+				B90E95802E27A765004FED66 /* MobileWebView.swift in Sources */,
 				B9B0051D2DFA834500B79152 /* TabsManager.swift in Sources */,
 				B9EE88F72E1315B300AB6ACE /* WebViewFallback.swift in Sources */,
 				B9B0050D2DFA71BF00B79152 /* WebMetadata.swift in Sources */,

@@ -27,85 +27,131 @@ struct MobileContent: View {
     @State var currentTab: BrowserTab?
     
     var body: some View {
-        
-        GeometryReader { geo in
-            ZStack {
-                LinearGradient(colors: backgroundGradientColors, startPoint: .top, endPoint: .bottom)
-                
-                VStack {
-                    ScrollView {
-                        Spacer()
-                            .frame(height: 75)
-                        
-                        LazyVGrid(columns: [GridItem(), GridItem()]) {
-                            ForEach(selectedSpace.primaryTabs, id:\.id) { tab in
-                                Button {
-                                    Task {
-                                        await storageManager.selectOrLoadTab(tabObject: tab)
+        NavigationStack {
+            GeometryReader { geo in
+                ZStack {
+                    LinearGradient(colors: backgroundGradientColors, startPoint: .top, endPoint: .bottom)
+                    
+                    VStack {
+                        ScrollView {
+                            Spacer()
+                                .frame(height: 75)
+                            
+                            LazyVGrid(columns: [GridItem(), GridItem()]) {
+                                ForEach(selectedSpace.primaryTabs, id:\.id) { tab in
+                                    NavigationLink {
+                                        MobileWebView()
+                                            .transition(.opacity)
+                                            .animation(.easeInOut(duration: 0.3), value: storageManager.currentTabs.isEmpty)
+                                            .onAppear {
+                                                print("DEBUG: MobileWebView condition met and appeared")
+                                            }
+                                            
+                                    } label: {
+                                        UrlSnapshotView(urlString: tab.url)
+                                            .scaledToFill()
+                                            .frame(width: geo.size.width/2 - 50, height: (geo.size.width/2 - 50)*(4/3), alignment: .top)
+                                            .clipped()
+                                            .matchedGeometryEffect(id: tab.id.description, in: namespace)
+                                            .matchedTransitionSource(id: tab.id.description, in: namespace)
                                     }
-                                } label: {
-                                    UrlSnapshotView(urlString: tab.url)
-                                        .scaledToFill()
-                                        .frame(width: geo.size.width/2 - 50, height: (geo.size.width/2 - 50)*(4/3), alignment: .top)
-                                        .clipped()
-                                        .matchedGeometryEffect(id: tab.id.description, in: namespace)
                                 }
-                                
                             }
                         }
+                        .allowsHitTesting(storageManager.currentTabs.isEmpty || storageManager.currentTabs[0].isEmpty)
                     }
-                }
-                
-                if storageManager.currentTabs.first?.first != nil || uiViewModel.showStartpage {
-                    VStack {
-                        if uiViewModel.showStartpage {
+                    
+                    if uiViewModel.showStartpage {
+                        VStack {
                             Startpage(selectedSpace: selectedSpace)
                         }
-                        else {
-                            WebsitePanel()
-                        }
                     }
-                }
-                
-                VStack {
-                    Spacer()
                     
-                    ZStack {
-                        VStack {
-                            HStack {
-                                Button {
-                                    withAnimation(.easeInOut) {
-                                        uiViewModel.showStartpage = true
-                                    }
-                                } label: {
-                                    Image(systemName: "chevron.left")
+                    
+                    if !storageManager.currentTabs.isEmpty && !storageManager.currentTabs[0].isEmpty {
+                        MobileWebView()
+                            .transition(.opacity)
+                            .animation(.easeInOut(duration: 0.3), value: storageManager.currentTabs.isEmpty)
+                            .onAppear {
+                                print("DEBUG: MobileWebView condition met and appeared")
+                            }
+                    } else {
+                        Color.clear
+                            .onAppear {
+                                print("DEBUG: MobileWebView condition NOT met")
+                                print("DEBUG: currentTabs.isEmpty: \(storageManager.currentTabs.isEmpty)")
+                                if !storageManager.currentTabs.isEmpty {
+                                    print("DEBUG: currentTabs[0].isEmpty: \(storageManager.currentTabs[0].isEmpty)")
                                 }
-                                
-                                Button {
-                                    withAnimation(.easeInOut) {
-                                        uiViewModel.showStartpage = true
+                            }
+                    }
+                    
+                    VStack {
+                        Spacer()
+                        
+                        ZStack {
+                            VStack {
+                                VStack(spacing: 10) {
+                                    HStack {
+                                        Button {
+                                            // Navigate back functionality
+                                            if let focusedTab = storageManager.getFocusedTab() {
+                                                focusedTab.page.goBack()
+                                            }
+                                        } label: {
+                                            Image(systemName: "chevron.left")
+                                        }
+                                        
+                                        Button {
+                                            // Navigate forward functionality
+                                            if let focusedTab = storageManager.getFocusedTab() {
+                                                focusedTab.page.goForward()
+                                            }
+                                        } label: {
+                                            Image(systemName: "chevron.right")
+                                        }
+                                        
+                                        Spacer()
+                                        
+                                        Button {
+                                            storageManager.currentTabs = [[]]
+                                            storageManager.focusedWebsite = []
+                                        } label: {
+                                            Image(systemName: "plus")
+                                        }.matchedGeometryEffect(id: "newTab", in: namespace)
                                     }
-                                } label: {
-                                    Image(systemName: "chevron.right")
+                                    
+                                    // Command bar TextField
+                                    TextField("Search or enter URL", text: $uiViewModel.commandBarText)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                        .textInputAutocapitalization(.never)
+                                        .autocorrectionDisabled(true)
+                                        .onSubmit {
+                                            if !uiViewModel.commandBarText.isEmpty {
+                                                if let space = storageManager.selectedSpace {
+                                                    storageManager.newTab(
+                                                        unformattedString: uiViewModel.commandBarText,
+                                                        space: space,
+                                                        modelContext: modelContext
+                                                    )
+                                                }
+                                                uiViewModel.commandBarText = ""
+                                            }
+                                        }
                                 }
-                                
-                                Spacer()
-                                
-                                Button {
-                                    withAnimation(.easeInOut) {
-                                        uiViewModel.showStartpage = true
-                                    }
-                                } label: {
-                                    Image(systemName: "plus")
-                                }.matchedGeometryEffect(id: "newTab", in: namespace)
                             }
                         }
+                        .glassEffect(.clear, in: .rect(cornerRadius: 20))
+                        .frame(width: geo.size.width-30, height: 200)
+                        .padding(15)
                     }
-                    .glassEffect(.regular, in: .rect(cornerRadius: 20))
-                    .frame(width: geo.size.width-30, height: 100)
-                    .padding(15)
                 }
-            }
+            }.rotationEffect(Angle(degrees: 180))
+        }
+        .rotationEffect(Angle(degrees: 180))
+        .onAppear {
+            print("DEBUG: MobileContent appeared, setting selectedSpace")
+            storageManager.selectedSpace = selectedSpace
         }
     }
     
