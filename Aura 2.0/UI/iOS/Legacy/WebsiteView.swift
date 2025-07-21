@@ -9,13 +9,13 @@ import SwiftUI
 
 struct WebsiteView: View {
     let namespace: Namespace.ID
-    @Binding var url: String
+//    @Binding var url: String
     @State private var offset = CGSize.zero
     @State private var scale: CGFloat = 1.0
     
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     
-    @ObservedObject var webViewManager: WebViewManager
+//    @EnvironmentObject var webViewManager: WebViewManager
     @EnvironmentObject var mobileTabs: MobileTabsModel
     @EnvironmentObject var storageManager: StorageManager
     @EnvironmentObject var uiViewModel: UIViewModel
@@ -33,10 +33,9 @@ struct WebsiteView: View {
     #else
     @State var webViewBackgroundColor: NSColor? = NSColor.white
     #endif
-    @Binding var webURL: String
     @Binding var fullScreenWebView: Bool
     
-    @State var tab: (id: UUID, url: String)
+    @State var tab: BrowserTab
     
     @Binding var browseForMeTabs: [String]
     
@@ -45,10 +44,19 @@ struct WebsiteView: View {
     
     var body: some View {
         GeometryReader { geo in
-            WebViewMobile(urlString: tab.url, title: $webTitle, webViewBackgroundColor: $webViewBackgroundColor, currentURLString: $webURL, webViewManager: webViewManager)
-                .navigationBarBackButtonHidden(true)
-                .matchedGeometryEffect(id: tab.id, in: namespace)
-                .ignoresSafeArea()
+            WebViewMobile(
+                urlString: tab.storedTab.url,
+                title: $webTitle,
+                webViewBackgroundColor: $webViewBackgroundColor,
+                currentURLString: Binding(get: {
+                    tab.storedTab.url
+                }, set: { value in
+                    tab.storedTab.url = value
+                })
+            )
+            .navigationBarBackButtonHidden(true)
+            .matchedGeometryEffect(id: tab.id, in: namespace)
+            .ignoresSafeArea()
         }.ignoresSafeArea(.container, edges: [.leading, .trailing, .bottom])
     }
     

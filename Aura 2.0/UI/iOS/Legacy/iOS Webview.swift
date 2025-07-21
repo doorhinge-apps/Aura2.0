@@ -3,6 +3,7 @@ import SwiftUI
 import WebKit
 import CryptoKit
 import Combine
+import SwiftData
 
 class WebViewCoordinator: NSObject, WKNavigationDelegate {
     @Binding var title: String
@@ -71,20 +72,33 @@ private func saveDisk(_ img: UIImage, for url: URL) {
 // MARK: – WebViewMobile with in-view snapshot on load
 
 struct WebViewMobile: UIViewRepresentable {
+    @Environment(\.modelContext) private var modelContext
+    @Query private var spaces: [SpaceData]
+    
     var urlString: String
     @Binding var title: String
     @Binding var webViewBackgroundColor: UIColor?
     @Binding var currentURLString: String
-    @ObservedObject var webViewManager: WebViewManager
+//    @EnvironmentObject var webViewManager: WebViewManager
+    @EnvironmentObject var storageManager: StorageManager
 
     func makeUIView(context: Context) -> WKWebView {
-        let wv = webViewManager.webView
-        wv.navigationDelegate = context.coordinator
-        return wv
+//        let wv = webViewManager.webView
+        if let wv = storageManager.currentTabs.first?.first?.page.wkWebView {
+            wv.navigationDelegate = context.coordinator
+            return wv
+        }
+        else {
+            return WKWebView()
+        }
     }
 
     func updateUIView(_ uiView: WKWebView, context: Context) {
-        webViewManager.load(urlString: urlString)
+//        webViewManager.load(urlString: urlString)
+        if let currentWebsite = storageManager.getFocusedTab() {
+            storageManager.updateURL(for: currentWebsite.id, newURL: urlString, modelContext: modelContext)
+        }
+        
     }
 
     func makeCoordinator() -> Coordinator {

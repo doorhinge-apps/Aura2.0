@@ -63,9 +63,11 @@ struct TabOverview: View {
                 
                 
                 if mobileTabs.fullScreenWebView {
-                    WebsiteView(namespace: namespace, url: $mobileTabs.webURL, webViewManager: mobileTabs.webViewManager, parentGeo: geo, webURL: $mobileTabs.webURL, fullScreenWebView: $mobileTabs.fullScreenWebView, tab: mobileTabs.selectedTab!, browseForMeTabs: $mobileTabs.browseForMeTabs)
-                        .offset(x: mobileTabs.tabOffset.width, y: mobileTabs.tabOffset.height)
-                        .scaleEffect(mobileTabs.tabScale)
+                    if let tab = storageManager.currentTabs.first?.first {
+                        WebsiteView(namespace: namespace, parentGeo: geo, fullScreenWebView: $mobileTabs.fullScreenWebView, tab: tab, browseForMeTabs: $mobileTabs.browseForMeTabs)
+                            .offset(x: mobileTabs.tabOffset.width, y: mobileTabs.tabOffset.height)
+                            .scaleEffect(mobileTabs.tabScale)
+                    }
                 }
                 
                 VStack {
@@ -325,7 +327,7 @@ struct TabOverview: View {
                                                     .onSubmit({
                                                         withAnimation {
                                                             DispatchQueue.main.async {
-                                                                mobileTabs.webViewManager.load(urlString: formatURL(from: mobileTabs.fromTabSearch))
+//                                                                mobileTabs.webViewManager.load(urlString: formatURL(from: mobileTabs.fromTabSearch))
                                                                 print("Loading url:")
                                                                 print(formatURL(from: mobileTabs.fromTabSearch))
                                                                 
@@ -358,7 +360,7 @@ struct TabOverview: View {
                                                     }
                                                 } else {
                                                     withAnimation {
-                                                        mobileTabs.webViewManager.load(urlString: formatURL(from: mobileTabs.fromTabSearch))
+//                                                        mobileTabs.webViewManager.load(urlString: formatURL(from: mobileTabs.fromTabSearch))
                                                         mobileTabs.newTabFromTab = false
                                                         inTabFocus = false
                                                         //mobileTabs.newTabSearch = ""
@@ -435,23 +437,23 @@ struct TabOverview: View {
                                     if !newTabFocus && !inTabFocus {
                                         HStack {
                                             Button(action: {
-                                                mobileTabs.webViewManager.goBack()
+//                                                mobileTabs.webViewManager.goBack()
                                             }, label: {
                                                 Image(systemName: "chevron.left")
                                             })
-                                            .disabled(!mobileTabs.webViewManager.canGoBack())
-                                            .foregroundStyle(!mobileTabs.webViewManager.canGoBack() ? Color.gray: Color(.systemBlue))
+//                                            .disabled(!mobileTabs.webViewManager.canGoBack())
+//                                            .foregroundStyle(!mobileTabs.webViewManager.canGoBack() ? Color.gray: Color(.systemBlue))
                                             .shadow(color: .white.opacity(0.5), radius: 2, x: 0, y: 0)
                                             
                                             Spacer()
                                             
                                             Button(action: {
-                                                mobileTabs.webViewManager.goForward()
+//                                                mobileTabs.webViewManager.goForward()
                                             }, label: {
                                                 Image(systemName: "chevron.right")
                                             })
-                                            .disabled(!mobileTabs.webViewManager.canGoForward())
-                                            .foregroundStyle(!mobileTabs.webViewManager.canGoForward() ? Color.gray: Color(.systemBlue))
+//                                            .disabled(!mobileTabs.webViewManager.canGoForward())
+//                                            .foregroundStyle(!mobileTabs.webViewManager.canGoForward() ? Color.gray: Color(.systemBlue))
                                             .shadow(color: .white.opacity(0.5), radius: 5, x: 0, y: 0)
                                             
                                             Spacer()

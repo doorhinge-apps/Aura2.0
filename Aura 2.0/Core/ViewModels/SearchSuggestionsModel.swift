@@ -1,53 +1,29 @@
 //
 // Aura 2.0
-// UIViewModel.swift
+// SearchSuggestionsModel.swift
 //
-// Created on 6/11/25
+// Created on 7/21/25
 //
 // Copyright ©2025 DoorHinge Apps.
 //
 
 
-import SwiftUI
+import Foundation
 import Combine
+import Playgrounds
 
-class UIViewModel: ObservableObject {
-//    let hoveringBackgroundOpacity = 0.5
-    // Shows the command bar
-    @Published var showCommandBar: Bool = false
-    // Determines if the command bar is editing the current url or opening a new tab
-    @Published var isEditingURL: Bool = false
-    @Published var commandBarText: String = ""
-    
-    @Published var hoveringID = ""
-    
-    @Published var showInspector = false
-    
-    @Published var currentSelectedTab: String?
-    
-    @Published var currentHoverTab: StoredTab?
-    @Published var currentHoverTabID: UUID?
-    
-    @AppStorage("sidebarWidth") var sidebarWidth = CGFloat(250)
-    
-    @AppStorage("showSidebar") var showSidebar = true
-    
-    @Published var sidebarOffset = true
-    
-    @Published var showSettings = false
-    
-    @Published var showStartpage = false
-    
-    @Published var selectedTabs: [StoredTab]?
-    
-    @Published var currentTabTypeMobile: TabType = .primary
-    
-    // Search suggestions from Google
+struct SearchSuggestion {
+    let id = UUID()
+    let url: String
+    var visited: Int = 1
+}
+
+class SearchSuggestionsModel: ObservableObject {
     @Published var searchSuggestions: [String] = []
     
-    func updateSearchSuggestions() {
+    func updateGoogleSearchSuggestions(inputString: String) {
         Task {
-            if let xml = await fetchXML(searchRequest: commandBarText) {
+            if let xml = await fetchXML(searchRequest: inputString) {
                 searchSuggestions = formatXML(from: xml)
             }
         }

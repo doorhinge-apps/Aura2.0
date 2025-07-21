@@ -26,7 +26,7 @@ class MobileTabsModel: ObservableObject {
     @Published var draggedTab: (id: UUID, url: String)?
     
     @StateObject var settings = SettingsManager()
-    @StateObject var webViewManager = WebViewManager()
+//    @StateObject var webViewManager = WebViewManager()
     
     @Published var selectedTabsSection: TabLocations = .tabs
     

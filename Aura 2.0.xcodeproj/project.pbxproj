@@ -32,6 +32,7 @@
 		B95E23BE2E2D9D8A00598F60 /* iOS Webview.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E23A02E2D9D8A00598F60 /* iOS Webview.swift */; };
 		B95E23BF2E2D9D8A00598F60 /* SnapshotRefresher.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E23AC2E2D9D8A00598F60 /* SnapshotRefresher.swift */; };
 		B95E23C02E2D9D8A00598F60 /* TabLocations.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E23A32E2D9D8A00598F60 /* TabLocations.swift */; };
+		B95E23C22E2EBE4500598F60 /* SearchSuggestionsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E23C12E2EBE4500598F60 /* SearchSuggestionsModel.swift */; };
 		B978E16F2E038D9D00146E9B /* Aura.icon in Resources */ = {isa = PBXBuildFile; fileRef = B978E16E2E038D9D00146E9B /* Aura.icon */; };
 		B9B004E62DF8D16E00B79152 /* StoredTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B004E52DF8D16E00B79152 /* StoredTab.swift */; };
 		B9B004E82DF8D18200B79152 /* BrowserTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B004E72DF8D18200B79152 /* BrowserTab.swift */; };
@@ -123,6 +124,7 @@
 		B95E23AD2E2D9D8A00598F60 /* URL Snapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL Snapshot.swift"; sourceTree = "<group>"; };
 		B95E23AF2E2D9D8A00598F60 /* WebsiteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteView.swift; sourceTree = "<group>"; };
 		B95E23B02E2D9D8A00598F60 /* WebSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSnapshot.swift; sourceTree = "<group>"; };
+		B95E23C12E2EBE4500598F60 /* SearchSuggestionsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSuggestionsModel.swift; sourceTree = "<group>"; };
 		B978E16E2E038D9D00146E9B /* Aura.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Aura.icon; sourceTree = "<group>"; };
 		B9B004E52DF8D16E00B79152 /* StoredTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredTab.swift; sourceTree = "<group>"; };
 		B9B004E72DF8D18200B79152 /* BrowserTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTab.swift; sourceTree = "<group>"; };
@@ -381,6 +383,7 @@
 				B9B0051C2DFA834500B79152 /* TabsManager.swift */,
 				B9B0050E2DFA740700B79152 /* SettingsManager.swift */,
 				B9B004FF2DF9836F00B79152 /* UIViewModel.swift */,
+				B95E23C12E2EBE4500598F60 /* SearchSuggestionsModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -698,6 +701,7 @@
 				B9B004E82DF8D18200B79152 /* BrowserTab.swift in Sources */,
 				B95A80E12E035199007FE1F4 /* AppearanceSettings.swift in Sources */,
 				B95A80D52E02BAAF007FE1F4 /* GeneralSettings.swift in Sources */,
+				B95E23C22E2EBE4500598F60 /* SearchSuggestionsModel.swift in Sources */,
 				B9B005072DFA0AF500B79152 /* SplitViewTab.swift in Sources */,
 				B9B0051A2DFA7E1600B79152 /* LoadingIndicators.swift in Sources */,
 				B9B0050F2DFA740700B79152 /* SettingsManager.swift in Sources */,
