@@ -11,9 +11,7 @@ extension Notification.Name {
 }
 
 @MainActor
-class SnapshotVM: ObservableObject, @unchecked Sendable {
-    let objectWillChange = PassthroughSubject<Void, Never>()
-    
+class SnapshotVM: ObservableObject {
     /// Call this to force a 1 s‐delayed snapshot & overwrite the cached PNG.
     func refresh(urlString: String) {
         guard let url = URL(string: urlString) else { return }
@@ -32,8 +30,8 @@ class SnapshotVM: ObservableObject, @unchecked Sendable {
         }
     }
 
-    // ... rest of your implementation stays the same
-    
+    // ——— internal helpers ——————————————————————————————
+
     private func load(_ url: URL, in wv: WKWebView) async throws {
         try await withCheckedThrowingContinuation { cont in
             let nav = NavDelegate(cont) {
@@ -124,9 +122,7 @@ class SnapshotVM: ObservableObject, @unchecked Sendable {
 
 /// Easy wrapper so you can inject this into any SwiftUI view
 @MainActor
-class SnapshotRefresher: ObservableObject, @unchecked Sendable {
-    let objectWillChange = PassthroughSubject<Void, Never>()
-    
+class SnapshotRefresher: ObservableObject {
     private let vm = SnapshotVM()
     func force(_ urlString: String) {
         vm.refresh(urlString: urlString)

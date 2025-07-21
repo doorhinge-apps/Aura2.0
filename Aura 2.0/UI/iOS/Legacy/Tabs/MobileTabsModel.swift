@@ -9,6 +9,7 @@
 
 
 import SwiftUI
+import Combine
 
 class MobileTabsModel: ObservableObject {
     
@@ -24,7 +25,7 @@ class MobileTabsModel: ObservableObject {
     @Published var selectedTab: (id: UUID, url: String)?
     @Published var draggedTab: (id: UUID, url: String)?
     
-    @StateObject var settings = SettingsVariables()
+    @StateObject var settings = SettingsManager()
     @StateObject var webViewManager = WebViewManager()
     
     @Published var selectedTabsSection: TabLocations = .tabs

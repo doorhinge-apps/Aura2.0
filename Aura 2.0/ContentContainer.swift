@@ -24,11 +24,12 @@ struct ContentContainerView: View {
             if let selected = spaces.first {
                 ZStack {
                     if UIDevice.current.userInterfaceIdiom == .phone {
-                        MobileContent(selectedSpace: selected)
-                            .modifier(ScrollEdgeDisabledIfAvailable())
-                            .modifier(ScrollEdgeIfAvailable())
-                            .statusBarHidden(true)
-                            .ignoresSafeArea()
+                        TabOverview(selectedSpace: selected)
+//                        MobileContent(selectedSpace: selected)
+//                            .modifier(ScrollEdgeDisabledIfAvailable())
+//                            .modifier(ScrollEdgeIfAvailable())
+//                            .statusBarHidden(true)
+//                            .ignoresSafeArea()
                     }
                     else {
                         ContentView(selectedSpace: selected)

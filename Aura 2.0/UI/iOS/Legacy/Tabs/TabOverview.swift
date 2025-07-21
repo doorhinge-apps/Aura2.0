@@ -1,9 +1,3 @@
-//
-//  TabOverview.swift
-//  Aura
-//
-//  Created by Reyna Myers on 25/6/24.
-//
 
 import SwiftUI
 import WebKit
@@ -13,35 +7,35 @@ import SwiftData
 
 struct TabOverview: View {
     @Namespace var namespace
-    @Query(sort: \SpaceStorage.spaceIndex) var spaces: [SpaceStorage]
+    
     @Environment(\.modelContext) private var modelContext
+    @Query private var spaces: [SpaceData]
     
-    @Binding var selectedSpaceIndex: Int
+    @EnvironmentObject var storageManager: StorageManager
+    @EnvironmentObject var uiViewModel: UIViewModel
+    @EnvironmentObject var tabsManager: TabsManager
+    @EnvironmentObject var settingsManager: SettingsManager
     
-    @EnvironmentObject var variables: ObservableVariables
-    @EnvironmentObject var mobileTabs: MobileTabsModel
+    @StateObject var mobileTabs = MobileTabsModel()
+    
+    @State var selectedSpace: SpaceData
     
     @FocusState var newTabFocus: Bool
     @FocusState var inTabFocus: Bool
     
-    init(selectedSpaceIndex: Binding<Int>) {
-        self._selectedSpaceIndex = selectedSpaceIndex
-    }
+//    init(selectedSpaceIndex: Binding<Int>, selectedSpace: SpaceData) {
+//        self._selectedSpaceIndex = selectedSpaceIndex
+//        self.selectedSpace = selectedSpace
+//    }
     
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                if selectedSpaceIndex < spaces.count && (!spaces[selectedSpaceIndex].startHex.isEmpty && !spaces[selectedSpaceIndex].endHex.isEmpty) {
-                    LinearGradient(colors: [Color(hex: spaces[selectedSpaceIndex].startHex), Color(hex: spaces[selectedSpaceIndex].endHex)], startPoint: .bottomLeading, endPoint: .topTrailing).ignoresSafeArea()
-                        .animation(.linear)
-                }
-                else {
-                    LinearGradient(colors: [variables.startColor, variables.endColor], startPoint: .bottomLeading, endPoint: .topTrailing).ignoresSafeArea()
-                        .animation(.linear)
-                }
+                LinearGradient(colors: backgroundGradientColors, startPoint: .top, endPoint: .bottom)
+                    .ignoresSafeArea()
                 
                 ScrollView {
-                    TabList(selectedSpaceIndex: $selectedSpaceIndex, newTabFocus: $newTabFocus, geo: geo)
+                    TabList(newTabFocus: $newTabFocus, geo: geo)
                         .namespace(namespace)
                 }
                 .defaultScrollAnchor(UnitPoint.bottom)
@@ -57,7 +51,7 @@ struct TabOverview: View {
                         //variables.navigationState.createNewWebView(withRequest: URLRequest(url: URL(string: "https\(url.absoluteString.dropFirst(4))")!))
                     }
                     else {
-                        createTab(url: url.absoluteString, isBrowseForMeTab: false)
+                        // TODO: - Add create tab code
                     }
                     print("Url:")
                     print(url)
@@ -78,18 +72,13 @@ struct TabOverview: View {
                     if !mobileTabs.fullScreenWebView {
                         HStack {
                             Button(action: {
-                                variables.showSettings = true
+                                uiViewModel.showSettings.toggle()
                             }, label: {
                                 Image(systemName: "gearshape")
                                 
                             }).buttonStyle(ToolbarButtonStyle())
-                                .sheet(isPresented: $variables.showSettings, content: {
-                                    if selectedSpaceIndex < spaces.count && (!spaces[selectedSpaceIndex].startHex.isEmpty && !spaces[selectedSpaceIndex].endHex.isEmpty) {
-                                        NewSettings(presentSheet: $variables.showSettings, startHex: spaces[selectedSpaceIndex].startHex, endHex: spaces[selectedSpaceIndex].endHex)
-                                    }
-                                    else {
-                                        NewSettings(presentSheet: $variables.showSettings, startHex: variables.startHex, endHex: variables.endHex)
-                                    }
+                                .sheet(isPresented: $uiViewModel.showSettings, content: {
+                                    Settings()
                                 })
                             
                             Spacer()
@@ -107,7 +96,7 @@ struct TabOverview: View {
                                         Button(action: {
                                             withAnimation {
                                                 newTabFocus = false
-                                                createTab(url: formatURL(from: suggestion), isBrowseForMeTab: false)
+                                                // TODO: - Add create tab code
                                                 mobileTabs.newTabSearch = ""
                                             }
                                         }, label: {
@@ -132,7 +121,7 @@ struct TabOverview: View {
                                                     Button(action: {
                                                         withAnimation {
                                                             newTabFocus = false
-                                                            createTab(url: formatURL(from: suggestion), isBrowseForMeTab: true)
+                                                            // TODO: - Add create tab code
                                                             mobileTabs.newTabSearch = ""
                                                         }
                                                     }, label: {
@@ -180,7 +169,7 @@ struct TabOverview: View {
                             .frame(height: newTabFocus || inTabFocus ? 75: 150)
                             .onChange(of: mobileTabs.webURL, {
                                 if mobileTabs.fullScreenWebView, let selectedTab = mobileTabs.selectedTab {
-                                    updateTabURL(for: selectedTab.id, with: mobileTabs.webURL)
+                                    // TODO: - Add update tab code
                                 }
                             })
                         
@@ -230,7 +219,7 @@ struct TabOverview: View {
                                                 withAnimation {
                                                     mobileTabs.newTabFromTab = false
                                                     newTabFocus = false
-                                                    createTab(url: formatURL(from: mobileTabs.newTabSearch), isBrowseForMeTab: false)
+                                                    // TODO: - Add create tab code
                                                     mobileTabs.newTabSearch = ""
                                                 }
                                             })
@@ -253,7 +242,7 @@ struct TabOverview: View {
                                             withAnimation {
                                                 mobileTabs.newTabFromTab = false
                                                 newTabFocus = false
-                                                createTab(url: formatURL(from: mobileTabs.newTabSearch), isBrowseForMeTab: false)
+                                                // TODO: - Add create tab code
                                                 mobileTabs.newTabSearch = ""
                                             }
                                         }
@@ -480,7 +469,7 @@ struct TabOverview: View {
                                                     } else {
                                                         withAnimation {
                                                             newTabFocus = false
-                                                            createTab(url: formatURL(from: mobileTabs.newTabSearch), isBrowseForMeTab: false)
+                                                            // TODO: - Add create tab code
                                                             mobileTabs.newTabSearch = ""
                                                         }
                                                     }
@@ -511,59 +500,81 @@ struct TabOverview: View {
                     }//.offset(y: newTabFocus || inTabFocus ? 50: 0)
                 }.ignoresSafeArea(newTabFocus || inTabFocus ? .container: .all, edges: .all)
             }
+            .onAppear {
+                if spaces.isEmpty {
+                    let newSpace = SpaceData(
+                        spaceIdentifier: UUID().uuidString,
+                        spaceName: "Untitled",
+                        isIncognito: false,
+                        spaceBackgroundColors: ["8041E6", "A0F2FC"],
+                        textColor: "ffffff"
+                    )
+                    modelContext.insert(newSpace)
+                    try? modelContext.save()
+                    selectedSpace = newSpace
+                } else {
+                    selectedSpace = spaces.first!
+                }
+            }
+            .onChange(of: selectedSpace) { _, _ in
+                try? modelContext.save()
+            }
+            .task {
+                storageManager.initializeSelectedSpace(from: spaces, modelContext: modelContext)
+            }
         }
         .environmentObject(mobileTabs)
-        .onAppear {
-            updateTabs()
-        }
+//        .onAppear {
+//            updateTabs()
+//        }
     }
     
     private var spaceSelector: some View {
         GeometryReader { geometry in
-            ScrollView(.horizontal, showsIndicators: false) {
-                ScrollViewReader { proxy in
-                    HStack(spacing: 10) {
-                        ForEach(spaces.indices, id: \.self) { index in
-                            Button(action: {
-                                withAnimation {
-                                    withAnimation {
-                                        selectedSpaceIndex = index
-                                        updateTabs()
-                                        proxy.scrollTo(index, anchor: .center) // Snap to center on tap
-                                    }
-                                }
-                            }) {
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 10)
-                                        .fill(.regularMaterial)
-                                        .frame(width: geometry.size.width - 50, height: 50)
-                                    
-                                    HStack {
-                                        Image(systemName: spaces[index].spaceIcon)
-                                        Text(spaces[index].spaceName)
-                                    }
-                                    .foregroundStyle(Color(hex: "4D4D4D"))
-                                    .font(.system(size: 16, weight: .bold))
-                                    .opacity(selectedSpaceIndex == index ? 1.0 : 0.4)
-                                    .padding(.horizontal, 15)
-                                }
-                                .frame(width: geometry.size.width / 2, height: 50)
-                                .background(Color.white.opacity(0.8))
-                                .cornerRadius(15)
-                                .contentShape(Rectangle())
-                                .id(index)
-                                .onAppear {
-                                    if selectedSpaceIndex == index {
-                                        proxy.scrollTo(index, anchor: .center)
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 25)
-                }
-            }
-            .padding(.bottom)
+//            ScrollView(.horizontal, showsIndicators: false) {
+//                ScrollViewReader { proxy in
+//                    HStack(spacing: 10) {
+//                        ForEach(spaces.indices, id: \.self) { index in
+//                            Button(action: {
+//                                withAnimation {
+//                                    withAnimation {
+//                                        selectedSpaceIndex = index
+////                                        updateTabs()
+//                                        proxy.scrollTo(index, anchor: .center) // Snap to center on tap
+//                                    }
+//                                }
+//                            }) {
+//                                ZStack {
+//                                    RoundedRectangle(cornerRadius: 10)
+//                                        .fill(.regularMaterial)
+//                                        .frame(width: geometry.size.width - 50, height: 50)
+//                                    
+//                                    HStack {
+//                                        Image(systemName: spaces[index].spaceIcon)
+//                                        Text(spaces[index].spaceName)
+//                                    }
+//                                    .foregroundStyle(Color(hex: "4D4D4D"))
+//                                    .font(.system(size: 16, weight: .bold))
+//                                    .opacity(selectedSpaceIndex == index ? 1.0 : 0.4)
+//                                    .padding(.horizontal, 15)
+//                                }
+//                                .frame(width: geometry.size.width / 2, height: 50)
+//                                .background(Color.white.opacity(0.8))
+//                                .cornerRadius(15)
+//                                .contentShape(Rectangle())
+//                                .id(index)
+//                                .onAppear {
+//                                    if selectedSpaceIndex == index {
+//                                        proxy.scrollTo(index, anchor: .center)
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                    .padding(.horizontal, 25)
+//                }
+//            }
+//            .padding(.bottom)
         }.frame(height: 75)
     }
     
@@ -591,7 +602,8 @@ struct TabOverview: View {
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                     withAnimation {
-                        removeItem(id)
+//                        removeItem(id)
+                        // TODO: - Add removing tab code
                     }
                 }
             }
@@ -605,120 +617,120 @@ struct TabOverview: View {
         mobileTabs.closeTabScrollDisabledCounter = 0
     }
     
-    private func updateTabs() {
-        if UserDefaults.standard.integer(forKey: "savedSelectedSpaceIndex") > spaces.count - 1 {
-            selectedSpaceIndex = 0
-        }
-        
-        Task {
-            if spaces.count <= 0 {
-                await modelContext.insert(SpaceStorage(spaceIndex: spaces.count, spaceName: "Untitled", spaceIcon: "circle.fill", favoritesUrls: [], pinnedUrls: [], tabUrls: []))
-            }
-        }
-        
-        if spaces.count > selectedSpaceIndex {
-            var temporaryTabs = spaces[selectedSpaceIndex].tabUrls.map { (id: UUID(), url: $0) }
-            //tabs = temporaryTabs.reversed()
-            mobileTabs.tabs = temporaryTabs
-            mobileTabs.pinnedTabs = spaces[selectedSpaceIndex].pinnedUrls.map { (id: UUID(), url: $0) }
-            mobileTabs.favoriteTabs = spaces[selectedSpaceIndex].favoritesUrls.map { (id: UUID(), url: $0) }
-        }
-    }
+//    private func updateTabs() {
+//        if UserDefaults.standard.integer(forKey: "savedSelectedSpaceIndex") > spaces.count - 1 {
+//            selectedSpaceIndex = 0
+//        }
+//        
+//        Task {
+//            if spaces.count <= 0 {
+//                await modelContext.insert(SpaceStorage(spaceIndex: spaces.count, spaceName: "Untitled", spaceIcon: "circle.fill", favoritesUrls: [], pinnedUrls: [], tabUrls: []))
+//            }
+//        }
+//        
+//        if spaces.count > selectedSpaceIndex {
+//            var temporaryTabs = spaces[selectedSpaceIndex].tabUrls.map { (id: UUID(), url: $0) }
+//            //tabs = temporaryTabs.reversed()
+//            mobileTabs.tabs = temporaryTabs
+//            mobileTabs.pinnedTabs = spaces[selectedSpaceIndex].pinnedUrls.map { (id: UUID(), url: $0) }
+//            mobileTabs.favoriteTabs = spaces[selectedSpaceIndex].favoritesUrls.map { (id: UUID(), url: $0) }
+//        }
+//    }
+//    
+//    private func saveTabs() {
+//        if UserDefaults.standard.integer(forKey: "savedSelectedSpaceIndex") > spaces.count - 1 {
+//            selectedSpaceIndex = 0
+//        }
+//        
+//        if spaces.count > selectedSpaceIndex {
+//            // Extracting URLs from tabs, pinnedTabs, and favoriteTabs arrays
+//            let extractedTabUrls = mobileTabs.tabs.map { $0.url }
+//            let extractedPinnedUrls = mobileTabs.pinnedTabs.map { $0.url }
+//            let extractedFavoriteUrls = mobileTabs.favoriteTabs.map { $0.url }
+//            
+//            // Updating the corresponding space with the extracted URLs
+//            spaces[selectedSpaceIndex].tabUrls = extractedTabUrls
+//            spaces[selectedSpaceIndex].pinnedUrls = extractedPinnedUrls
+//            spaces[selectedSpaceIndex].favoritesUrls = extractedFavoriteUrls
+//        }
+//    }
     
-    private func saveTabs() {
-        if UserDefaults.standard.integer(forKey: "savedSelectedSpaceIndex") > spaces.count - 1 {
-            selectedSpaceIndex = 0
-        }
-        
-        if spaces.count > selectedSpaceIndex {
-            // Extracting URLs from tabs, pinnedTabs, and favoriteTabs arrays
-            let extractedTabUrls = mobileTabs.tabs.map { $0.url }
-            let extractedPinnedUrls = mobileTabs.pinnedTabs.map { $0.url }
-            let extractedFavoriteUrls = mobileTabs.favoriteTabs.map { $0.url }
-            
-            // Updating the corresponding space with the extracted URLs
-            spaces[selectedSpaceIndex].tabUrls = extractedTabUrls
-            spaces[selectedSpaceIndex].pinnedUrls = extractedPinnedUrls
-            spaces[selectedSpaceIndex].favoritesUrls = extractedFavoriteUrls
-        }
-    }
-    
-    private func removeItem(_ id: UUID) {
-        mobileTabs.browseForMeTabs.removeAll { $0 == id.description }
-        
-        switch mobileTabs.selectedTabsSection {
-        case .tabs:
-            if let index = mobileTabs.tabs.firstIndex(where: { $0.id == id }) {
-                mobileTabs.tabs.remove(at: index)
-                spaces[selectedSpaceIndex].tabUrls.remove(at: index)
-            }
-        case .pinned:
-            if let index = mobileTabs.pinnedTabs.firstIndex(where: { $0.id == id }) {
-                mobileTabs.pinnedTabs.remove(at: index)
-                spaces[selectedSpaceIndex].pinnedUrls.remove(at: index)
-            }
-        case .favorites:
-            if let index = mobileTabs.favoriteTabs.firstIndex(where: { $0.id == id }) {
-                mobileTabs.favoriteTabs.remove(at: index)
-                spaces[selectedSpaceIndex].favoritesUrls.remove(at: index)
-            }
-        }
-        
-        withAnimation {
-            mobileTabs.offsets.removeValue(forKey: id)
-            mobileTabs.tilts.removeValue(forKey: id)
-            mobileTabs.zIndexes.removeValue(forKey: id)
-        }
-    }
-    
-    private func updateTabURL(for id: UUID, with newURL: String) {
-        switch mobileTabs.selectedTabsSection {
-        case .tabs:
-            if let index = mobileTabs.tabs.firstIndex(where: { $0.id == id }) {
-                mobileTabs.tabs[index].url = newURL
-                spaces[selectedSpaceIndex].tabUrls[index] = newURL
-            }
-        case .pinned:
-            if let index = mobileTabs.pinnedTabs.firstIndex(where: { $0.id == id }) {
-                mobileTabs.pinnedTabs[index].url = newURL
-                spaces[selectedSpaceIndex].pinnedUrls[index] = newURL
-            }
-        case .favorites:
-            if let index = mobileTabs.favoriteTabs.firstIndex(where: { $0.id == id }) {
-                mobileTabs.favoriteTabs[index].url = newURL
-                spaces[selectedSpaceIndex].favoritesUrls[index] = newURL
-            }
-        }
-    }
-    
-    
-    private func createTab(url: String, isBrowseForMeTab: Bool) {
-        let newTab = (id: UUID(), url: url)
-        
-        switch mobileTabs.selectedTabsSection {
-        case .tabs:
-            mobileTabs.tabs.append(newTab)
-            spaces[selectedSpaceIndex].tabUrls.append(url)
-        case .pinned:
-            mobileTabs.pinnedTabs.append(newTab)
-            spaces[selectedSpaceIndex].pinnedUrls.append(url)
-        case .favorites:
-            mobileTabs.favoriteTabs.append(newTab)
-            spaces[selectedSpaceIndex].favoritesUrls.append(url)
-        }
-        
-        if isBrowseForMeTab {
-            mobileTabs.browseForMeTabs.append(newTab.id.description)
-        }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
-            withAnimation {
-                mobileTabs.selectedTab = newTab
-                mobileTabs.webURL = newTab.url
-                mobileTabs.fullScreenWebView = true
-            }
-        })
-    }
+//    private func removeItem(_ id: UUID) {
+//        mobileTabs.browseForMeTabs.removeAll { $0 == id.description }
+//        
+//        switch mobileTabs.selectedTabsSection {
+//        case .tabs:
+//            if let index = mobileTabs.tabs.firstIndex(where: { $0.id == id }) {
+//                mobileTabs.tabs.remove(at: index)
+//                spaces[selectedSpaceIndex].tabUrls.remove(at: index)
+//            }
+//        case .pinned:
+//            if let index = mobileTabs.pinnedTabs.firstIndex(where: { $0.id == id }) {
+//                mobileTabs.pinnedTabs.remove(at: index)
+//                spaces[selectedSpaceIndex].pinnedUrls.remove(at: index)
+//            }
+//        case .favorites:
+//            if let index = mobileTabs.favoriteTabs.firstIndex(where: { $0.id == id }) {
+//                mobileTabs.favoriteTabs.remove(at: index)
+//                spaces[selectedSpaceIndex].favoritesUrls.remove(at: index)
+//            }
+//        }
+//        
+//        withAnimation {
+//            mobileTabs.offsets.removeValue(forKey: id)
+//            mobileTabs.tilts.removeValue(forKey: id)
+//            mobileTabs.zIndexes.removeValue(forKey: id)
+//        }
+//    }
+//    
+//    private func updateTabURL(for id: UUID, with newURL: String) {
+//        switch mobileTabs.selectedTabsSection {
+//        case .tabs:
+//            if let index = mobileTabs.tabs.firstIndex(where: { $0.id == id }) {
+//                mobileTabs.tabs[index].url = newURL
+//                spaces[selectedSpaceIndex].tabUrls[index] = newURL
+//            }
+//        case .pinned:
+//            if let index = mobileTabs.pinnedTabs.firstIndex(where: { $0.id == id }) {
+//                mobileTabs.pinnedTabs[index].url = newURL
+//                spaces[selectedSpaceIndex].pinnedUrls[index] = newURL
+//            }
+//        case .favorites:
+//            if let index = mobileTabs.favoriteTabs.firstIndex(where: { $0.id == id }) {
+//                mobileTabs.favoriteTabs[index].url = newURL
+//                spaces[selectedSpaceIndex].favoritesUrls[index] = newURL
+//            }
+//        }
+//    }
+//    
+//    
+//    private func createTab(url: String, isBrowseForMeTab: Bool) {
+//        let newTab = (id: UUID(), url: url)
+//        
+//        switch mobileTabs.selectedTabsSection {
+//        case .tabs:
+//            mobileTabs.tabs.append(newTab)
+//            spaces[selectedSpaceIndex].tabUrls.append(url)
+//        case .pinned:
+//            mobileTabs.pinnedTabs.append(newTab)
+//            spaces[selectedSpaceIndex].pinnedUrls.append(url)
+//        case .favorites:
+//            mobileTabs.favoriteTabs.append(newTab)
+//            spaces[selectedSpaceIndex].favoritesUrls.append(url)
+//        }
+//        
+//        if isBrowseForMeTab {
+//            mobileTabs.browseForMeTabs.append(newTab.id.description)
+//        }
+//        
+//        DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+//            withAnimation {
+//                mobileTabs.selectedTab = newTab
+//                mobileTabs.webURL = newTab.url
+//                mobileTabs.fullScreenWebView = true
+//            }
+//        })
+//    }
     
     func fetchXML(searchRequest: String) {
         guard let url = URL(string: "https://toolbarqueries.google.com/complete/search?q=\(searchRequest.replacingOccurrences(of: " ", with: "+"))&output=toolbar&hl=en") else {
@@ -766,6 +778,11 @@ struct TabOverview: View {
         }
         
         return results
+    }
+    
+    var backgroundGradientColors: [Color] {
+        let hexes = storageManager.selectedSpace?.spaceBackgroundColors ?? ["8041E6", "A0F2FC"]
+        return hexes.map { Color(hex: $0) }
     }
 }
 
