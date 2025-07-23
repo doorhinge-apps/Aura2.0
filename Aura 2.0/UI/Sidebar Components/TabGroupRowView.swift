@@ -180,7 +180,7 @@ struct TabGroupRowView: View {
     private func closeTabGroup() {
         // Close the entire TabGroup
         if let firstTab = firstTab {
-            let replacement = storageManager.closeTabGroup(tabGroup: tabGroup, modelContext: modelContext)
+            let replacement = storageManager.closeTabGroup(tabGroup: tabGroup, modelContext: modelContext, selectNext: true)
             uiViewModel.currentSelectedTab = replacement?.id ?? ""
         }
     }

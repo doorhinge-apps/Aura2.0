@@ -301,31 +301,36 @@ struct Sidebar: View {
                     }
                     
                     // MARK: - Switch Spaces
-                    ForEach(spaces, id:\.self) { space in
-                        Button {
-                            storageManager.selectedSpace = space
-                        } label: {                            
-                            ZStack {
-                                Color.white.opacity(uiViewModel.hoveringID == space.spaceIdentifier ? 0.25: 0.0)
-                                
-                                Image(systemName: space.spaceIcon)
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 20, height: 20)
-                                    .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
-                                    .opacity(uiViewModel.hoveringID == space.spaceIdentifier ? 1.0: 0.5)
-                                
-                            }.frame(width: 40, height: 40).cornerRadius(7)
-                                .onHover { hover in
-                                    withAnimation {
-                                        if uiViewModel.hoveringID == space.spaceIdentifier {
-                                            uiViewModel.hoveringID = ""
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack {
+                            ForEach(spaces, id:\.self) { space in
+                                Button {
+                                    storageManager.selectedSpace = space
+                                } label: {
+                                    ZStack {
+                                        Color.white.opacity(storageManager.selectedSpace?.spaceIdentifier == space.spaceIdentifier ? 0.5: uiViewModel.hoveringID == space.spaceIdentifier ? 0.25: 0.0)
+                                        
+                                        Image(systemName: space.spaceIcon)
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 20, height: 20)
+                                        //                                        .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
+                                            .foregroundStyle(storageManager.selectedSpace?.spaceIdentifier == space.spaceIdentifier ? Color.black: Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
+                                            .opacity(uiViewModel.hoveringID == space.spaceIdentifier ? 1.0: 0.5)
+                                        
+                                    }.frame(width: 40, height: 40).cornerRadius(7)
+                                        .onHover { hover in
+                                            withAnimation {
+                                                if uiViewModel.hoveringID == space.spaceIdentifier {
+                                                    uiViewModel.hoveringID = ""
+                                                }
+                                                else {
+                                                    uiViewModel.hoveringID = space.spaceIdentifier
+                                                }
+                                            }
                                         }
-                                        else {
-                                            uiViewModel.hoveringID = space.spaceIdentifier
-                                        }
-                                    }
                                 }
+                            }
                         }
                     }
                     
@@ -421,7 +426,7 @@ struct Sidebar: View {
     }
 }
 
-private extension Comparable {
+extension Comparable {
     func clamped(to range: ClosedRange<Self>) -> Self {
         min(max(self, range.lowerBound), range.upperBound)
     }

@@ -33,6 +33,9 @@
 		B95E23BF2E2D9D8A00598F60 /* SnapshotRefresher.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E23AC2E2D9D8A00598F60 /* SnapshotRefresher.swift */; };
 		B95E23C02E2D9D8A00598F60 /* TabLocations.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E23A32E2D9D8A00598F60 /* TabLocations.swift */; };
 		B95E23C22E2EBE4500598F60 /* SearchSuggestionsModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E23C12E2EBE4500598F60 /* SearchSuggestionsModel.swift */; };
+		B95E23C52E2ECF8300598F60 /* MobileHomepage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E23C42E2ECF8300598F60 /* MobileHomepage.swift */; };
+		B95E23CD2E2F289000598F60 /* MobileTabGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E23CB2E2F289000598F60 /* MobileTabGroup.swift */; };
+		B95E23D32E2F289000598F60 /* MobileTabGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E23C62E2F289000598F60 /* MobileTabGrid.swift */; };
 		B978E16F2E038D9D00146E9B /* Aura.icon in Resources */ = {isa = PBXBuildFile; fileRef = B978E16E2E038D9D00146E9B /* Aura.icon */; };
 		B9B004E62DF8D16E00B79152 /* StoredTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B004E52DF8D16E00B79152 /* StoredTab.swift */; };
 		B9B004E82DF8D18200B79152 /* BrowserTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B004E72DF8D18200B79152 /* BrowserTab.swift */; };
@@ -65,6 +68,7 @@
 		B9B060822E07BF2E00480CEF /* TabGroupFavoriteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060802E07BF2E00480CEF /* TabGroupFavoriteView.swift */; };
 		B9B060832E07BF2E00480CEF /* TabGroupRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060812E07BF2E00480CEF /* TabGroupRowView.swift */; };
 		B9B060852E07C54600480CEF /* TemporaryTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060842E07C54600480CEF /* TemporaryTabView.swift */; };
+		B9BA609D2E308E630072F4D3 /* WebsiteMobile.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BA609C2E308E630072F4D3 /* WebsiteMobile.swift */; };
 		B9BB57382DF8CE6F00B7E1E7 /* Aura_2_0App.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BB57332DF8CE6F00B7E1E7 /* Aura_2_0App.swift */; };
 		B9BB57392DF8CE6F00B7E1E7 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BB57342DF8CE6F00B7E1E7 /* ContentView.swift */; };
 		B9BB573B2DF8CE6F00B7E1E7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B9BB57312DF8CE6F00B7E1E7 /* Assets.xcassets */; };
@@ -125,6 +129,9 @@
 		B95E23AF2E2D9D8A00598F60 /* WebsiteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteView.swift; sourceTree = "<group>"; };
 		B95E23B02E2D9D8A00598F60 /* WebSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSnapshot.swift; sourceTree = "<group>"; };
 		B95E23C12E2EBE4500598F60 /* SearchSuggestionsModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchSuggestionsModel.swift; sourceTree = "<group>"; };
+		B95E23C42E2ECF8300598F60 /* MobileHomepage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileHomepage.swift; sourceTree = "<group>"; };
+		B95E23C62E2F289000598F60 /* MobileTabGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileTabGrid.swift; sourceTree = "<group>"; };
+		B95E23CB2E2F289000598F60 /* MobileTabGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileTabGroup.swift; sourceTree = "<group>"; };
 		B978E16E2E038D9D00146E9B /* Aura.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Aura.icon; sourceTree = "<group>"; };
 		B9B004E52DF8D16E00B79152 /* StoredTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredTab.swift; sourceTree = "<group>"; };
 		B9B004E72DF8D18200B79152 /* BrowserTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTab.swift; sourceTree = "<group>"; };
@@ -156,6 +163,7 @@
 		B9B060802E07BF2E00480CEF /* TabGroupFavoriteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupFavoriteView.swift; sourceTree = "<group>"; };
 		B9B060812E07BF2E00480CEF /* TabGroupRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupRowView.swift; sourceTree = "<group>"; };
 		B9B060842E07C54600480CEF /* TemporaryTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryTabView.swift; sourceTree = "<group>"; };
+		B9BA609C2E308E630072F4D3 /* WebsiteMobile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteMobile.swift; sourceTree = "<group>"; };
 		B9BB57022DF8CE4500B7E1E7 /* Aura 2.0.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Aura 2.0.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9BB57132DF8CE4700B7E1E7 /* Aura 2.0Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Aura 2.0Tests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		B9BB571D2DF8CE4700B7E1E7 /* Aura 2.0UITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "Aura 2.0UITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -328,6 +336,17 @@
 			path = "Website Shapshots";
 			sourceTree = "<group>";
 		};
+		B95E23C32E2ECF7700598F60 /* iOS 2 */ = {
+			isa = PBXGroup;
+			children = (
+				B95E23C42E2ECF8300598F60 /* MobileHomepage.swift */,
+				B95E23C62E2F289000598F60 /* MobileTabGrid.swift */,
+				B95E23CB2E2F289000598F60 /* MobileTabGroup.swift */,
+				B9BA609C2E308E630072F4D3 /* WebsiteMobile.swift */,
+			);
+			path = "iOS 2";
+			sourceTree = "<group>";
+		};
 		B9B004ED2DF96BCD00B79152 /* Scheme Handlers */ = {
 			isa = PBXGroup;
 			children = (
@@ -471,6 +490,7 @@
 			isa = PBXGroup;
 			children = (
 				B9BB57342DF8CE6F00B7E1E7 /* ContentView.swift */,
+				B95E23C32E2ECF7700598F60 /* iOS 2 */,
 				B92128AD2E274B7500CC9463 /* iOS */,
 				B9B0051E2DFAA2BC00B79152 /* CommandBar.swift */,
 				B9B060842E07C54600480CEF /* TemporaryTabView.swift */,
@@ -723,11 +743,15 @@
 				B95E23B62E2D9D8A00598F60 /* TabList.swift in Sources */,
 				B95E23B72E2D9D8A00598F60 /* TabOverview.swift in Sources */,
 				B95E23B82E2D9D8A00598F60 /* WebPreview.swift in Sources */,
+				B95E23C52E2ECF8300598F60 /* MobileHomepage.swift in Sources */,
 				B95E23B92E2D9D8A00598F60 /* MobileTabsModel.swift in Sources */,
 				B95E23BB2E2D9D8A00598F60 /* TabTypeSwitcher2.swift in Sources */,
 				B95E23BC2E2D9D8A00598F60 /* WebSnapshot.swift in Sources */,
 				B95E23BD2E2D9D8A00598F60 /* PlusButtonStyle.swift in Sources */,
 				B95E23BE2E2D9D8A00598F60 /* iOS Webview.swift in Sources */,
+				B9BA609D2E308E630072F4D3 /* WebsiteMobile.swift in Sources */,
+				B95E23CD2E2F289000598F60 /* MobileTabGroup.swift in Sources */,
+				B95E23D32E2F289000598F60 /* MobileTabGrid.swift in Sources */,
 				B95E23BF2E2D9D8A00598F60 /* SnapshotRefresher.swift in Sources */,
 				B95E23C02E2D9D8A00598F60 /* TabLocations.swift in Sources */,
 				B9B004EA2DF8D1F400B79152 /* TabType.swift in Sources */,

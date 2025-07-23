@@ -162,7 +162,7 @@ struct TabGroupFavoriteView: View {
     }
     
     private func closeTabGroup() {
-        let replacement = storageManager.closeTabGroup(tabGroup: tabGroup, modelContext: modelContext)
+        let replacement = storageManager.closeTabGroup(tabGroup: tabGroup, modelContext: modelContext, selectNext: true)
         uiViewModel.currentSelectedTab = replacement?.id ?? ""
     }
     

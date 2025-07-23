@@ -1,8 +1,8 @@
 //
 // Aura 2.0
-// WebsitePanel.swift
+// WebsiteMobile.swift
 //
-// Created on 6/11/25
+// Created on 7/22/25
 //
 // Copyright ©2025 DoorHinge Apps.
 //
@@ -12,15 +12,13 @@ import SwiftUI
 import WebKit
 import SwiftData
 
-struct WebsitePanel: View {
+struct WebsiteMobile: View {
     @EnvironmentObject var storageManager: StorageManager
     @EnvironmentObject var uiViewModel: UIViewModel
     @EnvironmentObject var tabsManager: TabsManager
     @EnvironmentObject var settingsManager: SettingsManager
     
     @Environment(\.modelContext) private var modelContext
-    
-//    @State var scrollPosition = ScrollPosition()
     
     @State var findNavigatorIsPresent: Bool = false
     
@@ -31,18 +29,6 @@ struct WebsitePanel: View {
     var body: some View {
         GeometryReader { geo in
             ZStack {
-                Button {
-                    presentWebsiteNavigatorIn = storageManager.focusedWebsite
-                } label: {
-                    Color.white.opacity(0.001)
-                }.keyboardShortcut("t", modifiers: [.command, .option])
-                
-                Button {
-                    findNavigatorIsPresent.toggle()
-                } label: {
-                    Color.white.opacity(0.001)
-                }.keyboardShortcut("f", modifiers: .command)
-                
                 RoundedRectangle(cornerRadius: 10)
                     .fill(Color.white.opacity(0.25))
                 

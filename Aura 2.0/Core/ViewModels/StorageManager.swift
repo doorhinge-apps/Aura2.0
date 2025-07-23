@@ -77,14 +77,19 @@ class StorageManager: ObservableObject {
         
         if let index = splitViewTabs.firstIndex(where: { $0.mainTab == tabObject }) {
             print("DEBUG: Found existing splitViewTab at index: \(index)")
-            splitViewTabs[index].subTabLayout = currentTabs
+            withAnimation {
+                splitViewTabs[index].subTabLayout = currentTabs
+            }
         } else {
             print("DEBUG: No existing splitViewTab found, creating new tab")
             // Find the TabGroup that contains this tab
             if let tabGroup = findTabGroup(containingTabId: tabObject.id, space: space) {
                 print("DEBUG: Found TabGroup, loading as currentTabs")
                 // Restore the entire nested structure from the TabGroup
-                currentTabs = await loadTabGroupAsCurrentTabs(tabGroup: tabGroup)
+                let tempCurrentTabs = await loadTabGroupAsCurrentTabs(tabGroup: tabGroup)
+                withAnimation {
+                    currentTabs = tempCurrentTabs
+                }
             } else {
                 print("DEBUG: No TabGroup found, loading single tab")
                 // Fallback: create a single tab if no TabGroup found
@@ -103,6 +108,9 @@ class StorageManager: ObservableObject {
         
         // Initialize URL tracking for all current tabs
         updateURLTracking()
+        
+        print("Current Tab Status:")
+        print(currentTabs.first?.isEmpty)
     }
     
     /// Load a TabGroup and convert it to [[BrowserTab]] structure
@@ -176,7 +184,9 @@ class StorageManager: ObservableObject {
             print("DEBUG: Creating new browser tab")
             let browserTab = await createBrowserTab(from: tabObject)
             print("DEBUG: Created browserTab, setting currentTabs")
-            currentTabs = [[browserTab]]
+            withAnimation {
+                currentTabs = [[browserTab]]
+            }
             loadedTabs.append(browserTab)
         }
         print("DEBUG: loadSingleTab completed, currentTabs count: \(currentTabs.count)")
@@ -990,7 +1000,7 @@ class StorageManager: ObservableObject {
     }
     
     /// Close an entire TabGroup
-    func closeTabGroup(tabGroup: TabGroup, modelContext: ModelContext) -> StoredTab? {
+    func closeTabGroup(tabGroup: TabGroup, modelContext: ModelContext, selectNext: Bool) -> StoredTab? {
         guard let space = selectedSpace else { return nil }
         
         // Remove the TabGroup from the appropriate array
@@ -1022,14 +1032,19 @@ class StorageManager: ObservableObject {
         // Delete the TabGroup itself
         modelContext.delete(tabGroup)
         
-        // Find a replacement TabGroup to switch to
-        let replacementGroup = findReplacementTabGroup(removedGroup: tabGroup, space: space)
-        
-        if let replacement = replacementGroup?.tabRows?.first?.tabs?.first {
-            Task { await selectOrLoadTab(tabObject: replacement) }
-            return replacement
-        } else {
-            currentTabs = [[]]
+        if selectNext {
+            // Find a replacement TabGroup to switch to
+            let replacementGroup = findReplacementTabGroup(removedGroup: tabGroup, space: space)
+            
+            if let replacement = replacementGroup?.tabRows?.first?.tabs?.first {
+                Task { await selectOrLoadTab(tabObject: replacement) }
+                return replacement
+            } else {
+                currentTabs = [[]]
+                return nil
+            }
+        }
+        else {
             return nil
         }
     }
