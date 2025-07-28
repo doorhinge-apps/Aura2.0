@@ -35,7 +35,8 @@ struct Aura_2_0App: App {
             let settingsManager = SettingsManager()
 
             ContentContainerView()
-                .ignoresSafeArea(edges: .all)
+//                .ignoresSafeArea(edges: .all)
+                .ignoresSafeArea(.container, edges: .all)
                 .environmentObject(storageManager)
                 .environmentObject(uiViewModel)
                 .environmentObject(tabsManager)
