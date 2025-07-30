@@ -242,38 +242,43 @@ struct MobileHomepage: View {
                             }
                             
                             // MARK: - Switch Spaces
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack {
-                                    ForEach(spaces, id:\.self) { space in
-                                        Button {
-                                            storageManager.selectedSpace = space
-                                        } label: {
-                                            ZStack {
-                                                Color.white.opacity(0.5)
-                                                
-                                                Label(space.spaceName, systemImage: space.spaceIcon)
-                                                //                                            Image(systemName: space.spaceIcon)
-                                                //                                                .resizable()
-                                                //                                                .scaledToFit()
-                                                //                                                .frame(width: 20, height: 20)
-                                                //                                                .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
-                                                //                                                .opacity(uiViewModel.hoveringID == space.spaceIdentifier ? 1.0: 0.5)
-                                                    .foregroundStyle(storageManager.selectedSpace?.spaceIdentifier == space.spaceIdentifier ? Color.black: Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
-                                                    .opacity(uiViewModel.hoveringID == space.spaceIdentifier ? 1.0: 0.5)
-                                                    .padding(.horizontal, 20)
-                                                
-                                            }.frame(height: 50)
-                                                .cornerRadius(10)
-                                                .onHover { hover in
-                                                    withAnimation {
-                                                        if uiViewModel.hoveringID == space.spaceIdentifier {
-                                                            uiViewModel.hoveringID = ""
-                                                        }
-                                                        else {
-                                                            uiViewModel.hoveringID = space.spaceIdentifier
+                            ScrollViewReader { proxy in
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack {
+                                        ForEach(spaces, id:\.self) { space in
+                                            Button {
+                                                storageManager.selectedSpace = space
+                                                withAnimation {
+                                                    proxy.scrollTo(space.id, anchor: .center)
+                                                }
+                                            } label: {
+                                                ZStack {
+                                                    Color.white.opacity(0.5)
+                                                    
+                                                    Label(space.spaceName, systemImage: space.spaceIcon)
+                                                    //                                            Image(systemName: space.spaceIcon)
+                                                    //                                                .resizable()
+                                                    //                                                .scaledToFit()
+                                                    //                                                .frame(width: 20, height: 20)
+                                                    //                                                .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
+                                                    //                                                .opacity(uiViewModel.hoveringID == space.spaceIdentifier ? 1.0: 0.5)
+                                                        .foregroundStyle(storageManager.selectedSpace?.spaceIdentifier == space.spaceIdentifier ? Color.black: Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
+                                                        .opacity(uiViewModel.hoveringID == space.spaceIdentifier ? 1.0: 0.5)
+                                                        .padding(.horizontal, 20)
+                                                    
+                                                }.frame(height: 50)
+                                                    .cornerRadius(10)
+                                                    .onHover { hover in
+                                                        withAnimation {
+                                                            if uiViewModel.hoveringID == space.spaceIdentifier {
+                                                                uiViewModel.hoveringID = ""
+                                                            }
+                                                            else {
+                                                                uiViewModel.hoveringID = space.spaceIdentifier
+                                                            }
                                                         }
                                                     }
-                                                }
+                                            }.id(space.id.storeIdentifier)
                                         }
                                     }
                                 }
