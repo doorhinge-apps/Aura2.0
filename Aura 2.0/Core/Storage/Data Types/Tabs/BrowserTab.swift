@@ -11,6 +11,7 @@
 import SwiftUI
 import WebKit
 
+/// Parsed from a StoredTab type and stores an open WKWebView and its data.
 struct BrowserTab: Hashable, Identifiable {
     let id: UUID = UUID()
     var lastActiveTime: Date

@@ -14,6 +14,8 @@ import WebKit
 import Combine
 
 struct ContentView: View {
+    @Environment(\.colorScheme) var colorScheme
+    
     @Environment(\.modelContext) private var modelContext
     @Query private var spaces: [SpaceData]
     
@@ -47,6 +49,11 @@ struct ContentView: View {
                             startPoint: .bottomLeading,
                             endPoint: .topTrailing
                         )
+                        .overlay(content: {
+                            if colorScheme == .dark {
+                                Color.black.opacity(0.5)
+                            }
+                        })
                         .ignoresSafeArea()
                         .animation(.default)
                     }

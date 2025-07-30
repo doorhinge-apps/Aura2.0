@@ -11,6 +11,8 @@ import SwiftUI
 import SwiftData
 
 struct ContentContainerView: View {
+    @Environment(\.colorScheme) var colorScheme
+    
     @Environment(\.modelContext) private var modelContext
     @Query private var spaces: [SpaceData]
     
@@ -25,19 +27,11 @@ struct ContentContainerView: View {
                 ZStack {
                     if UIDevice.current.userInterfaceIdiom == .phone {
                         MobileHomepage()
-                        //TabOverview(selectedSpace: selected)
-//                        MobileContent(selectedSpace: selected)
-//                            .modifier(ScrollEdgeDisabledIfAvailable())
-//                            .modifier(ScrollEdgeIfAvailable())
-//                            .statusBarHidden(true)
-//                            .ignoresSafeArea()
                     }
                     else {
                         ContentView(selectedSpace: selected)
-                        //.scrollEdgeEffectDisabled(true)
                             .modifier(ScrollEdgeDisabledIfAvailable())
                             .modifier(ScrollEdgeIfAvailable())
-                        //.scrollEdgeEffectStyle(.hard, for: .top)
                             .statusBarHidden(true)
                     }
                 }.onAppear {
@@ -47,7 +41,7 @@ struct ContentContainerView: View {
                         // Clean up old tabs from the new group structure
                         cleanupOldTabsFromGroups(space: space, cutoff: cutoff, modelContext: modelContext)
                         
-                        // Also clean up legacy tabs for migration
+                        // Clean up old tabs from old structure
                         let oldTabs = space.primaryTabs.filter { $0.timestamp < cutoff }
                         for tab in oldTabs {
                             if let spaceTabs = space.tabs,

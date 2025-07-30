@@ -12,8 +12,6 @@ import WebKit
 import Combine
 
 // MARK: - WebView Fallback
-
-@available(iOS 16.0, *)
 class WebPageFallback: ObservableObject {
     private var webKitWebView: WKWebView?
     
@@ -182,8 +180,6 @@ class WebPageFallback: ObservableObject {
 }
 
 // MARK: - WKWebView Navigation Delegate
-
-@available(iOS 16.0, *)
 class WebViewNavigationDelegate: NSObject, WKNavigationDelegate {
     weak var parent: WebPageFallback?
     
@@ -200,11 +196,6 @@ class WebViewNavigationDelegate: NSObject, WKNavigationDelegate {
         parent?.url = webView.url
         parent?.title = webView.title
         parent?.hasOnlySecureContent = webView.hasOnlySecureContent
-        
-        // Extract theme color after page loads
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            self.parent?.extractThemeColor()
-        }
     }
     
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
@@ -213,8 +204,6 @@ class WebViewNavigationDelegate: NSObject, WKNavigationDelegate {
 }
 
 // MARK: - SwiftUI WebView Wrapper
-
-@available(iOS 16.0, *)
 struct WebViewFallback: UIViewRepresentable {
     @ObservedObject var webPage: WebPageFallback
     
@@ -238,7 +227,6 @@ struct WebViewFallback: UIViewRepresentable {
 
 // MARK: - Compatibility Extensions
 
-@available(iOS 16.0, *)
 extension WebViewFallback {
     func scrollEdgeEffectDisabled(_ disabled: Bool) -> some View {
         if #available(iOS 18.0, *) {

@@ -2,12 +2,12 @@
 import Foundation
 import SwiftData
 
-// Represents one tab with its nested [[StoredTab]] structure
+/// Represents one tab with its nested [[StoredTab]] structure
 @Model
 final class TabGroup {
     var id: String = UUID().uuidString
     var timestamp: Date = Date()
-    var tabType: TabType = TabType.primary // You'll need to add a default case to your TabType enum
+    var tabType: TabType = TabType.primary
     var orderIndex: Int = 0
     
     @Relationship(deleteRule: .cascade, inverse: \TabRow.parentGroup)
@@ -118,26 +118,3 @@ final class TabGroup {
     }
 }
 
-// Represents one row of tabs in the nested structure
-@Model
-final class TabRow {
-    var id: String = UUID().uuidString
-    var rowIndex: Int = 0
-    
-    @Relationship(deleteRule: .cascade, inverse: \StoredTab.parentRow)
-    var tabs: [StoredTab]? = []
-    
-    @Relationship var parentGroup: TabGroup?
-    
-    init() {}
-    
-    init(
-        id: String = UUID().uuidString,
-        rowIndex: Int,
-        parentGroup: TabGroup? = nil
-    ) {
-        self.id = id
-        self.rowIndex = rowIndex
-        self.parentGroup = parentGroup
-    }
-}

@@ -2,17 +2,18 @@
 import Foundation
 import SwiftData
 
+/// The type that is used to store tab data in SwiftData and in CloudKit
 @Model
 final class StoredTab {
     var id: String = UUID().uuidString
     var timestamp: Date = Date()
     var url: String = ""
     var orderIndex: Int = 0
-    var tabType: TabType = TabType.primary // You'll need to add a default case to your TabType enum
+    var tabType: TabType = TabType.primary
     var folderName: String?
     var isTemporary: Bool = false
     
-    @Relationship var parentSpace: SpaceData?   // inverse handled above
+    @Relationship var parentSpace: SpaceData?
     @Relationship var parentRow: TabRow?
     
     init() {}

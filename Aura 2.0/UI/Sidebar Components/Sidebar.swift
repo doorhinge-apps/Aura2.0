@@ -388,7 +388,7 @@ struct Sidebar: View {
                             .frame(width: 5, height: 30)
                     }
                 }
-#if targetEnvironment(macCatalyst)
+                #if targetEnvironment(macCatalyst)
                 .onHover(perform: { hover in
                     if hover {
                         NSCursor.resizeLeftRight.push()
@@ -397,16 +397,35 @@ struct Sidebar: View {
                         NSCursor.pop()
                     }
                 })
-#endif
+                #endif
+                .background(
+                    GeometryReader { handleGeometry in
+                        Color.clear
+                            .preference(key: HandlePositionKey.self, value: handleGeometry.frame(in: .global).minX)
+                    }
+                )
+                .onPreferenceChange(HandlePositionKey.self) { handleX in
+                    // Store the handle's X position if needed
+                }
                 .gesture(
-                    DragGesture(minimumDistance: 0)
+                    DragGesture(minimumDistance: 0, coordinateSpace: .global)
                         .onChanged { value in
-                            dragOffset = (uiViewModel.sidebarWidth + value.translation.width)
-                                .clamped(to: 150...400) - uiViewModel.sidebarWidth
+                            // Use the current location of the drag
+                            let fingerX = value.location.x
+                            
+                            // Calculate width based on the assumption that the sidebar starts at x=0
+                            // Adjust for the handle being 15 points wide
+                            let newWidth = fingerX.clamped(to: 150...400)
+                            
+                            // Update only the dragOffset during the drag
+                            dragOffset = newWidth - uiViewModel.sidebarWidth
                         }
                         .onEnded { value in
-                            let finalWidth = uiViewModel.sidebarWidth + value.translation.width
-                            uiViewModel.sidebarWidth = min(max(finalWidth, 150), 400)
+                            // Finalize the width
+                            let fingerX = value.location.x
+                            let finalWidth = fingerX.clamped(to: 150...400)
+                            
+                            uiViewModel.sidebarWidth = finalWidth
                             dragOffset = 0
                         }
                 )
@@ -534,5 +553,11 @@ struct TabGroupDropDelegate: DropDelegate {
         do { try modelContext.save() }
         catch { assertionFailure("SwiftData save failed: \(error)") }
         return true
+    }
+}
+struct HandlePositionKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = nextValue()
     }
 }
