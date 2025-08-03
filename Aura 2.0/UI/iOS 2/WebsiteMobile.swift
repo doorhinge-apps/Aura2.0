@@ -65,9 +65,7 @@ struct WebsiteMobile: View {
                                                 } else {
                                                     // Show regular web view
                                                     WebViewFallback(website.page)
-//                                                        .scrollEdgeEffectDisabled(true)
                                                         .modifier(ScrollEdgeDisabledIfAvailable())
-//                                                        .modifier(WebViewModifiersIfAvailable(scrollPosition: $scrollPosition))
                                                         .scrollBounceBehavior(.basedOnSize, axes: .horizontal)
                                                         .findNavigator(isPresented: $findNavigatorIsPresent)
                                                         .padding(.vertical, 10)
@@ -103,84 +101,8 @@ struct WebsiteMobile: View {
                                         }
                                     }
                                 }
-                                
-                                HStack {
-                                    Spacer()
-                                    Button {
-                                        // Horizontal split - add new tab to current row
-                                        storageManager.addTabToCurrentRow(rowIndex: rowIdx, modelContext: modelContext)
-                                    } label: {
-                                        ZStack {
-                                            Color.blue.opacity(0.001)
-                                                .frame(width: 30)
-                                            
-                                            ZStack {
-                                                Color.white.opacity(1)
-                                                
-                                                Image(systemName: "plus")
-                                                    .resizable()
-                                                    .scaledToFit()
-                                                    .padding(2)
-                                            }.frame(width: 30)
-                                                .cornerRadius(10)
-                                                .shadow(color: Color.black.opacity(0.4), radius: 5, x: 0, y: 0)
-                                                .offset(x: uiViewModel.hoveringID == "horizontalSplit" ? 0: 50)
-                                        }.onHover { hover in
-                                            withAnimation {
-                                                if uiViewModel.hoveringID == "horizontalSplit" {
-                                                    uiViewModel.hoveringID = ""
-                                                }
-                                                else {
-                                                    uiViewModel.hoveringID = "horizontalSplit"
-                                                }
-                                            }
-                                        }
-                                    }
-                                    
-                                }
                             }
                         }
-                        
-                        /*VStack {
-                            Spacer()
-                            
-                            // Vertical split button - add new row
-                            HStack {
-                                Button {
-                                    // Vertical split - add new row to current tabs
-                                    storageManager.addNewRowToCurrentTabs(modelContext: modelContext)
-                                } label: {
-                                    ZStack {
-                                        Color.blue.opacity(0.001)
-                                            .frame(height: 30)
-                                        
-                                        ZStack {
-                                            Color.white.opacity(1)
-                                            
-                                            Image(systemName: "plus")
-                                                .resizable()
-                                                .scaledToFit()
-                                                .padding(2)
-                                        }
-                                        .frame(height: 30)
-                                        .cornerRadius(10)
-                                        .shadow(color: Color.black.opacity(0.4), radius: 5, x: 0, y: 0)
-                                        .offset(y: uiViewModel.hoveringID == "verticalSplit" ? 0: 50)
-                                    }
-                                }.onHover { hover in
-                                    withAnimation {
-                                        if uiViewModel.hoveringID == "verticalSplit" {
-                                            uiViewModel.hoveringID = ""
-                                        }
-                                        else {
-                                            uiViewModel.hoveringID = "verticalSplit"
-                                        }
-                                    }
-                                }
-                            }
-//                            .padding(.horizontal, 10)
-//                            .padding(.bottom, 10)
-                        }*/
                     }
                 }
             }

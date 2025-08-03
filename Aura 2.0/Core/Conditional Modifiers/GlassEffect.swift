@@ -107,3 +107,30 @@ struct ConditionalGlassEffect: ViewModifier {
         }
     }
 }
+
+struct WrappedGlassEffect: ViewModifier {
+    @EnvironmentObject var settingsManager: SettingsManager
+
+    var glass: GlassType?
+    var shape: AnyShape?
+    
+    var enabled: Bool?
+    
+    func body(content: Content) -> some View {
+        Group {
+            if #available(iOS 26, *), enabled != false {
+                content
+#if !os(visionOS)
+                    .glassEffect(glass == .regular ? .regular: .clear, in: shape ?? AnyShape(.rect))
+#endif
+            } else {
+                content
+            }
+        }
+    }
+}
+
+enum GlassType {
+    case regular
+    case clear
+}

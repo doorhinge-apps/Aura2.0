@@ -216,6 +216,20 @@ struct AppearanceSettings: View {
                     }
                     
                     Group {
+                        Text("Command Bar Transparency")
+                            .font(.system(.headline, design: .rounded, weight: .bold))
+                        HStack {
+                            Text(String(Int(settingsManager.commandBarTransparency)))
+                                .font(.system(.body, design: .rounded, weight: .bold))
+                            
+                            Slider(value: $settingsManager.commandBarTransparency, in: 0...1, step: 0.1)
+                                .tint(backgroundGradientColors.first?.opacity(0.5))
+                        }
+                        
+                        Divider()
+                    }
+                    
+                    Group {
                         Toggle(isOn: $settingsManager.showBorder) {
                             Text("Show Borders")
                                 .font(.system(.headline, design: .rounded, weight: .bold))

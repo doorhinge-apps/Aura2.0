@@ -180,6 +180,13 @@ struct ContentView: View {
                                 uiViewModel.commandBarText = ""
                                 uiViewModel.searchSuggestions = []
                             }
+                            .onKeyPress(.escape) {
+                                uiViewModel.showCommandBar = false
+                                uiViewModel.commandBarText = ""
+                                uiViewModel.searchSuggestions = []
+                                
+                                return KeyPress.Result.handled
+                            }
                     }
                 }
                 

@@ -40,6 +40,8 @@ struct MobileHomepage: View {
         GeometryReader { geo in
             ZStack {
                 LinearGradient(colors: backgroundGradientColors, startPoint: .top, endPoint: .bottom)
+                    .ignoresSafeArea(edges: .all)
+                
                 HStack(spacing: 0) {
                     VStack {
                         Spacer()
@@ -282,7 +284,7 @@ struct MobileHomepage: View {
                                         }
                                     }
                                 }
-                            }
+                            }.ignoresSafeArea(.container, edges: .all)
                             
                             Button {
                                 let newSpace = SpaceData(
@@ -324,12 +326,7 @@ struct MobileHomepage: View {
                         }
                     }
                     .clipped()
-                }//.blur(radius: max(0.5, 1.0 - 0.5 * (abs(dragUpGesture) / 800.0)))
-                
-                //            Rectangle()
-                //                .fill(.regularMaterial)
-                //                .ignoresSafeArea()
-                //                .opacity(max(0.5, 1.0 - 0.5 * (abs(dragUpGesture) / 800.0)))
+                }
                 
                 if let thing = storageManager.currentTabs.first {
                     if !thing.isEmpty {
@@ -409,11 +406,17 @@ struct MobileHomepage: View {
                                         TextField("Search or enter URL", text: $uiViewModel.commandBarText)
                                             .padding(.horizontal, 10)
                                             .frame(width: geo.size.width - 75, height: 50)
-                                            .glassEffect(.clear, in: .capsule)
+//                                            .glassEffect(.clear, in: .capsule)
+                                            .modifier(WrappedGlassEffect(glass: .clear, shape: AnyShape(.capsule)))
                                     }.padding(10)
-                                }.glassEffect(.regular, in: .rect(cornerRadius: 25))
+                                }
+                                .ignoresSafeArea(.container, edges: .all)
+                                    .modifier(WrappedGlassEffect(glass: .regular, shape: AnyShape(.rect(cornerRadius: 25))))
                                     .padding(10)
                                     .offset(y: dragUpGesture)
+                                    .background(content: {
+                                        Color.white.opacity(0.001)
+                                    })
                                     .highPriorityGesture(
                                         DragGesture(minimumDistance: 20)
                                             .onChanged { gesture in

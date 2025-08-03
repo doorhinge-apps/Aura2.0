@@ -53,7 +53,7 @@ struct MobileContent: View {
                                             .frame(width: geo.size.width/2 - 50, height: (geo.size.width/2 - 50)*(4/3), alignment: .top)
                                             .clipped()
                                             .matchedGeometryEffect(id: tab.id.description, in: namespace)
-                                            .matchedTransitionSource(id: tab.id.description, in: namespace)
+//                                            .matchedTransitionSource(id: tab.id.description, in: namespace)
                                     }
                                 }
                             }
@@ -141,7 +141,8 @@ struct MobileContent: View {
                                 }
                             }
                         }
-                        .glassEffect(.clear, in: .rect(cornerRadius: 20))
+//                        .glassEffect(.clear, in: .rect(cornerRadius: 20))
+                        .modifier(WrappedGlassEffect(glass: .clear, shape: AnyShape(.rect(cornerRadius: 20))))
                         .frame(width: geo.size.width-30, height: 200)
                         .padding(15)
                     }

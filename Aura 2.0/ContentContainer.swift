@@ -10,6 +10,8 @@
 import SwiftUI
 import SwiftData
 
+let automaticColor = Color("Automatic")
+
 struct ContentContainerView: View {
     @Environment(\.colorScheme) var colorScheme
     
@@ -30,6 +32,7 @@ struct ContentContainerView: View {
                     }
                     else {
                         ContentView(selectedSpace: selected)
+                            .ignoresSafeArea(.container, edges: .all)
                             .modifier(ScrollEdgeDisabledIfAvailable())
                             .modifier(ScrollEdgeIfAvailable())
                             .statusBarHidden(true)

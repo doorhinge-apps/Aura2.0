@@ -30,7 +30,7 @@ struct ScrollEdgeDisabledIfAvailable: ViewModifier {
         if #available(iOS 26, *) {
             content
             #if !os(visionOS)
-                .scrollEdgeEffectDisabled(true, for: .all)
+                .scrollEdgeEffectHidden(true, for: .all)
             #endif
         }
         else {

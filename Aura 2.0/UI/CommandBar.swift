@@ -39,9 +39,15 @@ struct CommandBar: View {
                 content
                     .padding(5)
                     .background(
-                        RoundedRectangle(cornerRadius: 20)
-                            .fill(.regularMaterial)
-                            .shadow(color: Color.black.opacity(0.5), radius: 20, x: 0, y: 0)
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(automaticColor)
+                                .opacity(settingsManager.commandBarTransparency)
+                            
+                            RoundedRectangle(cornerRadius: 20)
+                                .fill(.regularMaterial)
+                                .shadow(color: Color.black.opacity(0.25), radius: 30, x: 0, y: 0)
+                        }
                     )
             }
             #else
@@ -167,6 +173,8 @@ struct CommandBar: View {
                     uiViewModel.showCommandBar = false
                 } label: {
                     HStack {
+                        Favicon(url: formatURL(from: suggestion))
+                        
                         Text(.init(suggestion))
                         
                         Spacer()

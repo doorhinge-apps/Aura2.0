@@ -35,14 +35,14 @@ struct Aura_2_0App: App {
             let settingsManager = SettingsManager()
 
             ContentContainerView()
-//                .ignoresSafeArea(edges: .all)
-                .ignoresSafeArea(.container, edges: .all)
+//                .ignoresSafeArea(.container, edges: .all)
                 .environmentObject(storageManager)
                 .environmentObject(uiViewModel)
                 .environmentObject(tabsManager)
                 .environmentObject(settingsManager)
                 .focusedSceneObject(storageManager)
                 .focusedSceneObject(uiViewModel)
+                .onAppear() { hideTitleBarOnCatalyst() }
         }
         .modelContainer(for: [SpaceData.self, TabGroup.self, TabRow.self, StoredTab.self], inMemory: false, isAutosaveEnabled: true, isUndoEnabled: true)
 //        .modelContainer(sharedModelContainer)
@@ -50,6 +50,12 @@ struct Aura_2_0App: App {
         .commands {
             CommandsBridge()
         }
+    }
+    
+    func hideTitleBarOnCatalyst() {
+#if targetEnvironment(macCatalyst)
+        (UIApplication.shared.connectedScenes.first as? UIWindowScene)?.titlebar?.titleVisibility = .hidden
+#endif
     }
 }
 
@@ -73,6 +79,9 @@ private struct SceneCommands: Commands {
             let currentTab = storageManager?.currentTabs.first?.first?.storedTab
 
             Button {
+                uiViewModel?.commandBarText = ""
+                uiViewModel?.searchSuggestions = []
+                
                 uiViewModel?.showCommandBar.toggle()
             } label: {
                 Label("New Tab", systemImage: "plus.square.on.square")
