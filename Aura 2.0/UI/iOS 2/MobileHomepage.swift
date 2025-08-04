@@ -36,6 +36,9 @@ struct MobileHomepage: View {
     
     @State var dragUpGesture: CGFloat = 0
     
+    @State private var dragOffset2: CGFloat = 0
+    @State private var initialSelectedIndex: Int = 0
+    
     var body: some View {
         GeometryReader { geo in
             ZStack {
@@ -244,81 +247,100 @@ struct MobileHomepage: View {
                             }
                             
                             // MARK: - Switch Spaces
-                            ScrollViewReader { proxy in
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack {
-                                        ForEach(spaces, id:\.self) { space in
-                                            Button {
-                                                storageManager.selectedSpace = space
-                                                withAnimation {
-                                                    proxy.scrollTo(space.id, anchor: .center)
-                                                }
-                                            } label: {
-                                                ZStack {
-                                                    Color.white.opacity(0.5)
-                                                    
-                                                    Label(space.spaceName, systemImage: space.spaceIcon)
-                                                    //                                            Image(systemName: space.spaceIcon)
-                                                    //                                                .resizable()
-                                                    //                                                .scaledToFit()
-                                                    //                                                .frame(width: 20, height: 20)
-                                                    //                                                .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
-                                                    //                                                .opacity(uiViewModel.hoveringID == space.spaceIdentifier ? 1.0: 0.5)
-                                                        .foregroundStyle(storageManager.selectedSpace?.spaceIdentifier == space.spaceIdentifier ? Color.black: Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
-                                                        .opacity(uiViewModel.hoveringID == space.spaceIdentifier ? 1.0: 0.5)
-                                                        .padding(.horizontal, 20)
-                                                    
-                                                }.frame(height: 50)
-                                                    .cornerRadius(10)
-                                                    .onHover { hover in
-                                                        withAnimation {
-                                                            if uiViewModel.hoveringID == space.spaceIdentifier {
-                                                                uiViewModel.hoveringID = ""
-                                                            }
-                                                            else {
-                                                                uiViewModel.hoveringID = space.spaceIdentifier
+//                            ScrollViewReader { proxy in
+//                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: -100) {
+//                                        ForEach(spaces, id:\.self) { space in
+                                        ForEach(Array(spaces.enumerated()), id: \.element) { index, space in
+                                            let (zIndex, scale, isVisible) = calculateDisplayProperties(
+                                                currentIndex: index,
+                                                selectedSpace: storageManager.selectedSpace,
+                                                spaces: spaces
+                                            )
+                                            if isVisible {
+                                                Button {
+//                                                    withAnimation {
+//                                                        proxy.scrollTo(space.id, anchor: .center)
+//                                                    }
+                                                    withAnimation {
+                                                        storageManager.selectedSpace = space
+                                                    }
+                                                } label: {
+                                                    ZStack {
+                                                        Capsule()
+//                                                            .fill(Color(hex: "7880B0"))
+                                                            .fill(.regularMaterial)
+                                                            .stroke(Color(hex: "7B7B7B"), lineWidth: 2)
+                                                            .shadow(color: Color.black.opacity(0.25), radius: 5, x: 0, y: 0)
+                                                        
+                                                        Label(space.spaceName, systemImage: space.spaceIcon)
+                                                            .foregroundStyle(Color.black)
+                                                            .opacity(uiViewModel.hoveringID == space.spaceIdentifier ? 1.0: 0.5)
+                                                            .padding(.horizontal, 20)
+                                                        
+                                                    }.frame(width: 150, height: 50)
+                                                        .cornerRadius(30)
+                                                        .onHover { hover in
+                                                            withAnimation {
+                                                                if uiViewModel.hoveringID == space.spaceIdentifier {
+                                                                    uiViewModel.hoveringID = ""
+                                                                }
+                                                                else {
+                                                                    uiViewModel.hoveringID = space.spaceIdentifier
+                                                                }
                                                             }
                                                         }
-                                                    }
-                                            }.id(space.id.storeIdentifier)
-                                        }
-                                    }
-                                }
-                            }.ignoresSafeArea(.container, edges: .all)
-                            
-                            Button {
-                                let newSpace = SpaceData(
-                                    spaceIdentifier: UUID().uuidString,
-                                    spaceName: "Untitled",
-                                    isIncognito: false,
-                                    spaceBackgroundColors: ["8041E6", "A0F2FC"],
-                                    textColor: "#ffffff"
-                                )
-                                
-                                modelContext.insert(newSpace)
-                            } label: {
-                                ZStack {
-                                    Color.white.opacity(uiViewModel.hoveringID == "addNewSpace" ? 0.25: 0.0)
-                                    
-                                    Image(systemName: "plus")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 20, height: 20)
-                                        .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
-                                        .opacity(uiViewModel.hoveringID == "addNewSpace" ? 1.0: 0.5)
-                                    
-                                }.frame(width: 40, height: 40).cornerRadius(7)
-                                    .onHover { hover in
-                                        withAnimation {
-                                            if uiViewModel.hoveringID == "addNewSpace" {
-                                                uiViewModel.hoveringID = ""
-                                            }
-                                            else {
-                                                uiViewModel.hoveringID = "addNewSpace"
+                                                }
+                                                .buttonStyle(PrimaryButtonStyle())
+                                                .id(space.id)
+                                                .zIndex(zIndex)
+                                                .scaleEffect(scale)
                                             }
                                         }
-                                    }
-                            }
+                                        
+//                                        Button {
+//                                            let newSpace = SpaceData(
+//                                                spaceIdentifier: UUID().uuidString,
+//                                                spaceName: "Untitled",
+//                                                isIncognito: false,
+//                                                spaceBackgroundColors: ["8041E6", "A0F2FC"],
+//                                                textColor: "#ffffff"
+//                                            )
+//                                            
+//                                            modelContext.insert(newSpace)
+//                                        } label: {
+//                                            ZStack {
+//                                                Color.white.opacity(0.5)
+//                                                
+//                                                Image(systemName: "plus")
+//                                                    .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
+//                                                    .opacity(uiViewModel.hoveringID == "createSpace" ? 1.0: 0.5)
+//                                                    .padding(.horizontal, 20)
+//                                            }
+//                                        }.frame(width: 50, height: 50)
+//                                            .cornerRadius(10)
+//                                            .onHover { hover in
+//                                                withAnimation {
+//                                                    if uiViewModel.hoveringID == "createSpace" {
+//                                                        uiViewModel.hoveringID = ""
+//                                                    }
+//                                                    else {
+//                                                        uiViewModel.hoveringID = "createSpace"
+//                                                    }
+//                                                }
+//                                            }
+                                    }.ignoresSafeArea(.container, edges: .all)
+                                .highPriorityGesture(
+                                        DragGesture()
+                                            .onChanged { value in
+                                                handleDragChanged(translation: value.translation.width, spaces: spaces)
+                                            }
+                                            .onEnded { value in
+                                                handleDragEnded()
+                                            }
+                                    )
+//                                }
+//                            }.ignoresSafeArea(.container, edges: .all)
                         }
                         .padding(.bottom, 30)
                         .sheet(isPresented: $uiViewModel.showSettings) {
@@ -462,5 +484,76 @@ struct MobileHomepage: View {
     var backgroundGradientColors: [Color] {
         let hexes = storageManager.selectedSpace?.spaceBackgroundColors ?? ["8041E6", "A0F2FC"]
         return hexes.map { Color(hex: $0) }
+    }
+    
+    func calculateZIndex(currentIndex: Int, selectedSpace: SpaceData?, spaces: [SpaceData]) -> Double {
+        guard let selectedSpace = selectedSpace,
+              let selectedIndex = spaces.firstIndex(where: { $0.spaceIdentifier == selectedSpace.spaceIdentifier }) else {
+            return 12
+        }
+        
+        let distance = abs(currentIndex - selectedIndex)
+        let zIndex = max(12, 14 - distance)
+        return Double(zIndex)
+    }
+    
+    func calculateDisplayProperties(currentIndex: Int, selectedSpace: SpaceData?, spaces: [SpaceData]) -> (zIndex: Double, scale: Double, isVisible: Bool) {
+        guard let selectedSpace = selectedSpace,
+              let selectedIndex = spaces.firstIndex(where: { $0.spaceIdentifier == selectedSpace.spaceIdentifier }) else {
+            return (12, 1.0, true) // Default if no selection
+        }
+        
+        let distance = abs(currentIndex - selectedIndex)
+        
+        let isVisible = distance <= 2
+        
+        let zIndex = max(12, 14 - distance)
+        
+        let scale = pow(0.8, Double(distance))
+        
+        return (Double(zIndex), scale, isVisible)
+    }
+    
+    func handleDragChanged(translation: CGFloat, spaces: [SpaceData]) {
+        guard let currentSelectedSpace = storageManager.selectedSpace,
+              let currentIndex = spaces.firstIndex(where: { $0.spaceIdentifier == currentSelectedSpace.spaceIdentifier }) else {
+            return
+        }
+        
+        if dragOffset == 0 {
+            initialSelectedIndex = currentIndex
+        }
+        
+        dragOffset = translation
+        
+        let steps = calculateStepsFromTranslation(translation)
+        
+        let newIndex = initialSelectedIndex - steps
+        
+        let clampedIndex = max(0, min(spaces.count - 1, newIndex))
+        
+        if clampedIndex != currentIndex {
+            withAnimation(.easeOut(duration: 0.2)) {
+                storageManager.selectedSpace = spaces[clampedIndex]
+            }
+        }
+    }
+
+    func calculateStepsFromTranslation(_ translation: CGFloat) -> Int {
+        let absTranslation = abs(translation)
+        var steps = 0
+        var currentThreshold: CGFloat = 40
+        
+        while absTranslation >= currentThreshold {
+            steps += 1
+            currentThreshold += 100
+        }
+        
+        return translation >= 0 ? steps : -steps
+    }
+
+    func handleDragEnded() {
+        dragOffset = 0
+        initialSelectedIndex = 0
     }
 }

@@ -21,6 +21,7 @@
 		B95E23CD2E2F289000598F60 /* MobileTabGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E23CB2E2F289000598F60 /* MobileTabGroup.swift */; };
 		B95E23D32E2F289000598F60 /* MobileTabGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E23C62E2F289000598F60 /* MobileTabGrid.swift */; };
 		B978E16F2E038D9D00146E9B /* Aura.icon in Resources */ = {isa = PBXBuildFile; fileRef = B978E16E2E038D9D00146E9B /* Aura.icon */; };
+		B9A3883F2E409F6D006A5C89 /* iOS Button Styles.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A3883E2E409F6D006A5C89 /* iOS Button Styles.swift */; };
 		B9B004E62DF8D16E00B79152 /* StoredTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B004E52DF8D16E00B79152 /* StoredTab.swift */; };
 		B9B004E82DF8D18200B79152 /* BrowserTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B004E72DF8D18200B79152 /* BrowserTab.swift */; };
 		B9B004EA2DF8D1F400B79152 /* TabType.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B004E92DF8D1F400B79152 /* TabType.swift */; };
@@ -102,6 +103,7 @@
 		B95E23C62E2F289000598F60 /* MobileTabGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileTabGrid.swift; sourceTree = "<group>"; };
 		B95E23CB2E2F289000598F60 /* MobileTabGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileTabGroup.swift; sourceTree = "<group>"; };
 		B978E16E2E038D9D00146E9B /* Aura.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Aura.icon; sourceTree = "<group>"; };
+		B9A3883E2E409F6D006A5C89 /* iOS Button Styles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "iOS Button Styles.swift"; sourceTree = "<group>"; };
 		B9B004E52DF8D16E00B79152 /* StoredTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredTab.swift; sourceTree = "<group>"; };
 		B9B004E72DF8D18200B79152 /* BrowserTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTab.swift; sourceTree = "<group>"; };
 		B9B004E92DF8D1F400B79152 /* TabType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabType.swift; sourceTree = "<group>"; };
@@ -276,6 +278,14 @@
 				B95E23AE2E2D9D8A00598F60 /* Website Shapshots */,
 			);
 			path = "iOS 2";
+			sourceTree = "<group>";
+		};
+		B9A3883D2E409F4B006A5C89 /* Button Styles */ = {
+			isa = PBXGroup;
+			children = (
+				B9A3883E2E409F6D006A5C89 /* iOS Button Styles.swift */,
+			);
+			path = "Button Styles";
 			sourceTree = "<group>";
 		};
 		B9B004ED2DF96BCD00B79152 /* Scheme Handlers */ = {
@@ -453,6 +463,7 @@
 				B9B0051B2DFA7E1E00B79152 /* Favicon */,
 				B9B004F92DF97CB400B79152 /* WebsitePanel.swift */,
 				B9B005032DFA091B00B79152 /* Launch Screen */,
+				B9A3883D2E409F4B006A5C89 /* Button Styles */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -674,6 +685,7 @@
 				B9B004EC2DF8D35A00B79152 /* TabLoadingData.swift in Sources */,
 				B9B004F82DF97CAA00B79152 /* Sidebar.swift in Sources */,
 				B9B060822E07BF2E00480CEF /* TabGroupFavoriteView.swift in Sources */,
+				B9A3883F2E409F6D006A5C89 /* iOS Button Styles.swift in Sources */,
 				B9B060832E07BF2E00480CEF /* TabGroupRowView.swift in Sources */,
 				B95A80A32DFD4D41007FE1F4 /* Settings.swift in Sources */,
 				B9D455132E0667C900CB1E24 /* FavoriteTabRowView.swift in Sources */,
