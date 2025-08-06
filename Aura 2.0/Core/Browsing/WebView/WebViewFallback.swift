@@ -11,9 +11,18 @@ import SwiftUI
 import WebKit
 import Combine
 
+
+class CustomSafeAreaWebViewContainer: UIView {
+    override var safeAreaInsets: UIEdgeInsets {
+        return UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0)
+    }
+}
+
 // MARK: - WebView Fallback
 class WebPageFallback: ObservableObject {
     private var webKitWebView: WKWebView?
+    
+    var containerView: CustomSafeAreaWebViewContainer?
     
     @Published var url: URL?
     @Published var title: String?
@@ -25,6 +34,15 @@ class WebPageFallback: ObservableObject {
         setupWKWebView()
     }
     
+//    private func setupWKWebView() {
+//        let configuration = WKWebViewConfiguration()
+//        configuration.allowsInlineMediaPlayback = true
+//        configuration.mediaTypesRequiringUserActionForPlayback = []
+//        
+//        let webView = WKWebView(frame: .zero, configuration: configuration)
+//        webView.navigationDelegate = WebViewNavigationDelegate(parent: self)
+//        self.webKitWebView = webView
+//    }
     private func setupWKWebView() {
         let configuration = WKWebViewConfiguration()
         configuration.allowsInlineMediaPlayback = true
@@ -32,7 +50,23 @@ class WebPageFallback: ObservableObject {
         
         let webView = WKWebView(frame: .zero, configuration: configuration)
         webView.navigationDelegate = WebViewNavigationDelegate(parent: self)
+        webView.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Create container view with custom safe area
+        let container = CustomSafeAreaWebViewContainer()
+        container.backgroundColor = UIColor.clear
+        container.addSubview(webView)
+        
+        // Add constraints to fill the container
+        NSLayoutConstraint.activate([
+            webView.topAnchor.constraint(equalTo: container.topAnchor),
+            webView.leadingAnchor.constraint(equalTo: container.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: container.trailingAnchor),
+            webView.bottomAnchor.constraint(equalTo: container.bottomAnchor)
+        ])
+        
         self.webKitWebView = webView
+        self.containerView = container
     }
     
     
@@ -211,11 +245,17 @@ struct WebViewFallback: UIViewRepresentable {
         self.webPage = webPage
     }
     
+//    func makeUIView(context: Context) -> UIView {
+//        if let wkWebView = webPage.wkWebView {
+//            wkWebView.backgroundColor = UIColor.clear
+//            wkWebView.scrollView.backgroundColor = UIColor.clear
+//            return wkWebView
+//        }
+//        return UIView()
+//    }
     func makeUIView(context: Context) -> UIView {
-        if let wkWebView = webPage.wkWebView {
-            wkWebView.backgroundColor = UIColor.clear
-            wkWebView.scrollView.backgroundColor = UIColor.clear
-            return wkWebView
+        if let containerView = webPage.containerView {
+            return containerView
         }
         return UIView()
     }

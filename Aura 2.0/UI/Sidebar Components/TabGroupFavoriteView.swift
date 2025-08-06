@@ -194,7 +194,7 @@ struct TabGroupFavoriteView: View {
                     closeTabGroup()
                 }
             } label: {
-                Label("Close Tab Group", systemImage: "rectangle.badge.xmark")
+                Label("Close Tab", systemImage: "rectangle.badge.xmark")
             }
             
             Divider()

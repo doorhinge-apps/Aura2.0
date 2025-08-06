@@ -10,6 +10,9 @@
 
 import SwiftUI
 import SwiftData
+#if targetEnvironment(macCatalyst)
+import AppKit
+#endif
 
 @main
 struct Aura_2_0App: App {
@@ -35,7 +38,6 @@ struct Aura_2_0App: App {
             let settingsManager = SettingsManager()
 
             ContentContainerView()
-//                .ignoresSafeArea(.container, edges: .all)
                 .environmentObject(storageManager)
                 .environmentObject(uiViewModel)
                 .environmentObject(tabsManager)
@@ -45,8 +47,6 @@ struct Aura_2_0App: App {
                 .onAppear() { hideTitleBarOnCatalyst() }
         }
         .modelContainer(for: [SpaceData.self, TabGroup.self, TabRow.self, StoredTab.self], inMemory: false, isAutosaveEnabled: true, isUndoEnabled: true)
-//        .modelContainer(sharedModelContainer)
-//        .commands { SceneCommands() }
         .commands {
             CommandsBridge()
         }

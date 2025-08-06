@@ -12,22 +12,26 @@ struct TabGroupRowView: View {
     @EnvironmentObject var uiViewModel: UIViewModel
     @EnvironmentObject var tabsManager: TabsManager
     @Environment(\.modelContext) private var modelContext
+    
+    @State var isHovered = false
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 15)
+            RoundedRectangle(cornerRadius: 20)
                 .fill(Color.white.opacity(0.001))
+                .frame(height: 50)
 
             // Highlight if this TabGroup contains the currently selected tab
             if isCurrentlySelected {
-                RoundedRectangle(cornerRadius: 15)
+                RoundedRectangle(cornerRadius: 20)
                     .fill(Color.white.opacity(0.5))
-                    .animation(.easeInOut, value: isCurrentlySelected)
-            } else if isCurrentlyHovered {
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(Color.white.opacity(0.25))
-                    .animation(.easeInOut, value: isCurrentlyHovered)
+                    .frame(height: 50)
+//                    .animation(.easeInOut, value: isCurrentlySelected)
             }
+            RoundedRectangle(cornerRadius: 20)
+                .fill(Color.white.opacity(isHovered ? 0.25: 0.0))
+                .frame(height: 50)
+                .animation(.easeInOut, value: isHovered)
 
             HStack {
                 // Display content based on whether it's a split view or single tab
@@ -94,6 +98,9 @@ struct TabGroupRowView: View {
             .padding(.vertical, 10)
             .padding(.horizontal, 5)
         }
+        .onHover(perform: { hover in
+            isHovered = hover
+        })
         .contentShape(Rectangle())
         .onTapGesture {
             Task {
@@ -214,7 +221,7 @@ struct TabGroupRowView: View {
                     closeTabGroup()
                 }
             } label: {
-                Label("Close Tab Group", systemImage: "rectangle.badge.xmark")
+                Label("Close Tab", systemImage: "rectangle.badge.xmark")
             }
             
             Divider()

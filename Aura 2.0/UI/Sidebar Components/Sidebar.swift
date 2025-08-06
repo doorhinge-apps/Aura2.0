@@ -405,23 +405,18 @@ struct Sidebar: View {
                     }
                 )
                 .onPreferenceChange(HandlePositionKey.self) { handleX in
-                    // Store the handle's X position if needed
                 }
                 .gesture(
+                    // DragGesture to control resizing the sidebar
                     DragGesture(minimumDistance: 0, coordinateSpace: .global)
                         .onChanged { value in
-                            // Use the current location of the drag
                             let fingerX = value.location.x
                             
-                            // Calculate width based on the assumption that the sidebar starts at x=0
-                            // Adjust for the handle being 15 points wide
                             let newWidth = fingerX.clamped(to: 150...400)
                             
-                            // Update only the dragOffset during the drag
                             dragOffset = newWidth - uiViewModel.sidebarWidth
                         }
                         .onEnded { value in
-                            // Finalize the width
                             let fingerX = value.location.x
                             let finalWidth = fingerX.clamped(to: 150...400)
                             
