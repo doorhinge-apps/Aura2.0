@@ -175,7 +175,8 @@ struct CommandBar: View {
                     HStack {
                         Favicon(url: formatURL(from: suggestion))
                         
-                        Text(.init(suggestion))
+//                        Text(.init(suggestion))
+                        Text(suggestion.decodingHTMLEntities())
                         
                         Spacer()
                     }.foregroundStyle(Color(.label))
@@ -203,7 +204,9 @@ struct CommandBar: View {
                     }
                 })
                 
-            }.onAppear() {
+            }
+            .animation(.easeInOut(duration: 0.5), value: uiViewModel.searchSuggestions)
+            .onAppear() {
                 uiViewModel.searchSuggestions = UserDefaults.standard.stringArray(forKey: "commandBarHistory") ?? ["arc.net", "thebrowser.company", "notion.so", "figma.com", "google.com", "apple.com"]
             }
         }

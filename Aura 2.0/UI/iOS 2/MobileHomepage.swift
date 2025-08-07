@@ -39,315 +39,235 @@ struct MobileHomepage: View {
     @State private var dragOffset2: CGFloat = 0
     @State private var initialSelectedIndex: Int = 0
     
+    @FocusState var searchFocused
+    
+    @State var showNewTabPage = false
+    
     var body: some View {
         GeometryReader { geo in
             ZStack {
                 LinearGradient(colors: backgroundGradientColors, startPoint: .top, endPoint: .bottom)
                     .ignoresSafeArea(edges: .all)
                 
-                HStack(spacing: 0) {
-                    VStack {
-                        Spacer()
-                            .frame(height: 50)
-                        
-                        if !settingsManager.useUnifiedToolbar {
-                            Toolbar()
-                        }
-                        
-                        HStack {
-                            Button {
-                                withAnimation {
-                                    if hoverSearch || !settingsManager.useUnifiedToolbar {
-                                        uiViewModel.showCommandBar.toggle()
-                                    }
-                                    else {
-                                        hoverSearch = true
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                                            withAnimation {
-                                                hoverSearch = false
-                                            }
-                                        }
-                                    }
-                                }
-                            } label: {
-                                HStack {
-                                    if !hoverSearch && settingsManager.useUnifiedToolbar {
-                                        Spacer()
-                                    }
-                                    
-                                    HStack {
-                                        if storageManager.currentTabs.first?.first?.page != nil {
-                                            Menu {
-                                                if storageManager.currentTabs.first?.first?.page.hasOnlySecureContent ?? false {
-                                                    Label("Secure", systemImage: "lock.fill")
-                                                        .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff").opacity(0.5))
-                                                }
-                                                else {
-                                                    Label("Not Secure", systemImage: "lock.open.fill")
-                                                        .foregroundStyle(Color.red)
-                                                }
-                                            } label: {
-                                                Image(systemName: storageManager.currentTabs.first?.first?.page.hasOnlySecureContent ?? false ? "lock.fill": "lock.open.fill")
-                                                    .font(.system(.body, design: .rounded, weight: .semibold))
-                                                    .foregroundStyle(storageManager.currentTabs.first?.first?.page.hasOnlySecureContent ?? false ? Color.white: Color.red)
-                                            }
-                                            
-                                        }
-                                        else {
-                                            Image(systemName: "magnifyingglass")
-                                                .font(.system(.body, design: .rounded, weight: .semibold))
-                                                .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff").opacity(0.5))
-                                        }
-                                        
-                                        Text(hoverSearch || !settingsManager.useUnifiedToolbar ? unformatURL(url: getFocusedOrFirstTabURL()): "")
-                                            .lineLimit(1)
-                                            .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff").opacity(0.5))
-                                    }
-                                    //                            Label(hoverSearch || !settingsManager.useUnifiedToolbar ? unformatURL(url: storageManager.currentTabs.first?.first?.storedTab.url ?? "Search or Enter URL"): "", systemImage: "magnifyingglass")
-                                    //                                .lineLimit(1)
-                                    //                                .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff").opacity(0.5))
-                                    
-                                    Spacer()
-                                    
-                                    if (hoverSearch) && storageManager.currentTabs.first?.first?.page != nil {
-                                        Button {
-                                            UIPasteboard.general.string = storageManager.currentTabs[0][0].storedTab.url
-                                        } label: {
-                                            ZStack {
-                                                Color.white.opacity(uiViewModel.hoveringID == "searchbarCopy" ? 0.25: 0.0)
-                                                
-                                                Image(systemName: "link")
-                                                    .resizable()
-                                                    .scaledToFit()
-                                                    .frame(width: 20, height: 20)
-                                                    .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
-                                                    .opacity(uiViewModel.hoveringID == "searchbarCopy" ? 1.0: 0.5)
-                                                
-                                            }.frame(width: 40, height: 40).cornerRadius(7)
-                                                .onHover { hover in
-                                                    withAnimation {
-                                                        if uiViewModel.hoveringID == "searchbarCopy" {
-                                                            uiViewModel.hoveringID = ""
-                                                        }
-                                                        else {
-                                                            uiViewModel.hoveringID = "searchbarCopy"
-                                                        }
-                                                    }
-                                                }
-                                        }
-                                        
-                                        
-                                        Button {
-                                            let activityController = UIActivityViewController(activityItems: [storageManager.currentTabs.first?.first?.page.url ?? URL(string: "")!, storageManager.currentTabs.first?.first?.page ?? WebPageFallback()], applicationActivities: nil)
-                                            
-                                            if let popoverController = activityController.popoverPresentationController {
-                                                popoverController.sourceView = UIApplication.shared.windows.first?.rootViewController?.view
-                                                
-                                                popoverController.permittedArrowDirections = [.up]
-                                                popoverController.permittedArrowDirections = []
-                                            }
-                                            
-                                            UIApplication.shared.windows.first?.rootViewController!.present(activityController, animated: true, completion: nil)
-                                        } label: {
-                                            ZStack {
-                                                Color.white.opacity(uiViewModel.hoveringID == "searchbarShare" ? 0.25: 0.0)
-                                                
-                                                Image(systemName: "square.and.arrow.up")
-                                                    .resizable()
-                                                    .scaledToFit()
-                                                    .frame(width: 20, height: 20)
-                                                    .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
-                                                    .opacity(uiViewModel.hoveringID == "searchbarShare" ? 1.0: 0.5)
-                                                
-                                            }.frame(width: 40, height: 40).cornerRadius(7)
-                                                .onHover { hover in
-                                                    withAnimation {
-                                                        if uiViewModel.hoveringID == "searchbarShare" {
-                                                            uiViewModel.hoveringID = ""
-                                                        }
-                                                        else {
-                                                            uiViewModel.hoveringID = "searchbarShare"
-                                                        }
-                                                    }
-                                                }
-                                        }
-                                    }
-                                }
-                                .padding(.horizontal, 15)
-                                .frame(width: hoverSearch || !settingsManager.useUnifiedToolbar ? .infinity: 50, height: 50)
-                                .background() {
-                                    RoundedRectangle(cornerRadius: 20)
-                                        .fill(Color.white.opacity(hoverSearch ? 0.25: 0.15))
-                                }
-                                .onHover { hover in
-                                    withAnimation {
-                                        hoverSearch = hover
-                                    }
-                                }
-                            }
-                            
-                            if settingsManager.useUnifiedToolbar {
-                                Toolbar()
-                                    .frame(width: hoverSearch ? 0: .infinity)
-                                    .clipped()
-                            }
-                            
+                if let selectedSpace = storageManager.selectedSpace {
+                    ScrollView {
+                        VStack {
                             Spacer()
+                                .frame(height: 50)
+                            
+                            MobileTabGrid(space: selectedSpace, draggingTabID: $draggingTabID, currentTabType: currentTabType, namespace: namespace)
                         }
-                        
-                        
-                        
-                        if let selectedSpace = storageManager.selectedSpace {
-                            //                    TabView(selection: $storageManager.selectedSpace) {
-                            //                        ForEach(spaces, id:\.id) { space in
-                            ScrollView {
-                                VStack {
-                                    MobileTabGrid(space: selectedSpace, draggingTabID: $draggingTabID, currentTabType: currentTabType, namespace: namespace)
-                                }
-                            }//.scrollEdgeEffectDisabled(true)
-                            .modifier(ScrollEdgeDisabledIfAvailable())
-                            .tag(selectedSpace)
-                            //                        }
-                            //                    }
-                            //                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
+                    }
+                    .modifier(ScrollEdgeDisabledIfAvailable())
+                    .tag(selectedSpace)
+                }
+                else {
+                    EmptyView()
+                        .onAppear() {
+                            storageManager.selectedSpace = spaces.first
                         }
-                        else {
-                            EmptyView()
-                                .onAppear() {
-                                    storageManager.selectedSpace = spaces.first
-                                }
-                        }
+                }
+                
+                VStack {
+                    HStack {
+                        Spacer()
                         
-                        
-                        HStack {
+                        Menu {
                             Button {
                                 uiViewModel.showSettings = true
                             } label: {
-                                ZStack {
-                                    Color.white.opacity(uiViewModel.hoveringID == "settings" ? 0.25: 0.0)
-                                    
-                                    Image(systemName: "gearshape")
-                                        .resizable()
-                                        .scaledToFit()
-                                        .frame(width: 20, height: 20)
-                                        .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
-                                        .opacity(uiViewModel.hoveringID == "settings" ? 1.0: 0.5)
-                                    
-                                }.frame(width: 40, height: 40).cornerRadius(7)
-                                    .onHover { hover in
-                                        withAnimation {
-                                            if uiViewModel.hoveringID == "settings" {
-                                                uiViewModel.hoveringID = ""
-                                            }
-                                            else {
-                                                uiViewModel.hoveringID = "settings"
-                                            }
-                                        }
-                                    }
+                                Label("Settings", systemImage: "gearshape")
                             }
                             
-                            // MARK: - Switch Spaces
-//                            ScrollViewReader { proxy in
-//                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: -100) {
-//                                        ForEach(spaces, id:\.self) { space in
-                                        ForEach(Array(spaces.enumerated()), id: \.element) { index, space in
-                                            let (zIndex, scale, isVisible) = calculateDisplayProperties(
-                                                currentIndex: index,
-                                                selectedSpace: storageManager.selectedSpace,
-                                                spaces: spaces
-                                            )
-                                            if isVisible {
-                                                Button {
-//                                                    withAnimation {
-//                                                        proxy.scrollTo(space.id, anchor: .center)
-//                                                    }
-                                                    withAnimation {
-                                                        storageManager.selectedSpace = space
-                                                    }
-                                                } label: {
-                                                    ZStack {
-                                                        Capsule()
-//                                                            .fill(Color(hex: "7880B0"))
-                                                            .fill(.regularMaterial)
-                                                            .stroke(Color(hex: "7B7B7B"), lineWidth: 2)
-                                                            .shadow(color: Color.black.opacity(0.25), radius: 5, x: 0, y: 0)
-                                                        
-                                                        Label(space.spaceName, systemImage: space.spaceIcon)
-                                                            .foregroundStyle(Color.black)
-                                                            .opacity(uiViewModel.hoveringID == space.spaceIdentifier ? 1.0: 0.5)
-                                                            .padding(.horizontal, 20)
-                                                        
-                                                    }.frame(width: 150, height: 50)
-                                                        .cornerRadius(30)
-                                                        .onHover { hover in
-                                                            withAnimation {
-                                                                if uiViewModel.hoveringID == space.spaceIdentifier {
-                                                                    uiViewModel.hoveringID = ""
-                                                                }
-                                                                else {
-                                                                    uiViewModel.hoveringID = space.spaceIdentifier
-                                                                }
-                                                            }
-                                                        }
-                                                }
-                                                .buttonStyle(PrimaryButtonStyle())
-                                                .id(space.id)
-                                                .zIndex(zIndex)
-                                                .scaleEffect(scale)
-                                            }
-                                        }
-                                        
-//                                        Button {
-//                                            let newSpace = SpaceData(
-//                                                spaceIdentifier: UUID().uuidString,
-//                                                spaceName: "Untitled",
-//                                                isIncognito: false,
-//                                                spaceBackgroundColors: ["8041E6", "A0F2FC"],
-//                                                textColor: "#ffffff"
-//                                            )
-//                                            
-//                                            modelContext.insert(newSpace)
-//                                        } label: {
-//                                            ZStack {
-//                                                Color.white.opacity(0.5)
-//                                                
-//                                                Image(systemName: "plus")
-//                                                    .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
-//                                                    .opacity(uiViewModel.hoveringID == "createSpace" ? 1.0: 0.5)
-//                                                    .padding(.horizontal, 20)
-//                                            }
-//                                        }.frame(width: 50, height: 50)
-//                                            .cornerRadius(10)
-//                                            .onHover { hover in
-//                                                withAnimation {
-//                                                    if uiViewModel.hoveringID == "createSpace" {
-//                                                        uiViewModel.hoveringID = ""
-//                                                    }
-//                                                    else {
-//                                                        uiViewModel.hoveringID = "createSpace"
-//                                                    }
-//                                                }
-//                                            }
-                                    }.ignoresSafeArea(.container, edges: .all)
-                                .highPriorityGesture(
-                                        DragGesture()
-                                            .onChanged { value in
-                                                handleDragChanged(translation: value.translation.width, spaces: spaces)
-                                            }
-                                            .onEnded { value in
-                                                handleDragEnded()
-                                            }
-                                    )
-//                                }
-//                            }.ignoresSafeArea(.container, edges: .all)
+                            Button {
+                                let newSpace = SpaceData(
+                                    spaceIdentifier: UUID().uuidString,
+                                    spaceName: "Untitled",
+                                    isIncognito: false,
+                                    spaceBackgroundColors: ["8041E6", "A0F2FC"],
+                                    textColor: "#ffffff"
+                                )
+
+                                modelContext.insert(newSpace)
+                            } label: {
+                                Label("New Space", systemImage: "plus.app")
+                            }
+                            
+                        } label: {
+                            ZStack {
+                                Circle()
+                                    .fill(.thinMaterial)
+                                    .stroke(Color.black.opacity(0.5), lineWidth: 2)
+                                
+                                Image(systemName: "ellipsis")
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 20, height: 20)
+                                    .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
+                                    .opacity(uiViewModel.hoveringID == "settings" ? 1.0: 0.5)
+                                
+                            }.frame(width: 40, height: 40)
+                                .cornerRadius(20)
                         }
-                        .padding(.bottom, 30)
-                        .sheet(isPresented: $uiViewModel.showSettings) {
-                            Settings()
+                    }.padding(20)
+                    
+                    Spacer()
+                    
+                    
+                    VStack {
+                        HStack {
+                            TextField(text: $uiViewModel.commandBarText) {
+                                Label("Search Open Tabs", systemImage: "magnifyingglass")
+                            }
+                                .padding(10)
+                                .focused($searchFocused)
+                                .background(content: {
+                                    Capsule()
+                                        .fill(.regularMaterial)
+                                        .stroke(Color(hex: "7B7B7B").opacity(0.5), lineWidth: 1)
+//                                        .shadow(color: Color.black.opacity(0.25), radius: 5, x: 0, y: 0)
+                                        .onTapGesture {
+                                            searchFocused = true
+                                        }
+                                })
+                            
+                            Button {
+                                showNewTabPage = true
+                            } label: {
+                                ZStack {
+                                    Circle()
+                                        .fill(.regularMaterial)
+                                        .stroke(Color(hex: "7B7B7B"), lineWidth: 2)
+                                        .shadow(color: Color.black.opacity(0.25), radius: 5, x: 0, y: 0)
+                                    
+                                    Image(systemName: "plus")
+                                        .foregroundStyle(Color.black)
+                                        .opacity(0.5)
+                                        .padding(.horizontal, 20)
+                                    
+                                }.frame(width: 50, height: 50)
+                                    .cornerRadius(30)
+                            }
+                            .buttonStyle(PrimaryButtonStyle())
+                        }
+                        .padding(10)
+                        
+                        HStack(spacing: -100) {
+                            ForEach(Array(spaces.enumerated()), id: \.element) { index, space in
+                                let (zIndex, scale, isVisible) = calculateDisplayProperties(
+                                    currentIndex: index,
+                                    selectedSpace: storageManager.selectedSpace,
+                                    spaces: spaces
+                                )
+                                if isVisible {
+                                    Button {
+                                        withAnimation {
+                                            storageManager.selectedSpace = space
+                                        }
+                                    } label: {
+                                        ZStack {
+                                            Capsule()
+                                                .fill(.regularMaterial)
+                                                .stroke(Color(hex: "7B7B7B"), lineWidth: 2)
+                                                .shadow(color: Color.black.opacity(0.25), radius: 5, x: 0, y: 0)
+                                            
+                                            Label(space.spaceName, systemImage: space.spaceIcon)
+                                                .foregroundStyle(Color.black)
+                                                .opacity(uiViewModel.hoveringID == space.spaceIdentifier ? 1.0: 0.5)
+                                                .padding(.horizontal, 20)
+                                            
+                                        }.frame(width: 150, height: 50)
+                                            .cornerRadius(30)
+                                            .onHover { hover in
+                                                withAnimation {
+                                                    if uiViewModel.hoveringID == space.spaceIdentifier {
+                                                        uiViewModel.hoveringID = ""
+                                                    }
+                                                    else {
+                                                        uiViewModel.hoveringID = space.spaceIdentifier
+                                                    }
+                                                }
+                                            }
+                                    }
+                                    .buttonStyle(PrimaryButtonStyle())
+                                    .id(space.id)
+                                    .zIndex(zIndex)
+                                    .scaleEffect(scale)
+                                }
+                            }
+                        }.ignoresSafeArea(.container, edges: .all)
+                            .highPriorityGesture(
+                                DragGesture()
+                                    .onChanged { value in
+                                        handleDragChanged(translation: value.translation.width, spaces: spaces)
+                                    }
+                                    .onEnded { value in
+                                        handleDragEnded()
+                                    }
+                            )
+                        
+                        Spacer()
+                    }
+                    .ignoresSafeArea(.container, edges: .bottom)
+                    .frame(width: geo.size.width-40, height: 130)
+                    .background(content: {
+                        RoundedRectangle(cornerRadius: 30)
+                            .fill(.ultraThinMaterial)
+                        
+                    })
+                    .padding(.bottom, 20)
+                    .sheet(isPresented: $uiViewModel.showSettings) {
+                        Settings()
+                    }
+                }
+                
+                if showNewTabPage {
+                    ZStack {
+                        LinearGradient(colors: backgroundGradientColors, startPoint: .top, endPoint: .bottom)
+                            .ignoresSafeArea(edges: .all)
+                        
+                        HStack {
+                            TextField(text: $uiViewModel.commandBarText) {
+                                Text("Search or Enter URL")
+                            }
+                                .padding(10)
+                                .focused($searchFocused)
+                                .background(content: {
+                                    Capsule()
+                                        .fill(.regularMaterial)
+                                        .stroke(Color(hex: "7B7B7B").opacity(0.5), lineWidth: 1)
+//                                        .shadow(color: Color.black.opacity(0.25), radius: 5, x: 0, y: 0)
+                                        .onTapGesture {
+                                            searchFocused = true
+                                        }
+                                })
+                            
+                            Button {
+                                withAnimation {
+                                    if let selectedSpace = storageManager.selectedSpace {
+                                        storageManager.newTab(unformattedString: uiViewModel.commandBarText, space: selectedSpace, modelContext: modelContext)
+                                    }
+                                    
+                                    showNewTabPage = false
+                                }
+                            } label: {
+                                ZStack {
+                                    Circle()
+                                        .fill(.regularMaterial)
+                                        .stroke(Color(hex: "7B7B7B"), lineWidth: 2)
+                                        .shadow(color: Color.black.opacity(0.25), radius: 5, x: 0, y: 0)
+                                    
+                                    Image(systemName: "magnifyingglass")
+                                        .foregroundStyle(Color.black)
+                                        .opacity(0.5)
+                                        .padding(.horizontal, 20)
+                                    
+                                }.frame(width: 50, height: 50)
+                                    .cornerRadius(30)
+                            }
+                            .buttonStyle(PrimaryButtonStyle())
                         }
                     }
-                    .clipped()
                 }
                 
                 if let thing = storageManager.currentTabs.first {

@@ -20,6 +20,8 @@
 		B95E23C52E2ECF8300598F60 /* MobileHomepage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E23C42E2ECF8300598F60 /* MobileHomepage.swift */; };
 		B95E23CD2E2F289000598F60 /* MobileTabGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E23CB2E2F289000598F60 /* MobileTabGroup.swift */; };
 		B95E23D32E2F289000598F60 /* MobileTabGrid.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95E23C62E2F289000598F60 /* MobileTabGrid.swift */; };
+		B9647ECE2E431C2D00401313 /* decodingHTMLEntities.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9647ECD2E431C2D00401313 /* decodingHTMLEntities.swift */; };
+		B9647ED22E44768700401313 /* NewTabPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9647ED12E44768700401313 /* NewTabPage.swift */; };
 		B978E16F2E038D9D00146E9B /* Aura.icon in Resources */ = {isa = PBXBuildFile; fileRef = B978E16E2E038D9D00146E9B /* Aura.icon */; };
 		B9A3883F2E409F6D006A5C89 /* iOS Button Styles.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9A3883E2E409F6D006A5C89 /* iOS Button Styles.swift */; };
 		B9B004E62DF8D16E00B79152 /* StoredTab.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B004E52DF8D16E00B79152 /* StoredTab.swift */; };
@@ -102,6 +104,8 @@
 		B95E23C42E2ECF8300598F60 /* MobileHomepage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileHomepage.swift; sourceTree = "<group>"; };
 		B95E23C62E2F289000598F60 /* MobileTabGrid.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileTabGrid.swift; sourceTree = "<group>"; };
 		B95E23CB2E2F289000598F60 /* MobileTabGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MobileTabGroup.swift; sourceTree = "<group>"; };
+		B9647ECD2E431C2D00401313 /* decodingHTMLEntities.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = decodingHTMLEntities.swift; sourceTree = "<group>"; };
+		B9647ED12E44768700401313 /* NewTabPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NewTabPage.swift; sourceTree = "<group>"; };
 		B978E16E2E038D9D00146E9B /* Aura.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Aura.icon; sourceTree = "<group>"; };
 		B9A3883E2E409F6D006A5C89 /* iOS Button Styles.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "iOS Button Styles.swift"; sourceTree = "<group>"; };
 		B9B004E52DF8D16E00B79152 /* StoredTab.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredTab.swift; sourceTree = "<group>"; };
@@ -272,6 +276,7 @@
 			isa = PBXGroup;
 			children = (
 				B95E23C42E2ECF8300598F60 /* MobileHomepage.swift */,
+				B9647ED12E44768700401313 /* NewTabPage.swift */,
 				B95E23C62E2F289000598F60 /* MobileTabGrid.swift */,
 				B95E23CB2E2F289000598F60 /* MobileTabGroup.swift */,
 				B9BA609C2E308E630072F4D3 /* WebsiteMobile.swift */,
@@ -280,12 +285,12 @@
 			path = "iOS 2";
 			sourceTree = "<group>";
 		};
-		B9A3883D2E409F4B006A5C89 /* Button Styles */ = {
+		B9A3883D2E409F4B006A5C89 /* Custom Components */ = {
 			isa = PBXGroup;
 			children = (
 				B9A3883E2E409F6D006A5C89 /* iOS Button Styles.swift */,
 			);
-			path = "Button Styles";
+			path = "Custom Components";
 			sourceTree = "<group>";
 		};
 		B9B004ED2DF96BCD00B79152 /* Scheme Handlers */ = {
@@ -332,6 +337,7 @@
 				B9D455162E06A80800CB1E24 /* someKey.swift */,
 				B9B005082DFA10B000B79152 /* URLFormatters.swift */,
 				B95A80D82E02C0DC007FE1F4 /* HoverDisabledVision.swift */,
+				B9647ECD2E431C2D00401313 /* decodingHTMLEntities.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -463,7 +469,7 @@
 				B9B0051B2DFA7E1E00B79152 /* Favicon */,
 				B9B004F92DF97CB400B79152 /* WebsitePanel.swift */,
 				B9B005032DFA091B00B79152 /* Launch Screen */,
-				B9A3883D2E409F4B006A5C89 /* Button Styles */,
+				B9A3883D2E409F4B006A5C89 /* Custom Components */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -683,6 +689,7 @@
 				B9B0051A2DFA7E1600B79152 /* LoadingIndicators.swift in Sources */,
 				B9B0050F2DFA740700B79152 /* SettingsManager.swift in Sources */,
 				B9B004EC2DF8D35A00B79152 /* TabLoadingData.swift in Sources */,
+				B9647ECE2E431C2D00401313 /* decodingHTMLEntities.swift in Sources */,
 				B9B004F82DF97CAA00B79152 /* Sidebar.swift in Sources */,
 				B9B060822E07BF2E00480CEF /* TabGroupFavoriteView.swift in Sources */,
 				B9A3883F2E409F6D006A5C89 /* iOS Button Styles.swift in Sources */,
@@ -698,6 +705,7 @@
 				B95E23CD2E2F289000598F60 /* MobileTabGroup.swift in Sources */,
 				B95E23D32E2F289000598F60 /* MobileTabGrid.swift in Sources */,
 				B95E23BF2E2D9D8A00598F60 /* SnapshotRefresher.swift in Sources */,
+				B9647ED22E44768700401313 /* NewTabPage.swift in Sources */,
 				B9B004EA2DF8D1F400B79152 /* TabType.swift in Sources */,
 				B9B060762E07787400480CEF /* IconsArrayStorage.swift in Sources */,
 			);

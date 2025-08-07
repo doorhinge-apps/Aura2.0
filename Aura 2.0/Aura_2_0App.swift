@@ -71,6 +71,7 @@ private struct SceneCommands: Commands {
     @Environment(\.modelContext) private var modelContext
     @FocusedObject private var storageManager: StorageManager?
     @FocusedObject private var uiViewModel: UIViewModel?
+    @FocusedObject private var settingsManager: SettingsManager?
 
     let selectedTabID: String
 
@@ -125,6 +126,18 @@ private struct SceneCommands: Commands {
                           systemImage: tab.tabType == .pinned ? "pin.fill" : "pin")
                 }
             }
+        }
+        
+//        CommandGroup(after: .sidebar) {
+        CommandGroup(replacing: .sidebar) {
+            Button {
+                withAnimation(.easeInOut) {
+                    uiViewModel?.showSidebar.toggle()
+                }
+            } label: {
+                Label(uiViewModel?.showSidebar ?? false ? "Hide Sidebar": "Show Sidebar",
+                      systemImage: settingsManager?.tabsPosition == "right" ? "sidebar.right": "sidebar.left")
+            }.keyboardShortcut("s", modifiers: .command)
         }
     }
 }

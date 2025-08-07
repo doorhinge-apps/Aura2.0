@@ -26,7 +26,7 @@ class WebPageFallback: ObservableObject {
     
     @Published var url: URL?
     @Published var title: String?
-    @Published var hasOnlySecureContent: Bool = false
+    @Published var hasOnlySecureContentFallback: Bool = false
     @Published var isLoading: Bool = false
     @Published var themeColor: Color?
     
@@ -97,6 +97,10 @@ class WebPageFallback: ObservableObject {
     
     var canGoForward: Bool {
         return webKitWebView?.canGoForward ?? false
+    }
+    
+    var hasOnlySecureContent: Bool {
+        return webKitWebView?.hasOnlySecureContent ?? false
     }
     
     // Extract theme color from meta tags
@@ -229,7 +233,7 @@ class WebViewNavigationDelegate: NSObject, WKNavigationDelegate {
         parent?.isLoading = false
         parent?.url = webView.url
         parent?.title = webView.title
-        parent?.hasOnlySecureContent = webView.hasOnlySecureContent
+        parent?.hasOnlySecureContentFallback = webView.hasOnlySecureContent
     }
     
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {

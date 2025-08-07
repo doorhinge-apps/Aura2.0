@@ -97,19 +97,15 @@ struct MobileTabGroup: View {
                 }
                 .padding(.vertical, 5)
             }
-            .frame(width: geo.size.width, height: geo.size.height) // Fill the entire GeometryReader
-            .contentShape(Rectangle()) // Make the entire area tappable
+            .frame(width: geo.size.width, height: geo.size.height)
+            .contentShape(Rectangle())
+
             .rotationEffect(Angle(degrees: degrees))
             .offset(x: dragOffset.width)
             .onTapGesture {
                 print("Selection started")
                 Task {
                     await selectTabGroup()
-                }
-            }
-            .onHover { hover in
-                withAnimation {
-                    // Handle hover state for TabGroup
                 }
             }
             .gesture(
@@ -124,7 +120,7 @@ struct MobileTabGroup: View {
             .contextMenu(menuItems: {
                 contextMenuItems
             })
-        }.zIndex(dragOffset.width != 0 ? 100: 1)
+        }//.zIndex(dragOffset.width != 0 ? 100: 1)
     }
     
     private func handleDragChange(_ gesture: DragGesture.Value) {
@@ -137,6 +133,7 @@ struct MobileTabGroup: View {
         // Calculate tilt based on drag distance
         let tilt = min(Double(abs(gesture.translation.width)) / 20, 15)
         degrees = gesture.translation.width < 0 ? -tilt : tilt
+        draggingTabID = tabGroup.id.description
     }
     
     private func handleDragEnd(_ gesture: DragGesture.Value) {
