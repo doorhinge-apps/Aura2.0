@@ -52,7 +52,7 @@ struct MobileTabGrid: View {
                     .zIndex(draggingTabID ?? "" == tabGroup.id.description ? 100: 0)
                     .animation(.easeInOut(duration: 0.1), value: draggingTabID)
                     .aspectRatio(3/5, contentMode: .fit)
-                    .shadow(color: Color.black.opacity(0.25), radius: 10, x: 0, y: 0)
+//                    .shadow(color: Color.black.opacity(0.25), radius: 10, x: 0, y: 0)
                     .onChange(of: draggingTabID) { old, new in
                         print("Dragging Tab: \(draggingTabID ?? "")")
                         print("Current Tab: \(tabGroup.id.description)")

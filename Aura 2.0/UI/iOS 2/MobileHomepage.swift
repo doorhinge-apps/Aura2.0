@@ -225,49 +225,60 @@ struct MobileHomepage: View {
                     ZStack {
                         LinearGradient(colors: backgroundGradientColors, startPoint: .top, endPoint: .bottom)
                             .ignoresSafeArea(edges: .all)
-                        
-                        HStack {
-                            TextField(text: $uiViewModel.commandBarText) {
-                                Text("Search or Enter URL")
+                        VStack {
+                            LazyVGrid(columns: [GridItem(), GridItem(), GridItem(), GridItem()]) {
+                                if let favoriteTabs = storageManager.selectedSpace?.favoriteTabGroups {
+                                    ForEach(favoriteTabs, id:\.id) { favoriteTab in
+                                        if let url = favoriteTab.tabRows?.first?.tabs?.first?.url {
+                                            Favicon(url: url)
+                                        }
+                                    }
+                                }
                             }
+                            
+                            HStack {
+                                TextField(text: $uiViewModel.commandBarText) {
+                                    Text("Search or Enter URL")
+                                }
                                 .padding(10)
                                 .focused($searchFocused)
                                 .background(content: {
                                     Capsule()
                                         .fill(.regularMaterial)
                                         .stroke(Color(hex: "7B7B7B").opacity(0.5), lineWidth: 1)
-//                                        .shadow(color: Color.black.opacity(0.25), radius: 5, x: 0, y: 0)
+                                    //                                        .shadow(color: Color.black.opacity(0.25), radius: 5, x: 0, y: 0)
                                         .onTapGesture {
                                             searchFocused = true
                                         }
                                 })
-                            
-                            Button {
-                                withAnimation {
-                                    if let selectedSpace = storageManager.selectedSpace {
-                                        storageManager.newTab(unformattedString: uiViewModel.commandBarText, space: selectedSpace, modelContext: modelContext)
+                                
+                                Button {
+                                    withAnimation {
+                                        if let selectedSpace = storageManager.selectedSpace {
+                                            storageManager.newTab(unformattedString: uiViewModel.commandBarText, space: selectedSpace, modelContext: modelContext)
+                                        }
+                                        
+                                        showNewTabPage = false
                                     }
-                                    
-                                    showNewTabPage = false
+                                } label: {
+                                    ZStack {
+                                        Circle()
+                                            .fill(.regularMaterial)
+                                            .stroke(Color(hex: "7B7B7B"), lineWidth: 2)
+                                            .shadow(color: Color.black.opacity(0.25), radius: 5, x: 0, y: 0)
+                                        
+                                        Image(systemName: "magnifyingglass")
+                                            .foregroundStyle(Color.black)
+                                            .opacity(0.5)
+                                            .padding(.horizontal, 20)
+                                        
+                                    }.frame(width: 50, height: 50)
+                                        .cornerRadius(30)
                                 }
-                            } label: {
-                                ZStack {
-                                    Circle()
-                                        .fill(.regularMaterial)
-                                        .stroke(Color(hex: "7B7B7B"), lineWidth: 2)
-                                        .shadow(color: Color.black.opacity(0.25), radius: 5, x: 0, y: 0)
-                                    
-                                    Image(systemName: "magnifyingglass")
-                                        .foregroundStyle(Color.black)
-                                        .opacity(0.5)
-                                        .padding(.horizontal, 20)
-                                    
-                                }.frame(width: 50, height: 50)
-                                    .cornerRadius(30)
+                                .buttonStyle(PrimaryButtonStyle())
                             }
-                            .buttonStyle(PrimaryButtonStyle())
                         }
-                    }
+                    }.animation(.easeInOut, value: showNewTabPage)
                 }
                 
                 if let thing = storageManager.currentTabs.first {

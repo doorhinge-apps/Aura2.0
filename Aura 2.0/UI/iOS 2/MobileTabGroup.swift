@@ -121,6 +121,8 @@ struct MobileTabGroup: View {
                 contextMenuItems
             })
         }//.zIndex(dragOffset.width != 0 ? 100: 1)
+        .shadow(color: Color(abs(dragOffset.width) > 100 ? .red: .black).opacity(abs(dragOffset.width) > 100 ? 0.75: 0.25), radius: 10, x: 0, y: 0)
+        .animation(.easeInOut, value: dragOffset.width)
     }
     
     private func handleDragChange(_ gesture: DragGesture.Value) {
@@ -148,7 +150,9 @@ struct MobileTabGroup: View {
             
             // Close the tab group after animation
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                closeTabGroup()
+                withAnimation {
+                    closeTabGroup()
+                }
             }
         } else {
             // Snap back to original position
