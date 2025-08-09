@@ -176,20 +176,14 @@ struct CommandBar: View {
                         Favicon(url: formatURL(from: suggestion))
                         
 //                        Text(.init(suggestion))
-                        Text(suggestion.decodingHTMLEntities())
+                        Text(suggestion.decodingGoogleSearchEntities())
+//                        Text(suggestion)
                         
                         Spacer()
                     }.foregroundStyle(Color(.label))
                 }
                 .padding(20)
                 .frame(width: geo.size.width/2)
-//                .glassEffect(
-//                    .regular.tint(
-//                        Color(hex: storageManager.selectedSpace?.spaceBackgroundColors.first ?? "8041E6")
-//                            .opacity(currentSuggestionIndex == uiViewModel.searchSuggestions.firstIndex(of: suggestion) ? 0.5: 0.0)
-//                    ),
-//                    isEnabled: settingsManager.liquidGlassCommandBar
-//                )
                 .modifier(
                     TintedGlassEffect2IfAvailable(
                         suggestion: suggestion,
