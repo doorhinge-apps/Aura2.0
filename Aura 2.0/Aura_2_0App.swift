@@ -14,8 +14,20 @@ import SwiftData
 import AppKit
 #endif
 
+class AppDelegate: UIResponder, UIApplicationDelegate {
+    override func buildMenu(with builder: UIMenuBuilder) {
+        super.buildMenu(with: builder)
+        
+        guard builder.system == .main else { return }
+        
+        builder.remove(menu: .format)
+    }
+}
+
 @main
 struct Aura_2_0App: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
     private let sharedModelContainer: ModelContainer = {
         let schema = Schema([SpaceData.self, TabGroup.self, TabRow.self, StoredTab.self])
         
@@ -47,6 +59,8 @@ struct Aura_2_0App: App {
                 .onAppear() { hideTitleBarOnCatalyst() }
         }
         .modelContainer(for: [SpaceData.self, TabGroup.self, TabRow.self, StoredTab.self], inMemory: false, isAutosaveEnabled: true, isUndoEnabled: true)
+//        .commandsRemoved()
+//        .commands {
         .commands {
             CommandsBridge()
         }
@@ -76,9 +90,15 @@ private struct SceneCommands: Commands {
     let selectedTabID: String
 
     var body: some Commands {
-        CommandGroup(after: .newItem) {
-            let currentTab = storageManager?.currentTabs.first?.first?.storedTab
-
+        CommandGroup(after: .appInfo) {
+            Button {
+                uiViewModel?.showSettings.toggle()
+            } label: {
+                Label("Settings", systemImage: "plus.square.on.square")
+            }.keyboardShortcut(",", modifiers: .command)
+        }
+        
+        CommandGroup(replacing: .newItem) {
             Button {
                 uiViewModel?.commandBarText = ""
                 uiViewModel?.searchSuggestions = []
@@ -86,7 +106,12 @@ private struct SceneCommands: Commands {
                 uiViewModel?.showCommandBar.toggle()
             } label: {
                 Label("New Tab", systemImage: "plus.square.on.square")
-            }.keyboardShortcut("t", modifiers: .command)
+            }
+            .keyboardShortcut(KeyboardShortcut("t", modifiers: [.command]))
+        }
+        
+        CommandGroup(after: .newItem) {
+            let currentTab = storageManager?.currentTabs.first?.first?.storedTab
 
             if let tab = currentTab {
                 Button {
@@ -139,5 +164,10 @@ private struct SceneCommands: Commands {
                       systemImage: settingsManager?.tabsPosition == "right" ? "sidebar.right": "sidebar.left")
             }.keyboardShortcut("s", modifiers: .command)
         }
+        
+        CommandGroup(replacing: .textFormatting) { }
+        CommandGroup(replacing: .textEditing) { }
+        CommandGroup(replacing: .toolbar) { }
     }
 }
+
