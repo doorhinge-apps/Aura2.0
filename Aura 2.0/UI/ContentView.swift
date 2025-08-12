@@ -90,7 +90,7 @@ struct ContentView: View {
                                         Spacer()
                                     }
                                     Sidebar()
-                                        .padding(.leading, 20)
+                                        .padding(settingsManager.tabsPosition == "right" ? .trailing: .leading, 20)
                                         .background {
                                             GeometryReader { sideGeo in
                                                 ZStack {

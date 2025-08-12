@@ -198,6 +198,19 @@ struct AppearanceSettings: View {
 #endif
                     }
                     
+                    Group {
+                        Text("Favorites Display Mode")
+                            .font(.system(.headline, design: .rounded, weight: .bold))
+                        
+                        Picker(selection: $settingsManager.tabsPosition) {
+                            Text("Left").tag("left")
+                            Text("Right").tag("right")
+                        } label: {
+                        }.pickerStyle(.segmented)
+                    }
+                    
+                    Divider()
+                    
                     if #available(iOS 26, *) {
                         Group {
                             Toggle(isOn: $settingsManager.liquidGlassCommandBar) {

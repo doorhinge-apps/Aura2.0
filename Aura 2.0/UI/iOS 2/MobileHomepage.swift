@@ -284,7 +284,7 @@ struct MobileHomepage: View {
                 if let thing = storageManager.currentTabs.first {
                     if !thing.isEmpty {
                         ZStack {
-                            WebsitePanel()
+                            WebsiteMobile()
                                 .matchedGeometryEffect(id: thing.first?.storedTab.id ?? "websitePreview", in: namespace, properties: .frame, anchor: .center)
                                 .background {
                                     Color("Automatic")

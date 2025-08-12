@@ -206,13 +206,7 @@
 				B9B004F72DF97CAA00B79152 /* Sidebar.swift */,
 				B9B060712E07709E00480CEF /* SpaceToolsBar.swift */,
 				B95A809D2DFD26BA007FE1F4 /* Toolbar.swift */,
-				B9D454FE2E06525100CB1E24 /* FavoriteTabsGridView.swift */,
-				B9D454FF2E06525100CB1E24 /* PinnedTabsView.swift */,
-				B9D455002E06525100CB1E24 /* PrimaryTabsView.swift */,
-				B9D455012E06525100CB1E24 /* TabRowView.swift */,
-				B9D455122E0667C900CB1E24 /* FavoriteTabRowView.swift */,
-				B9B060802E07BF2E00480CEF /* TabGroupFavoriteView.swift */,
-				B9B060812E07BF2E00480CEF /* TabGroupRowView.swift */,
+				B9BA28502E4AACE00048BBB7 /* Tab Components */,
 				B9B060772E07789500480CEF /* Icons Picker */,
 			);
 			path = "Sidebar Components";
@@ -394,6 +388,20 @@
 				B9B060752E07787400480CEF /* IconsArrayStorage.swift */,
 			);
 			path = "Icons Picker";
+			sourceTree = "<group>";
+		};
+		B9BA28502E4AACE00048BBB7 /* Tab Components */ = {
+			isa = PBXGroup;
+			children = (
+				B9D454FE2E06525100CB1E24 /* FavoriteTabsGridView.swift */,
+				B9D454FF2E06525100CB1E24 /* PinnedTabsView.swift */,
+				B9D455002E06525100CB1E24 /* PrimaryTabsView.swift */,
+				B9D455012E06525100CB1E24 /* TabRowView.swift */,
+				B9D455122E0667C900CB1E24 /* FavoriteTabRowView.swift */,
+				B9B060802E07BF2E00480CEF /* TabGroupFavoriteView.swift */,
+				B9B060812E07BF2E00480CEF /* TabGroupRowView.swift */,
+			);
+			path = "Tab Components";
 			sourceTree = "<group>";
 		};
 		B9BA61902E39AF690072F4D3 /* Data Types */ = {

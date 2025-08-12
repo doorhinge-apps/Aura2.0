@@ -16,6 +16,7 @@ class SettingsManager: ObservableObject {
     
     // left, right, top, or bottom
     @AppStorage("tabsPosition") var tabsPosition: String = "left"
+//    @Published var tabsPosition: String = "right"
     
     @AppStorage("searchEngine") var searchEngine = "https://www.google.com/search?q="
     

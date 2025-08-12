@@ -42,14 +42,14 @@ struct Sidebar: View {
                         .fill(Color.gray.opacity(0.001))
                         .frame(width: 15)
                         .contentShape(Rectangle())
-
+                    
                     if !settingsManager.hideResizingHandles {
                         RoundedRectangle(cornerRadius: 10)
                             .fill(Color.white.opacity(0.25))
                             .frame(width: 5, height: 30)
                     }
                 }
-#if targetEnvironment(macCatalyst)
+                #if targetEnvironment(macCatalyst)
                 .onHover(perform: { hover in
                     if hover {
                         NSCursor.resizeLeftRight.push()
@@ -58,18 +58,34 @@ struct Sidebar: View {
                         NSCursor.pop()
                     }
                 })
-#endif
+                #endif
+                .background(
+                    GeometryReader { handleGeometry in
+                        Color.clear
+                            .preference(key: HandlePositionKey.self, value: handleGeometry.frame(in: .global).minX)
+                    }
+                )
+                .onPreferenceChange(HandlePositionKey.self) { handleX in
+                }
                 .gesture(
-                    DragGesture(minimumDistance: 0)
+                    DragGesture(minimumDistance: 0, coordinateSpace: .global)
                         .onChanged { value in
-                            let proposedWidth = uiViewModel.sidebarWidth - value.translation.width
-                            dragOffset = proposedWidth
-                                .clamped(to: 150...400) - uiViewModel.sidebarWidth
+                            if startWidth == nil {
+                                startWidth = uiViewModel.sidebarWidth
+                            }
+                            
+                            let dragAmount = value.translation.width
+                            let newWidth = (startWidth ?? uiViewModel.sidebarWidth) - dragAmount
+                            
+                            dragOffset = newWidth.clamped(to: 200...600) - uiViewModel.sidebarWidth
                         }
                         .onEnded { value in
-                            let finalWidth = uiViewModel.sidebarWidth - value.translation.width
-                            uiViewModel.sidebarWidth = finalWidth.clamped(to: 150...400)
+                            let dragAmount = value.translation.width
+                            let finalWidth = ((startWidth ?? uiViewModel.sidebarWidth) - dragAmount).clamped(to: 200...600)
+                            
+                            uiViewModel.sidebarWidth = finalWidth
                             dragOffset = 0
+                            startWidth = nil
                         }
                 )
             }
@@ -330,6 +346,14 @@ struct Sidebar: View {
                                             }
                                         }
                                 }
+                                .contextMenu {
+                                    Button {
+                                        
+                                    } label: {
+                                        Label("Delete Space", systemImage: "trash")
+                                    }
+
+                                }
                             }
                         }
                     }
@@ -373,7 +397,7 @@ struct Sidebar: View {
             }
             .frame(width: uiViewModel.sidebarWidth + dragOffset)
             .clipped()
-
+            
             // MARK: - Drag to resize: Left
             if settingsManager.tabsPosition == "left" {
                 ZStack {
@@ -407,21 +431,24 @@ struct Sidebar: View {
                 .onPreferenceChange(HandlePositionKey.self) { handleX in
                 }
                 .gesture(
-                    // DragGesture to control resizing the sidebar
                     DragGesture(minimumDistance: 0, coordinateSpace: .global)
                         .onChanged { value in
-                            let fingerX = value.location.x
+                            if startWidth == nil {
+                                startWidth = uiViewModel.sidebarWidth
+                            }
                             
-                            let newWidth = fingerX.clamped(to: 150...400)
+                            let dragAmount = value.translation.width
+                            let newWidth = (startWidth ?? uiViewModel.sidebarWidth) + dragAmount
                             
-                            dragOffset = newWidth - uiViewModel.sidebarWidth
+                            dragOffset = newWidth.clamped(to: 200...600) - uiViewModel.sidebarWidth
                         }
                         .onEnded { value in
-                            let fingerX = value.location.x
-                            let finalWidth = fingerX.clamped(to: 150...400)
+                            let dragAmount = value.translation.width
+                            let finalWidth = ((startWidth ?? uiViewModel.sidebarWidth) + dragAmount).clamped(to: 200...600)
                             
                             uiViewModel.sidebarWidth = finalWidth
                             dragOffset = 0
+                            startWidth = nil
                         }
                 )
             }
