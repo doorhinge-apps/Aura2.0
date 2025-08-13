@@ -219,7 +219,7 @@ struct AppearanceSettings: View {
                             }.tint(backgroundGradientColors.first?.opacity(0.5))
                             HStack {
                                 Text("Use the liquid glass UI style for the command bar.")
-                                    .font(.system(.body, design: .rounded, weight: .bold))
+                                    .font(.system(.body, design: .rounded, weight: .regular))
                                 
                                 Spacer()
                             }
@@ -232,8 +232,10 @@ struct AppearanceSettings: View {
                         Text("Command Bar Transparency")
                             .font(.system(.headline, design: .rounded, weight: .bold))
                         HStack {
-                            Text(String(Int(settingsManager.commandBarTransparency)))
+                            Text("\(Int(settingsManager.commandBarTransparency*100))%")
                                 .font(.system(.body, design: .rounded, weight: .bold))
+                                .contentTransition(.numericText(value: settingsManager.commandBarTransparency))
+                                .animation(.easeInOut, value: settingsManager.commandBarTransparency)
                             
                             Slider(value: $settingsManager.commandBarTransparency, in: 0...1, step: 0.1)
                                 .tint(backgroundGradientColors.first?.opacity(0.5))
@@ -249,7 +251,7 @@ struct AppearanceSettings: View {
                         }.tint(backgroundGradientColors.first?.opacity(0.5))
                         HStack {
                             Text("Show borders around the screen and websites.")
-                                .font(.system(.body, design: .rounded, weight: .bold))
+                                .font(.system(.body, design: .rounded, weight: .regular))
                             
                             Spacer()
                         }
@@ -264,7 +266,7 @@ struct AppearanceSettings: View {
                         }.tint(backgroundGradientColors.first?.opacity(0.5))
                         HStack {
                             Text("Put the searchbar and other toolbar items in the same row.")
-                                .font(.system(.body, design: .rounded, weight: .bold))
+                                .font(.system(.body, design: .rounded, weight: .regular))
                             
                             Spacer()
                         }
@@ -299,22 +301,24 @@ struct AppearanceSettings: View {
 //                            Label("Light", systemImage: "sun.max.fill")
 //                            Label("Dark", systemImage: "moon.stars.fill")
                         }.pickerStyle(.segmented)
-                        Text("Force Dark Mode On Websites")
-                            .font(.system(.headline, design: .rounded, weight: .bold))
                         
-                        Picker(selection: $settingsManager.forceDarkMode) {
-                            Text("None").tag("none")
-                            Text("Basic").tag("basic")
-                            Text("Advanced").tag("advanced")
-                        } label: {
-                        }.pickerStyle(.segmented)
                         
-                        Picker(selection: $settingsManager.forceDarkModeTime) {
-                            Text("Automatic").tag("system")
-                            Text("Light").tag("light")
-                            Text("Dark").tag("dark")
-                        } label: {
-                        }.pickerStyle(.segmented)
+//                        Text("Force Dark Mode On Websites")
+//                            .font(.system(.headline, design: .rounded, weight: .bold))
+//                        
+//                        Picker(selection: $settingsManager.forceDarkMode) {
+//                            Text("None").tag("none")
+//                            Text("Basic").tag("basic")
+//                            Text("Advanced").tag("advanced")
+//                        } label: {
+//                        }.pickerStyle(.segmented)
+//                        
+//                        Picker(selection: $settingsManager.forceDarkModeTime) {
+//                            Text("Automatic").tag("system")
+//                            Text("Light").tag("light")
+//                            Text("Dark").tag("dark")
+//                        } label: {
+//                        }.pickerStyle(.segmented)
                     }
                     
                 }.foregroundStyle(Color.white)

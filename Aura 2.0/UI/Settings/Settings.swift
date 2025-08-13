@@ -12,6 +12,8 @@ import SwiftUI
 import WebKit
 
 struct Settings: View {
+    @Environment(\.dismiss) private var dismiss
+    
     @EnvironmentObject var storageManager: StorageManager
     @EnvironmentObject var uiViewModel: UIViewModel
     @EnvironmentObject var tabsManager: TabsManager
@@ -105,6 +107,14 @@ struct Settings: View {
                 }
                 .scrollContentBackground(.hidden)
                 .navigationTitle("Settings")
+                .toolbar {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark")
+                    }
+
+                }
                 
 //                 .background(Color.blue)
 //                NavigationLink {

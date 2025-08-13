@@ -38,6 +38,7 @@ struct ContentContainerView: View {
                             .statusBarHidden(true)
                     }
                 }.onAppear {
+                    // MARK: - Clear old tabs
                     let cutoff = Date().addingTimeInterval(-Double(settingsManager.closePrimaryTabsAfter) * 60)
 
                     for space in spaces {
@@ -56,6 +57,11 @@ struct ContentContainerView: View {
                     }
                     
                     try? modelContext.save()
+                    
+                    // MARK: - Show command bar on launch
+                    if settingsManager.commandBarOnLaunch {
+                        uiViewModel.showCommandBar = true
+                    }
                 }
                 .onOpenURL { url in
                     uiViewModel.currentSelectedTab = storageManager.newTab(unformattedString: url.absoluteString, space: selected, modelContext: modelContext).id
