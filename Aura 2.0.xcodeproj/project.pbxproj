@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B947306C2E7657F3001077CA /* iPad Pointer.swift in Sources */ = {isa = PBXBuildFile; fileRef = B947306B2E7657F3001077CA /* iPad Pointer.swift */; };
 		B95A809E2DFD26BA007FE1F4 /* Toolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95A809D2DFD26BA007FE1F4 /* Toolbar.swift */; };
 		B95A80A32DFD4D41007FE1F4 /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95A80A22DFD4D41007FE1F4 /* Settings.swift */; };
 		B95A80D52E02BAAF007FE1F4 /* GeneralSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = B95A80D42E02BAAF007FE1F4 /* GeneralSettings.swift */; };
@@ -55,6 +56,9 @@
 		B9B060822E07BF2E00480CEF /* TabGroupFavoriteView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060802E07BF2E00480CEF /* TabGroupFavoriteView.swift */; };
 		B9B060832E07BF2E00480CEF /* TabGroupRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060812E07BF2E00480CEF /* TabGroupRowView.swift */; };
 		B9B060852E07C54600480CEF /* TemporaryTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B060842E07C54600480CEF /* TemporaryTabView.swift */; };
+		B9B3AD842E765C6600307785 /* iPad Resize Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B3AD832E765C6600307785 /* iPad Resize Cursor.swift */; };
+		B9B3AD862E76790600307785 /* ScreenStateManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B3AD852E76790600307785 /* ScreenStateManager.swift */; };
+		B9B3AD882E77549200307785 /* HiddenCursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9B3AD872E77549200307785 /* HiddenCursor.swift */; };
 		B9BA609D2E308E630072F4D3 /* WebsiteMobile.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BA609C2E308E630072F4D3 /* WebsiteMobile.swift */; };
 		B9BA61932E39AFE60072F4D3 /* TabRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BA61922E39AFE60072F4D3 /* TabRow.swift */; };
 		B9BB57382DF8CE6F00B7E1E7 /* Aura_2_0App.swift in Sources */ = {isa = PBXBuildFile; fileRef = B9BB57332DF8CE6F00B7E1E7 /* Aura_2_0App.swift */; };
@@ -91,6 +95,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B947306B2E7657F3001077CA /* iPad Pointer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "iPad Pointer.swift"; sourceTree = "<group>"; };
 		B95A809D2DFD26BA007FE1F4 /* Toolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Toolbar.swift; sourceTree = "<group>"; };
 		B95A80A22DFD4D41007FE1F4 /* Settings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; };
 		B95A80D42E02BAAF007FE1F4 /* GeneralSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralSettings.swift; sourceTree = "<group>"; };
@@ -138,6 +143,9 @@
 		B9B060802E07BF2E00480CEF /* TabGroupFavoriteView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupFavoriteView.swift; sourceTree = "<group>"; };
 		B9B060812E07BF2E00480CEF /* TabGroupRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabGroupRowView.swift; sourceTree = "<group>"; };
 		B9B060842E07C54600480CEF /* TemporaryTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemporaryTabView.swift; sourceTree = "<group>"; };
+		B9B3AD832E765C6600307785 /* iPad Resize Cursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "iPad Resize Cursor.swift"; sourceTree = "<group>"; };
+		B9B3AD852E76790600307785 /* ScreenStateManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenStateManager.swift; sourceTree = "<group>"; };
+		B9B3AD872E77549200307785 /* HiddenCursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HiddenCursor.swift; sourceTree = "<group>"; };
 		B9BA609C2E308E630072F4D3 /* WebsiteMobile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteMobile.swift; sourceTree = "<group>"; };
 		B9BA61922E39AFE60072F4D3 /* TabRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabRow.swift; sourceTree = "<group>"; };
 		B9BB57022DF8CE4500B7E1E7 /* Aura 2.0.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Aura 2.0.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -266,7 +274,7 @@
 			path = "Website Shapshots";
 			sourceTree = "<group>";
 		};
-		B95E23C32E2ECF7700598F60 /* iOS 2 */ = {
+		B95E23C32E2ECF7700598F60 /* iOS */ = {
 			isa = PBXGroup;
 			children = (
 				B95E23C42E2ECF8300598F60 /* MobileHomepage.swift */,
@@ -276,13 +284,16 @@
 				B9BA609C2E308E630072F4D3 /* WebsiteMobile.swift */,
 				B95E23AE2E2D9D8A00598F60 /* Website Shapshots */,
 			);
-			path = "iOS 2";
+			path = iOS;
 			sourceTree = "<group>";
 		};
 		B9A3883D2E409F4B006A5C89 /* Custom Components */ = {
 			isa = PBXGroup;
 			children = (
 				B9A3883E2E409F6D006A5C89 /* iOS Button Styles.swift */,
+				B947306B2E7657F3001077CA /* iPad Pointer.swift */,
+				B9B3AD872E77549200307785 /* HiddenCursor.swift */,
+				B9B3AD832E765C6600307785 /* iPad Resize Cursor.swift */,
 			);
 			path = "Custom Components";
 			sourceTree = "<group>";
@@ -332,6 +343,7 @@
 				B9B005082DFA10B000B79152 /* URLFormatters.swift */,
 				B95A80D82E02C0DC007FE1F4 /* HoverDisabledVision.swift */,
 				B9647ECD2E431C2D00401313 /* decodingHTMLEntities.swift */,
+				B9B3AD852E76790600307785 /* ScreenStateManager.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -468,7 +480,7 @@
 			isa = PBXGroup;
 			children = (
 				B9BB57342DF8CE6F00B7E1E7 /* ContentView.swift */,
-				B95E23C32E2ECF7700598F60 /* iOS 2 */,
+				B95E23C32E2ECF7700598F60 /* iOS */,
 				B9B0051E2DFAA2BC00B79152 /* CommandBar.swift */,
 				B9B060842E07C54600480CEF /* TemporaryTabView.swift */,
 				B95A80A12DFD4D39007FE1F4 /* Settings */,
@@ -689,6 +701,7 @@
 				B9B004F32DF96DC400B79152 /* SpaceData.swift in Sources */,
 				B9D455152E06A69900CB1E24 /* SearchSettings.swift in Sources */,
 				B9B060852E07C54600480CEF /* TemporaryTabView.swift in Sources */,
+				B947306C2E7657F3001077CA /* iPad Pointer.swift in Sources */,
 				B9B004E82DF8D18200B79152 /* BrowserTab.swift in Sources */,
 				B95A80E12E035199007FE1F4 /* AppearanceSettings.swift in Sources */,
 				B95A80D52E02BAAF007FE1F4 /* GeneralSettings.swift in Sources */,
@@ -705,12 +718,15 @@
 				B95A80A32DFD4D41007FE1F4 /* Settings.swift in Sources */,
 				B9D455132E0667C900CB1E24 /* FavoriteTabRowView.swift in Sources */,
 				B9F078812E0B96A400723BA5 /* ScrollEdge.swift in Sources */,
+				B9B3AD842E765C6600307785 /* iPad Resize Cursor.swift in Sources */,
 				B9B004EF2DF96BE600B79152 /* AuraSchemeHandler.swift in Sources */,
 				B9B060742E07775C00480CEF /* IconsPicker.swift in Sources */,
+				B9B3AD862E76790600307785 /* ScreenStateManager.swift in Sources */,
 				B95E23B52E2D9D8A00598F60 /* URL Snapshot.swift in Sources */,
 				B95E23C52E2ECF8300598F60 /* MobileHomepage.swift in Sources */,
 				B9BA609D2E308E630072F4D3 /* WebsiteMobile.swift in Sources */,
 				B95E23CD2E2F289000598F60 /* MobileTabGroup.swift in Sources */,
+				B9B3AD882E77549200307785 /* HiddenCursor.swift in Sources */,
 				B95E23D32E2F289000598F60 /* MobileTabGrid.swift in Sources */,
 				B95E23BF2E2D9D8A00598F60 /* SnapshotRefresher.swift in Sources */,
 				B9647ED22E44768700401313 /* NewTabPage.swift in Sources */,

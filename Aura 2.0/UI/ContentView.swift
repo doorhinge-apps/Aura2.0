@@ -55,7 +55,7 @@ struct ContentView: View {
                             }
                         })
                         .ignoresSafeArea()
-                        .animation(.default)
+                        .animation(.default, value: storageManager.selectedSpace)
                     }
                     
                     HStack(spacing: 0) {

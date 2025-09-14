@@ -104,7 +104,7 @@ struct SpaceToolsBar: View {
                     }
 #if !os(visionOS) && !os(macOS)
                     .hoverEffect(.lift)
-                #endif
+#endif
                 
                 if renameIsFocused {
                     Button(action: {
@@ -180,7 +180,7 @@ struct SpaceToolsBar: View {
                         .offset(x: -10)
                 }
                 .frame(width: 200, height: 200)
-
+                
                 VStack(spacing: 12) {
                     if let selectedSpace = storageManager.selectedSpace {
                         let colorsBinding = Binding<[String]>(
@@ -201,7 +201,7 @@ struct SpaceToolsBar: View {
                         )
                         
                         //Toggle("Adaptive Theme", isOn: adaptiveThemeBinding)
-
+                        
                         ForEach(colorsBinding.wrappedValue.indices, id: \.self) { idx in
                             HStack {
                                 ColorPicker(
@@ -229,7 +229,7 @@ struct SpaceToolsBar: View {
                                 }
                             }
                         }
-
+                        
                         Button {
                             if let lastHex = colorsBinding.wrappedValue.last {
                                 var updated = colorsBinding.wrappedValue
@@ -246,7 +246,7 @@ struct SpaceToolsBar: View {
                     }
                 }
                 .padding()
-
+                
                 Spacer()
             }
         }

@@ -33,6 +33,16 @@ struct Sidebar: View {
     
     @State private var draggingTabID: String?
     
+    @FocusState var renameIsFocused: Bool
+    
+    @State var temporaryRenameSpace = ""
+    
+    @State private var presentIcons = false
+    
+    @State private var changeColorSheet = false
+    
+    @State private var changingIcon = ""
+    
     var body: some View {
         HStack(spacing: 0) {
             // MARK: - Drag to resize: Right
@@ -49,6 +59,7 @@ struct Sidebar: View {
                             .frame(width: 5, height: 30)
                     }
                 }
+                .resizePointer()
                 #if targetEnvironment(macCatalyst)
                 .onHover(perform: { hover in
                     if hover {
@@ -77,11 +88,11 @@ struct Sidebar: View {
                             let dragAmount = value.translation.width
                             let newWidth = (startWidth ?? uiViewModel.sidebarWidth) - dragAmount
                             
-                            dragOffset = newWidth.clamped(to: 200...600) - uiViewModel.sidebarWidth
+                            dragOffset = newWidth.clamped(to: 250...600) - uiViewModel.sidebarWidth
                         }
                         .onEnded { value in
                             let dragAmount = value.translation.width
-                            let finalWidth = ((startWidth ?? uiViewModel.sidebarWidth) - dragAmount).clamped(to: 200...600)
+                            let finalWidth = ((startWidth ?? uiViewModel.sidebarWidth) - dragAmount).clamped(to: 250...600)
                             
                             uiViewModel.sidebarWidth = finalWidth
                             dragOffset = 0
@@ -92,7 +103,7 @@ struct Sidebar: View {
             
             VStack {
                 Spacer()
-                    .frame(height: 50)
+                    .frame(height: 0)
                 
                 if !settingsManager.useUnifiedToolbar {
                     Toolbar()
@@ -248,7 +259,15 @@ struct Sidebar: View {
                                 FavoriteTabsGridView(space: space, draggingTabID: $draggingTabID)
                                 PinnedTabsView(space: space, draggingTabID: $draggingTabID)
                                 
-                                SpaceToolsBar(space: space)
+                                if !settingsManager.hideSpaceDivider {
+                                    SpaceToolsBar(space: space)
+                                }
+                                else {
+                                    Color(hex: space.textColor ?? "ffffff")
+                                        .opacity(0.5)
+                                        .frame(height: 1)
+                                        .cornerRadius(10)
+                                }
 
                                 // MARK: - New Tab
                                 Button {
@@ -326,15 +345,23 @@ struct Sidebar: View {
                                     ZStack {
                                         Color.white.opacity(storageManager.selectedSpace?.spaceIdentifier == space.spaceIdentifier ? 0.5: uiViewModel.hoveringID == space.spaceIdentifier ? 0.25: 0.0)
                                         
-                                        Image(systemName: space.spaceIcon)
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 20, height: 20)
+                                        HStack {
+                                            Image(systemName: space.spaceIcon)
+                                                .resizable()
+                                                .scaledToFit()
+                                                .frame(width: 20, height: 20)
+                                            
+                                            if settingsManager.hideSpaceDivider && storageManager.selectedSpace == space {
+                                                Text(space.spaceName)
+                                            }
+                                        }
+                                        .padding(.horizontal, (settingsManager.hideSpaceDivider && storageManager.selectedSpace == space) ? 10: 0)
+                                        
                                         //                                        .foregroundStyle(Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
                                             .foregroundStyle(storageManager.selectedSpace?.spaceIdentifier == space.spaceIdentifier ? Color.black: Color(hex: storageManager.selectedSpace?.textColor ?? "ffffff"))
                                             .opacity(uiViewModel.hoveringID == space.spaceIdentifier ? 1.0: 0.5)
                                         
-                                    }.frame(width: 40, height: 40).cornerRadius(7)
+                                    }.frame(width: (settingsManager.hideSpaceDivider && storageManager.selectedSpace == space) ? .infinity: 40, height: 40).cornerRadius(7)
                                         .onHover { hover in
                                             withAnimation {
                                                 if uiViewModel.hoveringID == space.spaceIdentifier {
@@ -348,11 +375,12 @@ struct Sidebar: View {
                                 }
                                 .contextMenu {
                                     Button {
-                                        
+                                        modelContext.delete(space)
                                     } label: {
                                         Label("Delete Space", systemImage: "trash")
                                     }
-
+                                    
+                                    Label(space.spaceName, systemImage: space.spaceIcon)
                                 }
                             }
                         }
@@ -405,13 +433,52 @@ struct Sidebar: View {
                         .fill(Color.gray.opacity(0.001))
                         .frame(width: 15)
                         .contentShape(Rectangle())
+                        .onHover { hover in
+                            withAnimation {
+                                if uiViewModel.hoveringID == "resizeThing" {
+                                    uiViewModel.hoveringID = ""
+                                }
+                                else {
+                                    uiViewModel.hoveringID = "resizeThing"
+                                }
+                            }
+                        }
                     
                     if !settingsManager.hideResizingHandles {
                         RoundedRectangle(cornerRadius: 10)
                             .fill(Color.white.opacity(0.25))
                             .frame(width: 5, height: 30)
+                            .hoverEffect(.lift)
+                            .overlay {
+                                if uiViewModel.hoveringID == "resizeThing" {
+                                    RoundedOutwardTriangles(gap: 12, cornerRadius: 6)
+                                        .fill(Color.white.opacity(0.25))
+                                        .frame(width: 50, height: 20)
+                                        .padding()
+                                        .contentShape(
+                                            .hoverEffect,
+                                            RoundedOutwardTriangles(
+                                                gap: 12, cornerRadius: 6
+                                            ).path(in: CGRect(x: 0, y: 0, width: 50, height: 20))
+                                        )
+                                }
+                            }
+                            .onHover { hover in
+                                withAnimation {
+                                    if uiViewModel.hoveringID == "resizeThing" {
+                                        uiViewModel.hoveringID = ""
+                                    }
+                                    else {
+                                        uiViewModel.hoveringID = "resizeThing"
+                                    }
+                                }
+                            }
                     }
                 }
+                .hideCursorOnHover()
+//                .resizePointer()
+                
+//                .iPadPointer(.horizontalBeam(length: 50))
                 #if targetEnvironment(macCatalyst)
                 .onHover(perform: { hover in
                     if hover {
@@ -440,11 +507,11 @@ struct Sidebar: View {
                             let dragAmount = value.translation.width
                             let newWidth = (startWidth ?? uiViewModel.sidebarWidth) + dragAmount
                             
-                            dragOffset = newWidth.clamped(to: 200...600) - uiViewModel.sidebarWidth
+                            dragOffset = newWidth.clamped(to: 250...600) - uiViewModel.sidebarWidth
                         }
                         .onEnded { value in
                             let dragAmount = value.translation.width
-                            let finalWidth = ((startWidth ?? uiViewModel.sidebarWidth) + dragAmount).clamped(to: 200...600)
+                            let finalWidth = ((startWidth ?? uiViewModel.sidebarWidth) + dragAmount).clamped(to: 250...600)
                             
                             uiViewModel.sidebarWidth = finalWidth
                             dragOffset = 0
@@ -464,6 +531,11 @@ struct Sidebar: View {
         
         // Fallback to first tab
         return storageManager.currentTabs.first?.first?.storedTab.url ?? "Search or Enter URL"
+    }
+    
+    var backgroundGradientColors: [Color] {
+        let hexes = storageManager.selectedSpace?.spaceBackgroundColors ?? ["8041E6", "A0F2FC"]
+        return hexes.map { Color(hex: $0) }
     }
 }
 

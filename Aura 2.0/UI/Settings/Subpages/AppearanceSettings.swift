@@ -199,14 +199,33 @@ struct AppearanceSettings: View {
                     }
                     
                     Group {
-                        Text("Favorites Display Mode")
-                            .font(.system(.headline, design: .rounded, weight: .bold))
+                        HStack {
+                            Text("Sidebar Position")
+                                .font(.system(.headline, design: .rounded, weight: .bold))
+                            
+                            Spacer()
+                        }
                         
                         Picker(selection: $settingsManager.tabsPosition) {
                             Text("Left").tag("left")
                             Text("Right").tag("right")
                         } label: {
                         }.pickerStyle(.segmented)
+                    }
+                    
+                    Divider()
+                    
+                    Group {
+                        Toggle(isOn: $settingsManager.hideSpaceDivider) {
+                            Text("Hide Space Label")
+                                .font(.system(.headline, design: .rounded, weight: .bold))
+                        }.tint(backgroundGradientColors.first?.opacity(0.5))
+                        HStack {
+                            Text("Hides the label and icon for the current space in the middle of the sidebar.")
+                                .font(.system(.body, design: .rounded, weight: .regular))
+                            
+                            Spacer()
+                        }
                     }
                     
                     Divider()

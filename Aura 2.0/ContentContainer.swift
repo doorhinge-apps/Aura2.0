@@ -23,64 +23,91 @@ struct ContentContainerView: View {
     @EnvironmentObject var tabsManager: TabsManager
     @EnvironmentObject var settingsManager: SettingsManager
     
+    @State private var screenStateManager = ScreenStateManager()
+    
     var body: some View {
-        Group {
-            if let selected = spaces.first {
-                ZStack {
-                    if UIDevice.current.userInterfaceIdiom == .phone {
-                        MobileHomepage()
+        ZStack {
+            GeometryReader { geo in
+                Color.clear
+                    .onAppear() {
+                        screenStateManager.defineBoundsAndUpdate(appWindowWidth: geo.size.width, appWindowHeight: geo.size.height)
+                        print("isFullScreen:")
+                        print(screenStateManager.isFullScreen)
+                        print(screenStateManager.screenWidth)
+                        print(screenStateManager.screenHeight)
+                        print(screenStateManager.appWindowWidth ?? 0)
+                        print(screenStateManager.appWindowHeight ?? 0)
                     }
-                    else {
-                        ContentView(selectedSpace: selected)
-                            .ignoresSafeArea(.container, edges: .all)
-                            .modifier(ScrollEdgeDisabledIfAvailable())
-                            .modifier(ScrollEdgeIfAvailable())
-                            .statusBarHidden(true)
+                    .onChange(of: geo.size) { oldValue, newValue in
+                        screenStateManager.defineBoundsAndUpdate(appWindowWidth: newValue.width, appWindowHeight: newValue.height)
+                        print("isFullScreen:")
+                        print(screenStateManager.isFullScreen)
+                        print(screenStateManager.screenWidth)
+                        print(screenStateManager.screenHeight)
+                        print(screenStateManager.appWindowWidth ?? 0)
+                        print(screenStateManager.appWindowHeight ?? 0)
                     }
-                }.onAppear {
-                    // MARK: - Clear old tabs
-                    let cutoff = Date().addingTimeInterval(-Double(settingsManager.closePrimaryTabsAfter) * 60)
-
-                    for space in spaces {
-                        // Clean up old tabs from the new group structure
-                        cleanupOldTabsFromGroups(space: space, cutoff: cutoff, modelContext: modelContext)
+            }.ignoresSafeArea()
+            
+            Group {
+                if let selected = spaces.first {
+                    ZStack {
+                        if UIDevice.current.userInterfaceIdiom == .phone {
+                            MobileHomepage()
+                        }
+                        else {
+                            ContentView(selectedSpace: selected)
+                                .ignoresSafeArea(.container, edges: .all)
+                                .modifier(ScrollEdgeDisabledIfAvailable())
+                                .modifier(ScrollEdgeIfAvailable())
+                                .statusBarHidden(true)
+                        }
+                    }.onAppear {
+                        // MARK: - Clear old tabs
+                        let cutoff = Date().addingTimeInterval(-Double(settingsManager.closePrimaryTabsAfter) * 60)
                         
-                        // Clean up old tabs from old structure
-                        let oldTabs = space.primaryTabs.filter { $0.timestamp < cutoff }
-                        for tab in oldTabs {
-                            if let spaceTabs = space.tabs,
-                               let index = spaceTabs.firstIndex(where: { $0.id == tab.id }) {
-                                space.tabs?.remove(at: index)
-                                modelContext.delete(tab)
+                        for space in spaces {
+                            // Clean up old tabs from the new group structure
+                            cleanupOldTabsFromGroups(space: space, cutoff: cutoff, modelContext: modelContext)
+                            
+                            // Clean up old tabs from old structure
+                            let oldTabs = space.primaryTabs.filter { $0.timestamp < cutoff }
+                            for tab in oldTabs {
+                                if let spaceTabs = space.tabs,
+                                   let index = spaceTabs.firstIndex(where: { $0.id == tab.id }) {
+                                    space.tabs?.remove(at: index)
+                                    modelContext.delete(tab)
+                                }
                             }
                         }
-                    }
-                    
-                    try? modelContext.save()
-                    
-                    // MARK: - Show command bar on launch
-                    if settingsManager.commandBarOnLaunch {
-                        uiViewModel.showCommandBar = true
-                    }
-                }
-                .onOpenURL { url in
-                    uiViewModel.currentSelectedTab = storageManager.newTab(unformattedString: url.absoluteString, space: selected, modelContext: modelContext).id
-                }
-            } else {
-                ProgressView()
-                    .task {
-                        let newSpace = SpaceData(
-                            spaceIdentifier: UUID().uuidString,
-                            spaceName: "Untitled",
-                            isIncognito: false,
-                            spaceBackgroundColors: ["8041E6", "A0F2FC"],
-                            textColor: "ffffff"
-                        )
-                        modelContext.insert(newSpace)
+                        
                         try? modelContext.save()
+                        
+                        // MARK: - Show command bar on launch
+                        if settingsManager.commandBarOnLaunch {
+                            uiViewModel.showCommandBar = true
+                        }
                     }
+                    .onOpenURL { url in
+                        uiViewModel.currentSelectedTab = storageManager.newTab(unformattedString: url.absoluteString, space: selected, modelContext: modelContext).id
+                    }
+                } else {
+                    ProgressView()
+                        .task {
+                            let newSpace = SpaceData(
+                                spaceIdentifier: UUID().uuidString,
+                                spaceName: "Untitled",
+                                isIncognito: false,
+                                spaceBackgroundColors: ["8041E6", "A0F2FC"],
+                                textColor: "ffffff"
+                            )
+                            modelContext.insert(newSpace)
+                            try? modelContext.save()
+                        }
+                }
             }
         }
+        .environment(screenStateManager)
     }
 }
 

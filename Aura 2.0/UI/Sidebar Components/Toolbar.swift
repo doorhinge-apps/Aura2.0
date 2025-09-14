@@ -17,8 +17,13 @@ struct Toolbar: View {
     @EnvironmentObject var tabsManager: TabsManager
     @EnvironmentObject var settingsManager: SettingsManager
     
+    @Environment(ScreenStateManager.self) private var screenStateManager
+    
     var body: some View {
         HStack {
+            Spacer()
+                .frame(width: screenStateManager.isFullScreen ? 0: 60, height: 50)
+            
             Button {
                 withAnimation {
                     uiViewModel.showSidebar.toggle()
